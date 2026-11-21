@@ -131,7 +131,7 @@ C$2(H$3, E$3.prototype);
 H$3.isPureReactComponent = true;
 var I$3 = Array.isArray;
 var J$2 = Object.prototype.hasOwnProperty;
-var K$3 = { current: null };
+var K$4 = { current: null };
 var L$3 = { key: true, ref: true, __self: true, __source: true };
 function M$3(a, b, e) {
   var d, c = {}, k2 = null, h = null;
@@ -149,7 +149,7 @@ function M$3(a, b, e) {
   if (a && a.defaultProps)
     for (d in g = a.defaultProps, g)
       void 0 === c[d] && (c[d] = g[d]);
-  return { $$typeof: l$4, type: a, key: k2, ref: h, props: c, _owner: K$3.current };
+  return { $$typeof: l$4, type: a, key: k2, ref: h, props: c, _owner: K$4.current };
 }
 function N$3(a, b) {
   return { $$typeof: l$4, type: a.type, key: b, ref: a.ref, props: a.props, _owner: a._owner };
@@ -234,7 +234,7 @@ function T$3(a) {
 }
 var U$3 = { current: null };
 var V$3 = { transition: null };
-var W$3 = { ReactCurrentDispatcher: U$3, ReactCurrentBatchConfig: V$3, ReactCurrentOwner: K$3 };
+var W$3 = { ReactCurrentDispatcher: U$3, ReactCurrentBatchConfig: V$3, ReactCurrentOwner: K$4 };
 function X$4() {
   throw Error("act(...) is not supported in production builds of React.");
 }
@@ -270,7 +270,7 @@ react_production_min.cloneElement = function(a, b, e) {
     throw Error("React.cloneElement(...): The argument must be a React element, but you passed " + a + ".");
   var d = C$2({}, a.props), c = a.key, k2 = a.ref, h = a._owner;
   if (null != b) {
-    void 0 !== b.ref && (k2 = b.ref, h = K$3.current);
+    void 0 !== b.ref && (k2 = b.ref, h = K$4.current);
     void 0 !== b.key && (c = "" + b.key);
     if (a.type && a.type.defaultProps)
       var g = a.type.defaultProps;
@@ -3635,7 +3635,7 @@ function nh(a, b, c) {
   if (null === d)
     return null;
   d = d.shared;
-  if (0 !== (K$2 & 2)) {
+  if (0 !== (K$3 & 2)) {
     var e = d.pending;
     null === e ? b.next = b : (b.next = e.next, e.next = b);
     d.pending = b;
@@ -6260,7 +6260,7 @@ var lk = Math.ceil;
 var mk = ua$2.ReactCurrentDispatcher;
 var nk = ua$2.ReactCurrentOwner;
 var ok = ua$2.ReactCurrentBatchConfig;
-var K$2 = 0;
+var K$3 = 0;
 var Q$2 = null;
 var Y$2 = null;
 var Z$2 = 0;
@@ -6287,12 +6287,12 @@ var zk = null;
 var Ak = -1;
 var Bk = 0;
 function R$2() {
-  return 0 !== (K$2 & 6) ? B$2() : -1 !== Ak ? Ak : Ak = B$2();
+  return 0 !== (K$3 & 6) ? B$2() : -1 !== Ak ? Ak : Ak = B$2();
 }
 function yi(a) {
   if (0 === (a.mode & 1))
     return 1;
-  if (0 !== (K$2 & 2) && 0 !== Z$2)
+  if (0 !== (K$3 & 2) && 0 !== Z$2)
     return Z$2 & -Z$2;
   if (null !== Kg.transition)
     return 0 === Bk && (Bk = yc$1()), Bk;
@@ -6307,8 +6307,8 @@ function gi(a, b, c, d) {
   if (50 < yk)
     throw yk = 0, zk = null, Error(p$2(185));
   Ac$1(a, c, d);
-  if (0 === (K$2 & 2) || a !== Q$2)
-    a === Q$2 && (0 === (K$2 & 2) && (qk |= c), 4 === T$2 && Ck(a, Z$2)), Dk(a, d), 1 === c && 0 === K$2 && 0 === (b.mode & 1) && (Gj = B$2() + 500, fg && jg());
+  if (0 === (K$3 & 2) || a !== Q$2)
+    a === Q$2 && (0 === (K$3 & 2) && (qk |= c), 4 === T$2 && Ck(a, Z$2)), Dk(a, d), 1 === c && 0 === K$3 && 0 === (b.mode & 1) && (Gj = B$2() + 500, fg && jg());
 }
 function Dk(a, b) {
   var c = a.callbackNode;
@@ -6320,7 +6320,7 @@ function Dk(a, b) {
     null != c && bc$1(c);
     if (1 === b)
       0 === a.tag ? ig(Ek.bind(null, a)) : hg(Ek.bind(null, a)), Jf(function() {
-        0 === (K$2 & 6) && jg();
+        0 === (K$3 & 6) && jg();
       }), c = null;
     else {
       switch (Dc$1(d)) {
@@ -6348,7 +6348,7 @@ function Dk(a, b) {
 function Gk(a, b) {
   Ak = -1;
   Bk = 0;
-  if (0 !== (K$2 & 6))
+  if (0 !== (K$3 & 6))
     throw Error(p$2(327));
   var c = a.callbackNode;
   if (Hk() && a.callbackNode !== c)
@@ -6360,8 +6360,8 @@ function Gk(a, b) {
     b = Ik(a, d);
   else {
     b = d;
-    var e = K$2;
-    K$2 |= 2;
+    var e = K$3;
+    K$3 |= 2;
     var f2 = Jk();
     if (Q$2 !== a || Z$2 !== b)
       uk = null, Gj = B$2() + 500, Kk(a, b);
@@ -6375,7 +6375,7 @@ function Gk(a, b) {
     while (1);
     $g();
     mk.current = f2;
-    K$2 = e;
+    K$3 = e;
     null !== Y$2 ? b = 0 : (Q$2 = null, Z$2 = 0, b = T$2);
   }
   if (0 !== b) {
@@ -6500,7 +6500,7 @@ function Ck(a, b) {
   }
 }
 function Ek(a) {
-  if (0 !== (K$2 & 6))
+  if (0 !== (K$3 & 6))
     throw Error(p$2(327));
   Hk();
   var b = uc$1(a, 0);
@@ -6522,24 +6522,24 @@ function Ek(a) {
   return null;
 }
 function Qk(a, b) {
-  var c = K$2;
-  K$2 |= 1;
+  var c = K$3;
+  K$3 |= 1;
   try {
     return a(b);
   } finally {
-    K$2 = c, 0 === K$2 && (Gj = B$2() + 500, fg && jg());
+    K$3 = c, 0 === K$3 && (Gj = B$2() + 500, fg && jg());
   }
 }
 function Rk(a) {
-  null !== wk && 0 === wk.tag && 0 === (K$2 & 6) && Hk();
-  var b = K$2;
-  K$2 |= 1;
+  null !== wk && 0 === wk.tag && 0 === (K$3 & 6) && Hk();
+  var b = K$3;
+  K$3 |= 1;
   var c = ok.transition, d = C$1;
   try {
     if (ok.transition = null, C$1 = 1, a)
       return a();
   } finally {
-    C$1 = d, ok.transition = c, K$2 = b, 0 === (K$2 & 6) && jg();
+    C$1 = d, ok.transition = c, K$3 = b, 0 === (K$3 & 6) && jg();
   }
 }
 function Hj() {
@@ -6725,8 +6725,8 @@ function tj() {
   null === Q$2 || 0 === (rh & 268435455) && 0 === (qk & 268435455) || Ck(Q$2, Z$2);
 }
 function Ik(a, b) {
-  var c = K$2;
-  K$2 |= 2;
+  var c = K$3;
+  K$3 |= 2;
   var d = Jk();
   if (Q$2 !== a || Z$2 !== b)
     uk = null, Kk(a, b);
@@ -6739,7 +6739,7 @@ function Ik(a, b) {
     }
   while (1);
   $g();
-  K$2 = c;
+  K$3 = c;
   mk.current = d;
   if (null !== Y$2)
     throw Error(p$2(261));
@@ -6808,7 +6808,7 @@ function Wk(a, b, c, d) {
   do
     Hk();
   while (null !== wk);
-  if (0 !== (K$2 & 6))
+  if (0 !== (K$3 & 6))
     throw Error(p$2(327));
   c = a.finishedWork;
   var e = a.finishedLanes;
@@ -6833,8 +6833,8 @@ function Wk(a, b, c, d) {
     ok.transition = null;
     var g = C$1;
     C$1 = 1;
-    var h = K$2;
-    K$2 |= 4;
+    var h = K$3;
+    K$3 |= 4;
     nk.current = null;
     Oj(a, c);
     dk(c, a);
@@ -6844,7 +6844,7 @@ function Wk(a, b, c, d) {
     a.current = c;
     hk(c);
     dc$1();
-    K$2 = h;
+    K$3 = h;
     C$1 = g;
     ok.transition = f2;
   } else
@@ -6877,10 +6877,10 @@ function Hk() {
         a = wk;
         wk = null;
         xk = 0;
-        if (0 !== (K$2 & 6))
+        if (0 !== (K$3 & 6))
           throw Error(p$2(331));
-        var e = K$2;
-        K$2 |= 4;
+        var e = K$3;
+        K$3 |= 4;
         for (V$2 = a.current; null !== V$2; ) {
           var f2 = V$2, g = f2.child;
           if (0 !== (V$2.flags & 16)) {
@@ -6988,7 +6988,7 @@ function Hk() {
                 V$2 = h.return;
               }
         }
-        K$2 = e;
+        K$3 = e;
         jg();
         if (lc$1 && "function" === typeof lc$1.onPostCommitFiberRoot)
           try {
@@ -7613,7 +7613,7 @@ Ec$1 = function(a) {
       var b = a.stateNode;
       if (b.current.memoizedState.isDehydrated) {
         var c = tc$1(b.pendingLanes);
-        0 !== c && (Cc$1(b, c | 1), Dk(b, B$2()), 0 === (K$2 & 6) && (Gj = B$2() + 500, jg()));
+        0 !== c && (Cc$1(b, c | 1), Dk(b, B$2()), 0 === (K$3 & 6) && (Gj = B$2() + 500, jg()));
       }
       break;
     case 13:
@@ -9393,6 +9393,9 @@ function useLocation() {
   !useInRouterContext() ? invariant$2(false) : void 0;
   return reactExports.useContext(LocationContext).location;
 }
+function useNavigationType() {
+  return reactExports.useContext(LocationContext).navigationType;
+}
 function useIsomorphicLayoutEffect(cb2) {
   let isStatic = reactExports.useContext(NavigationContext).static;
   if (!isStatic) {
@@ -9451,6 +9454,13 @@ function useOutlet(context) {
     }, outlet);
   }
   return outlet;
+}
+function useParams() {
+  let {
+    matches
+  } = reactExports.useContext(RouteContext);
+  let routeMatch = matches[matches.length - 1];
+  return routeMatch ? routeMatch.params : {};
 }
 function useResolvedPath(to, _temp2) {
   let {
@@ -16090,7 +16100,7 @@ var lb$1 = "function" === typeof Object.is ? Object.is : kb$1;
 var I$1 = null;
 var ob$1 = null;
 var J$1 = null;
-var K$1 = null;
+var K$2 = null;
 var L$1 = false;
 var M$1 = false;
 var N$1 = 0;
@@ -16107,48 +16117,48 @@ function pb$1() {
   return { memoizedState: null, queue: null, next: null };
 }
 function qb$1() {
-  null === K$1 ? null === J$1 ? (L$1 = false, J$1 = K$1 = pb$1()) : (L$1 = true, K$1 = J$1) : null === K$1.next ? (L$1 = false, K$1 = K$1.next = pb$1()) : (L$1 = true, K$1 = K$1.next);
-  return K$1;
+  null === K$2 ? null === J$1 ? (L$1 = false, J$1 = K$2 = pb$1()) : (L$1 = true, K$2 = J$1) : null === K$2.next ? (L$1 = false, K$2 = K$2.next = pb$1()) : (L$1 = true, K$2 = K$2.next);
+  return K$2;
 }
 function rb$1() {
   ob$1 = I$1 = null;
   M$1 = false;
   J$1 = null;
   P$1 = 0;
-  K$1 = O$1 = null;
+  K$2 = O$1 = null;
 }
 function sb$1(a, b) {
   return "function" === typeof b ? b(a) : b;
 }
 function tb$1(a, b, c) {
   I$1 = Q$1();
-  K$1 = qb$1();
+  K$2 = qb$1();
   if (L$1) {
-    var d = K$1.queue;
+    var d = K$2.queue;
     b = d.dispatch;
     if (null !== O$1 && (c = O$1.get(d), void 0 !== c)) {
       O$1.delete(d);
-      d = K$1.memoizedState;
+      d = K$2.memoizedState;
       do
         d = a(d, c.action), c = c.next;
       while (null !== c);
-      K$1.memoizedState = d;
+      K$2.memoizedState = d;
       return [d, b];
     }
-    return [K$1.memoizedState, b];
+    return [K$2.memoizedState, b];
   }
   a = a === sb$1 ? "function" === typeof b ? b() : b : void 0 !== c ? c(b) : b;
-  K$1.memoizedState = a;
-  a = K$1.queue = { last: null, dispatch: null };
+  K$2.memoizedState = a;
+  a = K$2.queue = { last: null, dispatch: null };
   a = a.dispatch = ub$1.bind(null, I$1, a);
-  return [K$1.memoizedState, a];
+  return [K$2.memoizedState, a];
 }
 function vb$1(a, b) {
   I$1 = Q$1();
-  K$1 = qb$1();
+  K$2 = qb$1();
   b = void 0 === b ? null : b;
-  if (null !== K$1) {
-    var c = K$1.memoizedState;
+  if (null !== K$2) {
+    var c = K$2.memoizedState;
     if (null !== c && null !== b) {
       var d = c[1];
       a:
@@ -16167,7 +16177,7 @@ function vb$1(a, b) {
     }
   }
   a = a();
-  K$1.memoizedState = [a, b];
+  K$2.memoizedState = [a, b];
   return a;
 }
 function ub$1(a, b, c) {
@@ -16194,9 +16204,9 @@ var xb$1 = { readContext: function(a) {
   return a._currentValue2;
 }, useMemo: vb$1, useReducer: tb$1, useRef: function(a) {
   I$1 = Q$1();
-  K$1 = qb$1();
-  var b = K$1.memoizedState;
-  return null === b ? (a = { current: a }, K$1.memoizedState = a) : b;
+  K$2 = qb$1();
+  var b = K$2.memoizedState;
+  return null === b ? (a = { current: a }, K$2.memoizedState = a) : b;
 }, useState: function(a) {
   return tb$1(sb$1, a);
 }, useInsertionEffect: R$1, useLayoutEffect: function() {
@@ -16282,7 +16292,7 @@ function Db$1(a, b, c, d, f2) {
   ob$1 = b;
   N$1 = 0;
   for (a = c(d, f2); M$1; )
-    M$1 = false, N$1 = 0, P$1 += 1, K$1 = null, a = c(d, f2);
+    M$1 = false, N$1 = 0, P$1 += 1, K$2 = null, a = c(d, f2);
   rb$1();
   return a;
 }
@@ -17219,7 +17229,7 @@ function J(a, b, c, d) {
     }
   }
 }
-var K = w(">");
+var K$1 = w(">");
 var Ka = w("/>");
 function L(a, b, c) {
   if (null != b) {
@@ -17257,7 +17267,7 @@ function Na(a, b, c, d) {
             J(a, d, e, g);
         }
     }
-  a.push(K);
+  a.push(K$1);
   L(a, f2, c);
   return "string" === typeof c ? (a.push(u(C(c))), null) : c;
 }
@@ -17298,7 +17308,7 @@ function Sa(a, b, c, d, f2) {
                 J(a, d, r2, h);
             }
         }
-      a.push(K);
+      a.push(K$1);
       L(a, g, e);
       return e;
     case "option":
@@ -17338,7 +17348,7 @@ function Sa(a, b, c, d, f2) {
           "" + g === c && a.push(Ma);
       else
         q2 && a.push(Ma);
-      a.push(K);
+      a.push(K$1);
       L(a, r2, h);
       return h;
     case "textarea":
@@ -17362,7 +17372,7 @@ function Sa(a, b, c, d, f2) {
               J(a, d, h, m2);
           }
       null === e && null !== g && (e = g);
-      a.push(K);
+      a.push(K$1);
       if (null != r2) {
         if (null != e)
           throw Error(k(92));
@@ -17417,7 +17427,7 @@ function Sa(a, b, c, d, f2) {
             default:
               J(a, d, A2, e);
           }
-      a.push(K);
+      a.push(K$1);
       return null;
     case "title":
       a.push(M("title"));
@@ -17433,7 +17443,7 @@ function Sa(a, b, c, d, f2) {
             default:
               J(a, d, v2, g);
           }
-      a.push(K);
+      a.push(K$1);
       return e;
     case "listing":
     case "pre":
@@ -17451,7 +17461,7 @@ function Sa(a, b, c, d, f2) {
             default:
               J(a, d, m2, h);
           }
-      a.push(K);
+      a.push(K$1);
       if (null != g) {
         if (null != e)
           throw Error(k(60));
@@ -17522,7 +17532,7 @@ function Sa(a, b, c, d, f2) {
             default:
               ia(q2) && "function" !== typeof h && "symbol" !== typeof h && a.push(H, u(q2), I, u(C(h)), E);
           }
-      a.push(K);
+      a.push(K$1);
       L(a, g, e);
       return e;
   }
@@ -18591,17 +18601,17 @@ reactDomServer_browser_production_min.renderToReadableStream = function(a, b) {
 };
 reactDomServer_browser_production_min.version = "18.3.1";
 var l;
-var s;
+var s$1;
 {
   l = reactDomServerLegacy_browser_production_min;
-  s = reactDomServer_browser_production_min;
+  s$1 = reactDomServer_browser_production_min;
 }
 l.version;
 l.renderToString;
 l.renderToStaticMarkup;
 l.renderToNodeStream;
 l.renderToStaticNodeStream;
-var renderToReadableStream = s.renderToReadableStream;
+var renderToReadableStream = s$1.renderToReadableStream;
 async function handleRequest(request, responseStatusCode, responseHeaders, remixContext, loadContext) {
   const body = await renderToReadableStream(
     /* @__PURE__ */ jsxRuntimeExports.jsx(RemixServer, { context: remixContext, url: request.url }),
@@ -40734,7 +40744,7 @@ function createAdminSupabaseClient(context) {
     }
   });
 }
-var stylesheet = "/assets/tailwind-BNFaSBlm.css";
+var stylesheet = "/assets/tailwind-DY8s4rf0.css";
 var YAMATO_API_BASE = "https://api.jptutoraiyamato.com";
 async function getAccessToken() {
   var _a;
@@ -40968,6 +40978,8 @@ var CREDIT_COSTS = {
   /** EOY Oral Superb（Realtime の自由会話）5 分 / 10 分 */
   realtime5: 25,
   realtime10: 50,
+  /** Yamato Town（お店の店員などと声で話す）3 分 */
+  worldTalk3: 15,
   /** 漢字AI検索: 1 日 20 回まで無料、それを超えたら 1 回このクレジット数 */
   kanjiLookup: 1,
   kanjiLookupFreePerDay: 20
@@ -41028,7 +41040,7 @@ function requestAuthModal(mode2 = "signin") {
 var DEFAULT_COLOR = "#dc2626";
 var KANJI_RE = /[㐀-䶿一-鿿豈-﫿々]/;
 var MAX_QUERY = 30;
-var HIDDEN_PATHS = ["/print-report"];
+var HIDDEN_PATHS = ["/print-report", "/prices", "/faq"];
 function textWithoutRuby(node) {
   const clone = node.cloneNode(true);
   if ("querySelectorAll" in clone)
@@ -41283,7 +41295,7 @@ function KanjiLookup() {
             error && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs text-rose-800 dark:text-rose-200 space-y-2", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: error.message }),
               error.code === "GUEST_LIMIT" && /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: openAuth, className: "px-3 py-1.5 rounded-lg text-white font-bold cursor-pointer", style: { backgroundColor: color }, children: "Sign in / Sign up" }),
-              error.code === "NO_CREDITS" && /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/prices", className: "inline-block px-3 py-1.5 rounded-lg text-white font-bold", style: { backgroundColor: color }, children: "Top up credits" })
+              (error.code === "NO_CREDITS" || error.code === "AI_TRIAL_REQUIRED") && /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/prices", className: "inline-block px-3 py-1.5 rounded-lg text-white font-bold", style: { backgroundColor: color }, children: "See plans" })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-500 dark:text-slate-400 leading-snug", children: quota ? quota.signedIn ? quota.free === false ? `Used ${CREDIT_COSTS.kanjiLookup} credit (today's free lookups are used up).` : `Free lookups left today: ${quota.remainingFree} / ${quota.freeLimit}` : `Guest: ${quota.remainingFree} / ${quota.freeLimit} free lookups left today. Sign in for ${CREDIT_COSTS.kanjiLookupFreePerDay} a day.` : `Tip: select (highlight) Japanese on the page to see its reading. ${CREDIT_COSTS.kanjiLookupFreePerDay} free lookups a day when signed in, then ${CREDIT_COSTS.kanjiLookup} credit each.` })
           ] })
@@ -41307,7 +41319,7 @@ var links$1 = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
   }
 ];
-async function loader$X({ request, context }) {
+async function loader$14({ request, context }) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
   let nickname = "";
@@ -41418,7 +41430,7 @@ var route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   Layout,
   default: App,
   links: links$1,
-  loader: loader$X
+  loader: loader$14
 }, Symbol.toStringTag, { value: "Module" }));
 var OUTSIDE_AU = "OUTSIDE_AU";
 var AU_STATES = [
@@ -41626,7 +41638,7 @@ async function getVerifiedSchoolEmails(admin, userId) {
 }
 var IMAGE_BUCKET = "writing-submissions";
 var SIGNED_URL_SECONDS = 300;
-async function loader$W({ request, context, params }) {
+async function loader$13({ request, context, params }) {
   const { user, admin } = await requireTeacher(request, context);
   const notFound = () => new Response("Image not found or no longer kept.", { status: 404 });
   const { data: submission } = await admin.from("edu_writing_submissions").select("user_id, image_path, image_deleted_at, image_delete_after").eq("id", params.submissionId ?? "").maybeSingle();
@@ -41648,15 +41660,15 @@ async function loader$W({ request, context, params }) {
 }
 var route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$W
+  loader: loader$13
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$V({ request }) {
+async function loader$12({ request }) {
   const url = new URL(request.url);
   return dist$1.redirect(`/vce/speaking/eoy-oral-superb${url.search}`, 301);
 }
 var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$V
+  loader: loader$12
 }, Symbol.toStringTag, { value: "Module" }));
 var toKebabCase = (string) => string == null ? void 0 : string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 function toLucideIconData(iconName, iconNode, aliases = []) {
@@ -41847,7 +41859,7 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   }
   return Component;
 }
-var __iconData$1l = {
+var __iconData$1r = {
   name: "arrow-down-right",
   size: 24,
   node: [
@@ -41855,9 +41867,9 @@ var __iconData$1l = {
     ["path", { d: "M17 7v10H7", key: "6fjiku" }]
   ]
 };
-__iconData$1l.node;
-var ArrowDownRight = createLucideIcon(__iconData$1l);
-var __iconData$1k = {
+__iconData$1r.node;
+var ArrowDownRight = createLucideIcon(__iconData$1r);
+var __iconData$1q = {
   name: "arrow-down",
   size: 24,
   node: [
@@ -41865,9 +41877,9 @@ var __iconData$1k = {
     ["path", { d: "m19 12-7 7-7-7", key: "1idqje" }]
   ]
 };
-__iconData$1k.node;
-var ArrowDown = createLucideIcon(__iconData$1k);
-var __iconData$1j = {
+__iconData$1q.node;
+var ArrowDown = createLucideIcon(__iconData$1q);
+var __iconData$1p = {
   name: "arrow-right",
   size: 24,
   node: [
@@ -41875,9 +41887,9 @@ var __iconData$1j = {
     ["path", { d: "m12 5 7 7-7 7", key: "xquz4c" }]
   ]
 };
-__iconData$1j.node;
-var ArrowRight = createLucideIcon(__iconData$1j);
-var __iconData$1i = {
+__iconData$1p.node;
+var ArrowRight = createLucideIcon(__iconData$1p);
+var __iconData$1o = {
   name: "arrow-up-right",
   size: 24,
   node: [
@@ -41885,9 +41897,19 @@ var __iconData$1i = {
     ["path", { d: "M7 17 17 7", key: "1vkiza" }]
   ]
 };
-__iconData$1i.node;
-var ArrowUpRight = createLucideIcon(__iconData$1i);
-var __iconData$1h = {
+__iconData$1o.node;
+var ArrowUpRight = createLucideIcon(__iconData$1o);
+var __iconData$1n = {
+  name: "arrow-up",
+  size: 24,
+  node: [
+    ["path", { d: "m5 12 7-7 7 7", key: "hav0vg" }],
+    ["path", { d: "M12 19V5", key: "x0mq9r" }]
+  ]
+};
+__iconData$1n.node;
+var ArrowUp = createLucideIcon(__iconData$1n);
+var __iconData$1m = {
   name: "book-open",
   size: 24,
   node: [
@@ -41901,9 +41923,9 @@ var __iconData$1h = {
     ]
   ]
 };
-__iconData$1h.node;
-var BookOpen = createLucideIcon(__iconData$1h);
-var __iconData$1g = {
+__iconData$1m.node;
+var BookOpen = createLucideIcon(__iconData$1m);
+var __iconData$1l = {
   name: "brain",
   size: 24,
   node: [
@@ -41917,9 +41939,41 @@ var __iconData$1g = {
     ["path", { d: "M6.004 5.125a4 4 0 00-2.526 5.77", key: "3cw1ss" }]
   ]
 };
-__iconData$1g.node;
-var Brain = createLucideIcon(__iconData$1g);
-var __iconData$1f = {
+__iconData$1l.node;
+var Brain = createLucideIcon(__iconData$1l);
+var __iconData$1k = {
+  name: "calculator",
+  size: 24,
+  node: [
+    ["rect", { width: "16", height: "20", x: "4", y: "2", rx: "2", key: "1nb95v" }],
+    ["line", { x1: "8", x2: "16", y1: "6", y2: "6", key: "x4nwl0" }],
+    ["line", { x1: "16", x2: "16", y1: "14", y2: "18", key: "wjye3r" }],
+    ["path", { d: "M16 10h.01", key: "1m94wz" }],
+    ["path", { d: "M12 10h.01", key: "1nrarc" }],
+    ["path", { d: "M8 10h.01", key: "19clt8" }],
+    ["path", { d: "M12 14h.01", key: "1etili" }],
+    ["path", { d: "M8 14h.01", key: "6423bh" }],
+    ["path", { d: "M12 18h.01", key: "mhygvu" }],
+    ["path", { d: "M8 18h.01", key: "lrp35t" }]
+  ]
+};
+__iconData$1k.node;
+var Calculator = createLucideIcon(__iconData$1k);
+var __iconData$1j = {
+  name: "calendar-off",
+  size: 24,
+  node: [
+    ["path", { d: "M16 2v3", key: "otl347" }],
+    ["path", { d: "m2 2 20 20", key: "1ooewy" }],
+    ["path", { d: "M21 9h-5.5", key: "1g344v" }],
+    ["path", { d: "M3 9h6", key: "1q2djq" }],
+    ["path", { d: "M3.586 3.586A2 2 0 003 5v14a2 2 0 002 2h14a2 2 0 001.414-.586", key: "1g7ltu" }],
+    ["path", { d: "M8.656 3H19a2 2 0 012 2v10.344", key: "1bwpd1" }]
+  ]
+};
+__iconData$1j.node;
+var CalendarOff = createLucideIcon(__iconData$1j);
+var __iconData$1i = {
   name: "chart-column",
   size: 24,
   node: [
@@ -41930,37 +41984,37 @@ var __iconData$1f = {
   ],
   aliases: ["bar-chart-3"]
 };
-__iconData$1f.node;
-var ChartColumn = createLucideIcon(__iconData$1f);
-var __iconData$1e = {
+__iconData$1i.node;
+var ChartColumn = createLucideIcon(__iconData$1i);
+var __iconData$1h = {
   name: "check",
   size: 24,
   node: [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]]
 };
-__iconData$1e.node;
-var Check = createLucideIcon(__iconData$1e);
-var __iconData$1d = {
+__iconData$1h.node;
+var Check = createLucideIcon(__iconData$1h);
+var __iconData$1g = {
   name: "chevron-down",
   size: 24,
   node: [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]]
 };
-__iconData$1d.node;
-var ChevronDown = createLucideIcon(__iconData$1d);
-var __iconData$1c = {
+__iconData$1g.node;
+var ChevronDown = createLucideIcon(__iconData$1g);
+var __iconData$1f = {
   name: "chevron-right",
   size: 24,
   node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
 };
-__iconData$1c.node;
-var ChevronRight = createLucideIcon(__iconData$1c);
-var __iconData$1b = {
+__iconData$1f.node;
+var ChevronRight = createLucideIcon(__iconData$1f);
+var __iconData$1e = {
   name: "chevron-up",
   size: 24,
   node: [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]]
 };
-__iconData$1b.node;
-var ChevronUp = createLucideIcon(__iconData$1b);
-var __iconData$1a = {
+__iconData$1e.node;
+var ChevronUp = createLucideIcon(__iconData$1e);
+var __iconData$1d = {
   name: "circle-check",
   size: 24,
   node: [
@@ -41969,9 +42023,9 @@ var __iconData$1a = {
   ],
   aliases: ["check-circle-2"]
 };
-__iconData$1a.node;
-var CircleCheck = createLucideIcon(__iconData$1a);
-var __iconData$19 = {
+__iconData$1d.node;
+var CircleCheck = createLucideIcon(__iconData$1d);
+var __iconData$1c = {
   name: "circle-dot",
   size: 24,
   node: [
@@ -41979,9 +42033,9 @@ var __iconData$19 = {
     ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
   ]
 };
-__iconData$19.node;
-var CircleDot = createLucideIcon(__iconData$19);
-var __iconData$18 = {
+__iconData$1c.node;
+var CircleDot = createLucideIcon(__iconData$1c);
+var __iconData$1b = {
   name: "circle-question-mark",
   size: 24,
   node: [
@@ -41991,9 +42045,9 @@ var __iconData$18 = {
   ],
   aliases: ["help-circle", "circle-help"]
 };
-__iconData$18.node;
-var CircleQuestionMark = createLucideIcon(__iconData$18);
-var __iconData$17 = {
+__iconData$1b.node;
+var CircleQuestionMark = createLucideIcon(__iconData$1b);
+var __iconData$1a = {
   name: "circle-x",
   size: 24,
   node: [
@@ -42003,16 +42057,33 @@ var __iconData$17 = {
   ],
   aliases: ["x-circle"]
 };
-__iconData$17.node;
-var CircleX = createLucideIcon(__iconData$17);
-var __iconData$16 = {
+__iconData$1a.node;
+var CircleX = createLucideIcon(__iconData$1a);
+var __iconData$19 = {
   name: "circle",
   size: 24,
   node: [["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]]
 };
-__iconData$16.node;
-var Circle = createLucideIcon(__iconData$16);
-var __iconData$15 = {
+__iconData$19.node;
+var Circle = createLucideIcon(__iconData$19);
+var __iconData$18 = {
+  name: "clipboard-check",
+  size: 24,
+  node: [
+    ["rect", { width: "8", height: "4", x: "8", y: "2", rx: "1", ry: "1", key: "tgr4d6" }],
+    [
+      "path",
+      {
+        d: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2",
+        key: "116196"
+      }
+    ],
+    ["path", { d: "m9 14 2 2 4-4", key: "df797q" }]
+  ]
+};
+__iconData$18.node;
+var ClipboardCheck = createLucideIcon(__iconData$18);
+var __iconData$17 = {
   name: "clipboard-list",
   size: 24,
   node: [
@@ -42030,9 +42101,19 @@ var __iconData$15 = {
     ["path", { d: "M8 16h.01", key: "18s6g9" }]
   ]
 };
-__iconData$15.node;
-var ClipboardList = createLucideIcon(__iconData$15);
-var __iconData$14 = {
+__iconData$17.node;
+var ClipboardList = createLucideIcon(__iconData$17);
+var __iconData$16 = {
+  name: "clock",
+  size: 24,
+  node: [
+    ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+    ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }]
+  ]
+};
+__iconData$16.node;
+var Clock = createLucideIcon(__iconData$16);
+var __iconData$15 = {
   name: "coins",
   size: 24,
   node: [
@@ -42042,9 +42123,9 @@ var __iconData$14 = {
     ["circle", { cx: "16", cy: "8", r: "6", key: "14bfc9" }]
   ]
 };
-__iconData$14.node;
-var Coins = createLucideIcon(__iconData$14);
-var __iconData$13 = {
+__iconData$15.node;
+var Coins = createLucideIcon(__iconData$15);
+var __iconData$14 = {
   name: "compass",
   size: 24,
   node: [
@@ -42058,9 +42139,9 @@ var __iconData$13 = {
     ]
   ]
 };
-__iconData$13.node;
-var Compass = createLucideIcon(__iconData$13);
-var __iconData$12 = {
+__iconData$14.node;
+var Compass = createLucideIcon(__iconData$14);
+var __iconData$13 = {
   name: "copy",
   size: 24,
   node: [
@@ -42068,9 +42149,9 @@ var __iconData$12 = {
     ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
   ]
 };
-__iconData$12.node;
-var Copy = createLucideIcon(__iconData$12);
-var __iconData$11 = {
+__iconData$13.node;
+var Copy = createLucideIcon(__iconData$13);
+var __iconData$12 = {
   name: "cpu",
   size: 24,
   node: [
@@ -42090,9 +42171,9 @@ var __iconData$11 = {
     ["rect", { x: "8", y: "8", width: "8", height: "8", rx: "1", key: "z9xiuo" }]
   ]
 };
-__iconData$11.node;
-var Cpu = createLucideIcon(__iconData$11);
-var __iconData$10 = {
+__iconData$12.node;
+var Cpu = createLucideIcon(__iconData$12);
+var __iconData$11 = {
   name: "crown",
   size: 24,
   node: [
@@ -42106,9 +42187,9 @@ var __iconData$10 = {
     ["path", { d: "M5 21h14", key: "11awu3" }]
   ]
 };
-__iconData$10.node;
-var Crown = createLucideIcon(__iconData$10);
-var __iconData$$ = {
+__iconData$11.node;
+var Crown = createLucideIcon(__iconData$11);
+var __iconData$10 = {
   name: "download",
   size: 24,
   node: [
@@ -42117,9 +42198,9 @@ var __iconData$$ = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData$$.node;
-var Download = createLucideIcon(__iconData$$);
-var __iconData$_ = {
+__iconData$10.node;
+var Download = createLucideIcon(__iconData$10);
+var __iconData$$ = {
   name: "eye-off",
   size: 24,
   node: [
@@ -42141,9 +42222,9 @@ var __iconData$_ = {
     ["path", { d: "m2 2 20 20", key: "1ooewy" }]
   ]
 };
-__iconData$_.node;
-var EyeOff = createLucideIcon(__iconData$_);
-var __iconData$Z = {
+__iconData$$.node;
+var EyeOff = createLucideIcon(__iconData$$);
+var __iconData$_ = {
   name: "eye",
   size: 24,
   node: [
@@ -42157,9 +42238,9 @@ var __iconData$Z = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData$Z.node;
-var Eye = createLucideIcon(__iconData$Z);
-var __iconData$Y = {
+__iconData$_.node;
+var Eye = createLucideIcon(__iconData$_);
+var __iconData$Z = {
   name: "file-text",
   size: 24,
   node: [
@@ -42176,9 +42257,9 @@ var __iconData$Y = {
     ["path", { d: "M16 17H8", key: "z1uh3a" }]
   ]
 };
-__iconData$Y.node;
-var FileText = createLucideIcon(__iconData$Y);
-var __iconData$X = {
+__iconData$Z.node;
+var FileText = createLucideIcon(__iconData$Z);
+var __iconData$Y = {
   name: "fingerprint-pattern",
   size: 24,
   node: [
@@ -42194,9 +42275,9 @@ var __iconData$X = {
   ],
   aliases: ["fingerprint"]
 };
-__iconData$X.node;
-var FingerprintPattern = createLucideIcon(__iconData$X);
-var __iconData$W = {
+__iconData$Y.node;
+var FingerprintPattern = createLucideIcon(__iconData$Y);
+var __iconData$X = {
   name: "flame",
   size: 24,
   node: [
@@ -42209,9 +42290,9 @@ var __iconData$W = {
     ]
   ]
 };
-__iconData$W.node;
-var Flame = createLucideIcon(__iconData$W);
-var __iconData$V = {
+__iconData$X.node;
+var Flame = createLucideIcon(__iconData$X);
+var __iconData$W = {
   name: "gamepad-2",
   size: 24,
   node: [
@@ -42228,9 +42309,9 @@ var __iconData$V = {
     ]
   ]
 };
-__iconData$V.node;
-var Gamepad2 = createLucideIcon(__iconData$V);
-var __iconData$U = {
+__iconData$W.node;
+var Gamepad2 = createLucideIcon(__iconData$W);
+var __iconData$V = {
   name: "gauge",
   size: 24,
   node: [
@@ -42238,9 +42319,9 @@ var __iconData$U = {
     ["path", { d: "M3.34 19a10 10 0 1 1 17.32 0", key: "19p75a" }]
   ]
 };
-__iconData$U.node;
-var Gauge = createLucideIcon(__iconData$U);
-var __iconData$T = {
+__iconData$V.node;
+var Gauge = createLucideIcon(__iconData$V);
+var __iconData$U = {
   name: "globe",
   size: 24,
   node: [
@@ -42249,9 +42330,9 @@ var __iconData$T = {
     ["path", { d: "M2 12h20", key: "9i4pu4" }]
   ]
 };
-__iconData$T.node;
-var Globe = createLucideIcon(__iconData$T);
-var __iconData$S = {
+__iconData$U.node;
+var Globe = createLucideIcon(__iconData$U);
+var __iconData$T = {
   name: "graduation-cap",
   size: 24,
   node: [
@@ -42266,9 +42347,9 @@ var __iconData$S = {
     ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
   ]
 };
-__iconData$S.node;
-var GraduationCap = createLucideIcon(__iconData$S);
-var __iconData$R = {
+__iconData$T.node;
+var GraduationCap = createLucideIcon(__iconData$T);
+var __iconData$S = {
   name: "grid-3x3",
   size: 24,
   node: [
@@ -42280,9 +42361,9 @@ var __iconData$R = {
   ],
   aliases: ["grid", "grid-3-x-3"]
 };
-__iconData$R.node;
-var Grid3x3 = createLucideIcon(__iconData$R);
-var __iconData$Q = {
+__iconData$S.node;
+var Grid3x3 = createLucideIcon(__iconData$S);
+var __iconData$R = {
   name: "heart",
   size: 24,
   node: [
@@ -42295,9 +42376,9 @@ var __iconData$Q = {
     ]
   ]
 };
-__iconData$Q.node;
-var Heart = createLucideIcon(__iconData$Q);
-var __iconData$P = {
+__iconData$R.node;
+var Heart = createLucideIcon(__iconData$R);
+var __iconData$Q = {
   name: "house",
   size: 24,
   node: [
@@ -42312,9 +42393,9 @@ var __iconData$P = {
   ],
   aliases: ["home"]
 };
-__iconData$P.node;
-var House = createLucideIcon(__iconData$P);
-var __iconData$O = {
+__iconData$Q.node;
+var House = createLucideIcon(__iconData$Q);
+var __iconData$P = {
   name: "image",
   size: 24,
   node: [
@@ -42323,9 +42404,9 @@ var __iconData$O = {
     ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", key: "1xmnt7" }]
   ]
 };
-__iconData$O.node;
-var Image$1 = createLucideIcon(__iconData$O);
-var __iconData$N = {
+__iconData$P.node;
+var Image$1 = createLucideIcon(__iconData$P);
+var __iconData$O = {
   name: "key-round",
   size: 24,
   node: [
@@ -42339,9 +42420,9 @@ var __iconData$N = {
     ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
   ]
 };
-__iconData$N.node;
-var KeyRound = createLucideIcon(__iconData$N);
-var __iconData$M = {
+__iconData$O.node;
+var KeyRound = createLucideIcon(__iconData$O);
+var __iconData$N = {
   name: "landmark",
   size: 24,
   node: [
@@ -42359,9 +42440,9 @@ var __iconData$M = {
     ["path", { d: "M6 18v-7", key: "1ivflk" }]
   ]
 };
-__iconData$M.node;
-var Landmark = createLucideIcon(__iconData$M);
-var __iconData$L = {
+__iconData$N.node;
+var Landmark = createLucideIcon(__iconData$N);
+var __iconData$M = {
   name: "languages",
   size: 24,
   node: [
@@ -42373,9 +42454,9 @@ var __iconData$L = {
     ["path", { d: "M14 18h6", key: "1m8k6r" }]
   ]
 };
-__iconData$L.node;
-var Languages = createLucideIcon(__iconData$L);
-var __iconData$K = {
+__iconData$M.node;
+var Languages = createLucideIcon(__iconData$M);
+var __iconData$L = {
   name: "layers",
   size: 24,
   node: [
@@ -42403,9 +42484,9 @@ var __iconData$K = {
   ],
   aliases: ["layers-3"]
 };
-__iconData$K.node;
-var Layers = createLucideIcon(__iconData$K);
-var __iconData$J = {
+__iconData$L.node;
+var Layers = createLucideIcon(__iconData$L);
+var __iconData$K = {
   name: "lightbulb",
   size: 24,
   node: [
@@ -42420,17 +42501,17 @@ var __iconData$J = {
     ["path", { d: "M10 22h4", key: "ceow96" }]
   ]
 };
-__iconData$J.node;
-var Lightbulb = createLucideIcon(__iconData$J);
-var __iconData$I = {
+__iconData$K.node;
+var Lightbulb = createLucideIcon(__iconData$K);
+var __iconData$J = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData$I.node;
-var LoaderCircle = createLucideIcon(__iconData$I);
-var __iconData$H = {
+__iconData$J.node;
+var LoaderCircle = createLucideIcon(__iconData$J);
+var __iconData$I = {
   name: "lock-open",
   size: 24,
   node: [
@@ -42439,9 +42520,9 @@ var __iconData$H = {
   ],
   aliases: ["unlock"]
 };
-__iconData$H.node;
-var LockOpen = createLucideIcon(__iconData$H);
-var __iconData$G = {
+__iconData$I.node;
+var LockOpen = createLucideIcon(__iconData$I);
+var __iconData$H = {
   name: "log-in",
   size: 24,
   node: [
@@ -42450,9 +42531,9 @@ var __iconData$G = {
     ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
   ]
 };
-__iconData$G.node;
-var LogIn = createLucideIcon(__iconData$G);
-var __iconData$F = {
+__iconData$H.node;
+var LogIn = createLucideIcon(__iconData$H);
+var __iconData$G = {
   name: "lock",
   size: 24,
   node: [
@@ -42460,9 +42541,9 @@ var __iconData$F = {
     ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4", key: "fwvmzm" }]
   ]
 };
-__iconData$F.node;
-var Lock = createLucideIcon(__iconData$F);
-var __iconData$E = {
+__iconData$G.node;
+var Lock = createLucideIcon(__iconData$G);
+var __iconData$F = {
   name: "log-out",
   size: 24,
   node: [
@@ -42471,9 +42552,9 @@ var __iconData$E = {
     ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
   ]
 };
-__iconData$E.node;
-var LogOut = createLucideIcon(__iconData$E);
-var __iconData$D = {
+__iconData$F.node;
+var LogOut = createLucideIcon(__iconData$F);
+var __iconData$E = {
   name: "mail",
   size: 24,
   node: [
@@ -42481,9 +42562,9 @@ var __iconData$D = {
     ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2", key: "izxlao" }]
   ]
 };
-__iconData$D.node;
-var Mail = createLucideIcon(__iconData$D);
-var __iconData$C = {
+__iconData$E.node;
+var Mail = createLucideIcon(__iconData$E);
+var __iconData$D = {
   name: "map-pin",
   size: 24,
   node: [
@@ -42497,9 +42578,9 @@ var __iconData$C = {
     ["circle", { cx: "12", cy: "10", r: "3", key: "ilqhr7" }]
   ]
 };
-__iconData$C.node;
-var MapPin = createLucideIcon(__iconData$C);
-var __iconData$B = {
+__iconData$D.node;
+var MapPin = createLucideIcon(__iconData$D);
+var __iconData$C = {
   name: "map",
   size: 24,
   node: [
@@ -42514,9 +42595,9 @@ var __iconData$B = {
     ["path", { d: "M9 3.236v15", key: "1uimfh" }]
   ]
 };
-__iconData$B.node;
-var Map$1 = createLucideIcon(__iconData$B);
-var __iconData$A = {
+__iconData$C.node;
+var Map$1 = createLucideIcon(__iconData$C);
+var __iconData$B = {
   name: "maximize-2",
   size: 24,
   node: [
@@ -42526,9 +42607,9 @@ var __iconData$A = {
     ["path", { d: "M9 21H3v-6", key: "wtvkvv" }]
   ]
 };
-__iconData$A.node;
-var Maximize2 = createLucideIcon(__iconData$A);
-var __iconData$z = {
+__iconData$B.node;
+var Maximize2 = createLucideIcon(__iconData$B);
+var __iconData$A = {
   name: "menu",
   size: 24,
   node: [
@@ -42537,8 +42618,30 @@ var __iconData$z = {
     ["path", { d: "M4 19h16", key: "1djgab" }]
   ]
 };
+__iconData$A.node;
+var Menu = createLucideIcon(__iconData$A);
+var __iconData$z = {
+  name: "messages-square",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+        key: "1n2ejm"
+      }
+    ],
+    [
+      "path",
+      {
+        d: "M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1",
+        key: "1qfcsi"
+      }
+    ]
+  ]
+};
 __iconData$z.node;
-var Menu = createLucideIcon(__iconData$z);
+var MessagesSquare = createLucideIcon(__iconData$z);
 var __iconData$y = {
   name: "mic",
   size: 24,
@@ -42563,6 +42666,16 @@ var __iconData$x = {
 __iconData$x.node;
 var Minimize2 = createLucideIcon(__iconData$x);
 var __iconData$w = {
+  name: "pause",
+  size: 24,
+  node: [
+    ["rect", { x: "14", y: "3", width: "5", height: "18", rx: "1", key: "kaeet6" }],
+    ["rect", { x: "5", y: "3", width: "5", height: "18", rx: "1", key: "1wsw3u" }]
+  ]
+};
+__iconData$w.node;
+var Pause = createLucideIcon(__iconData$w);
+var __iconData$v = {
   name: "pen-line",
   size: 24,
   node: [
@@ -42577,9 +42690,9 @@ var __iconData$w = {
   ],
   aliases: ["edit-3"]
 };
-__iconData$w.node;
-var PenLine = createLucideIcon(__iconData$w);
-var __iconData$v = {
+__iconData$v.node;
+var PenLine = createLucideIcon(__iconData$v);
+var __iconData$u = {
   name: "pencil-line",
   size: 24,
   node: [
@@ -42594,9 +42707,9 @@ var __iconData$v = {
     ]
   ]
 };
-__iconData$v.node;
-var PencilLine = createLucideIcon(__iconData$v);
-var __iconData$u = {
+__iconData$u.node;
+var PencilLine = createLucideIcon(__iconData$u);
+var __iconData$t = {
   name: "pencil",
   size: 24,
   node: [
@@ -42610,9 +42723,9 @@ var __iconData$u = {
     ["path", { d: "m15 5 4 4", key: "1mk7zo" }]
   ]
 };
-__iconData$u.node;
-var Pencil = createLucideIcon(__iconData$u);
-var __iconData$t = {
+__iconData$t.node;
+var Pencil = createLucideIcon(__iconData$t);
+var __iconData$s = {
   name: "play",
   size: 24,
   node: [
@@ -42625,9 +42738,9 @@ var __iconData$t = {
     ]
   ]
 };
-__iconData$t.node;
-var Play = createLucideIcon(__iconData$t);
-var __iconData$s = {
+__iconData$s.node;
+var Play = createLucideIcon(__iconData$s);
+var __iconData$r = {
   name: "plus",
   size: 24,
   node: [
@@ -42635,9 +42748,9 @@ var __iconData$s = {
     ["path", { d: "M12 5v14", key: "s699le" }]
   ]
 };
-__iconData$s.node;
-var Plus = createLucideIcon(__iconData$s);
-var __iconData$r = {
+__iconData$r.node;
+var Plus = createLucideIcon(__iconData$r);
+var __iconData$q = {
   name: "printer",
   size: 24,
   node: [
@@ -42652,9 +42765,9 @@ var __iconData$r = {
     ["rect", { x: "6", y: "14", width: "12", height: "8", rx: "1", key: "1ue0tg" }]
   ]
 };
-__iconData$r.node;
-var Printer = createLucideIcon(__iconData$r);
-var __iconData$q = {
+__iconData$q.node;
+var Printer = createLucideIcon(__iconData$q);
+var __iconData$p = {
   name: "refresh-cw",
   size: 24,
   node: [
@@ -42664,9 +42777,9 @@ var __iconData$q = {
     ["path", { d: "M8 16H3v5", key: "1cv678" }]
   ]
 };
-__iconData$q.node;
-var RefreshCw = createLucideIcon(__iconData$q);
-var __iconData$p = {
+__iconData$p.node;
+var RefreshCw = createLucideIcon(__iconData$p);
+var __iconData$o = {
   name: "rotate-ccw-clock",
   size: 24,
   node: [
@@ -42676,9 +42789,9 @@ var __iconData$p = {
   ],
   aliases: ["history"]
 };
-__iconData$p.node;
-var RotateCcwClock = createLucideIcon(__iconData$p);
-var __iconData$o = {
+__iconData$o.node;
+var RotateCcwClock = createLucideIcon(__iconData$o);
+var __iconData$n = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -42686,9 +42799,9 @@ var __iconData$o = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData$o.node;
-var RotateCcw = createLucideIcon(__iconData$o);
-var __iconData$n = {
+__iconData$n.node;
+var RotateCcw = createLucideIcon(__iconData$n);
+var __iconData$m = {
   name: "school",
   size: 24,
   node: [
@@ -42706,9 +42819,9 @@ var __iconData$n = {
     ["circle", { cx: "12", cy: "9", r: "2", key: "1092wv" }]
   ]
 };
-__iconData$n.node;
-var School = createLucideIcon(__iconData$n);
-var __iconData$m = {
+__iconData$m.node;
+var School = createLucideIcon(__iconData$m);
+var __iconData$l = {
   name: "search",
   size: 24,
   node: [
@@ -42716,9 +42829,9 @@ var __iconData$m = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData$m.node;
-var Search = createLucideIcon(__iconData$m);
-var __iconData$l = {
+__iconData$l.node;
+var Search = createLucideIcon(__iconData$l);
+var __iconData$k = {
   name: "send",
   size: 24,
   node: [
@@ -42732,9 +42845,9 @@ var __iconData$l = {
     ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
   ]
 };
-__iconData$l.node;
-var Send = createLucideIcon(__iconData$l);
-var __iconData$k = {
+__iconData$k.node;
+var Send = createLucideIcon(__iconData$k);
+var __iconData$j = {
   name: "shield-check",
   size: 24,
   node: [
@@ -42748,25 +42861,8 @@ var __iconData$k = {
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ]
 };
-__iconData$k.node;
-var ShieldCheck = createLucideIcon(__iconData$k);
-var __iconData$j = {
-  name: "sliders-horizontal",
-  size: 24,
-  node: [
-    ["path", { d: "M10 5H3", key: "1qgfaw" }],
-    ["path", { d: "M12 19H3", key: "yhmn1j" }],
-    ["path", { d: "M14 3v4", key: "1sua03" }],
-    ["path", { d: "M16 17v4", key: "1q0r14" }],
-    ["path", { d: "M21 12h-9", key: "1o4lsq" }],
-    ["path", { d: "M21 19h-5", key: "1rlt1p" }],
-    ["path", { d: "M21 5h-7", key: "1oszz2" }],
-    ["path", { d: "M8 10v4", key: "tgpxqk" }],
-    ["path", { d: "M8 12H3", key: "a7s4jb" }]
-  ]
-};
 __iconData$j.node;
-var SlidersHorizontal = createLucideIcon(__iconData$j);
+var ShieldCheck = createLucideIcon(__iconData$j);
 var __iconData$i = {
   name: "sparkles",
   size: 24,
@@ -46144,6 +46240,42 @@ function useYamatoAccount(options = {}) {
     updateLearningPace
   };
 }
+var CreditError = class extends Error {
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+    this.name = "CreditError";
+  }
+};
+function creditErrorText(code) {
+  if (code === "AI_TRIAL_REQUIRED") {
+    return "To use the AI features, start with the AI Trial (A$1 for 100 credits) or choose a plan on the Plans page (/prices). After that, your daily quiz credits can be used for AI too.";
+  }
+  return "You don\u2019t have enough credits for this. Please choose a plan, or top up if you already have one, on the Plans page (/prices).";
+}
+var PLANS_LINK = '<a href="/prices" style="color:#4f46e5;font-weight:700;text-decoration:underline">\u{1F449} See plans</a>';
+function creditErrorChatHtml(code) {
+  if (code === "AI_TRIAL_REQUIRED") {
+    return `\u{1F513} <b>AI Trial or plan needed</b>
+
+To use the AI features, start with the <b>AI Trial (A$1 for 100 credits)</b> or choose a plan.
+
+${PLANS_LINK}
+
+After that, your daily quiz credits can be used for AI too.`;
+  }
+  return `\u{1F31F} <b>Not enough credits</b>
+
+You don\u2019t have enough credits for this. Please choose a plan, or top up if you already have one. New to the AI features? Try the <b>AI Trial (A$1 for 100 credits)</b>.
+
+${PLANS_LINK}`;
+}
+async function creditErrorFromResponse(res) {
+  if (res.status !== 402)
+    return null;
+  const data2 = await res.clone().json().catch(() => ({}));
+  return new CreditError(data2.error || "ZERO_CREDITS", creditErrorText(data2.error));
+}
 function resolveDisplayName(userNickname, defaultName = "my friend") {
   if (!userNickname)
     return defaultName;
@@ -46336,9 +46468,7 @@ function YamatoChatCommon({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `\u{1F31F} **[Zero Credits Remaining]**
-
-Hello, ${callName}! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! \u{1F4DA}\u2728`
+          content: creditErrorChatHtml()
         }
       ]);
       setTutorInput("");
@@ -46418,14 +46548,17 @@ ${callName}, your current balance (${currentCredits} credits) is not enough for 
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data2 == null ? void 0 : data2.error;
+          if (errorCode === "AI_TRIAL_REQUIRED") {
+            setTutorMessages([...newMessages, { role: "assistant", content: creditErrorChatHtml(errorCode) }]);
+            await refreshUserCredits();
+            return;
+          }
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `\u{1F31F} **[Zero Credits Remaining]**
-
-Hello, ${callName}! Please top up your credits to continue!`
+                content: creditErrorChatHtml(errorCode)
               }
             ]);
             await refreshUserCredits();
@@ -46506,10 +46639,12 @@ Please log in to chat with AI Yamato.`
               type: "button",
               onClick: () => setIsAiTutorOpen(true),
               style: floatingInlineStyle,
-              className: `${finalFloatingButtonClass} border-4 font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`,
+              "aria-label": `Open ${characterName}`,
+              title: characterName,
+              className: `${finalFloatingButtonClass} border-4 font-bold px-3 sm:px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`,
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F916}" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: characterName }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg sm:text-sm leading-none", children: "\u{1F916}" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "hidden sm:inline", children: characterName }),
                 activeImagePreview && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse" }),
                 activeUserId && currentCredits < FEATURE_COSTS.textAi && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white text-[9px] font-bold flex items-center justify-center text-white", children: "!" })
               ]
@@ -46643,7 +46778,7 @@ Please log in to chat with AI Yamato.`
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500 leading-relaxed", children: [
                     "Please sign up or log in to chat with ",
                     characterName,
-                    " and receive welcome credits!"
+                    "."
                   ] }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "button",
@@ -47324,7 +47459,7 @@ function generateModuleMeta(portalContent, currentPath) {
 var links = () => [
   { rel: "stylesheet", href: genkoStyles }
 ];
-async function loader$U({ request }) {
+async function loader$11({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -47337,7 +47472,7 @@ async function loader$U({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$P = ({ data: data2 }) => {
+var meta$_ = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47594,8 +47729,8 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: GenkoyoshiEditorVce,
   links,
-  loader: loader$U,
-  meta: meta$P
+  loader: loader$11,
+  meta: meta$_
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -47744,7 +47879,7 @@ var VCE_GRAMMAR_LIST = [
   "\u3066\u3044\u307E\u3059",
   "\u3067\u3044\u307E\u3059"
 ];
-async function loader$T({ request }) {
+async function loader$10({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48055,14 +48190,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$O = ({ data: data2 }) => {
+var meta$Z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
-  loader: loader$T,
-  meta: meta$O
+  loader: loader$10,
+  meta: meta$Z
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48131,7 +48266,7 @@ async function fetchOralExamQuestionsData(supabaseClient) {
     return null;
   }
 }
-async function loader$S({ request }) {
+async function loader$$({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48144,7 +48279,7 @@ async function loader$S({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$N = ({ data: data2 }) => {
+var meta$Y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48270,15 +48405,15 @@ function OralExamQuestions() {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-amber-100/70 border border-amber-300 rounded-2xl p-5 mb-8 shadow-inner flex flex-col md:flex-row gap-6 justify-between items-center", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2", children: "Select Section" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex flex-wrap rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto gap-1", children: ["beforeSec1", "sec1", "sec2", "afterSec2"].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex flex-wrap rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto gap-1", children: ["beforeSec1", "sec1", "sec2", "afterSec2"].map((sec2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "button",
                 {
                   type: "button",
-                  onClick: () => setCurrentSection(sec),
-                  className: `flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${currentSection === sec ? "bg-amber-600 text-white" : "text-slate-700 hover:text-amber-700"}`,
-                  children: sec === "beforeSec1" ? "Before" : sec === "sec1" ? "Section 1" : sec === "sec2" ? "Section 2" : "After"
+                  onClick: () => setCurrentSection(sec2),
+                  className: `flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer ${currentSection === sec2 ? "bg-amber-600 text-white" : "text-slate-700 hover:text-amber-700"}`,
+                  children: sec2 === "beforeSec1" ? "Before" : sec2 === "sec1" ? "Section 1" : sec2 === "sec2" ? "Section 2" : "After"
                 },
-                sec
+                sec2
               )) })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full md:w-auto", children: [
@@ -48351,8 +48486,8 @@ function OralExamQuestions() {
 var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OralExamQuestions,
-  loader: loader$S,
-  meta: meta$N
+  loader: loader$$,
+  meta: meta$Y
 }, Symbol.toStringTag, { value: "Module" }));
 var OralExaminerAvatar = ({
   isSpeaking = false,
@@ -48826,7 +48961,8 @@ var OralCenterChatPractice = ({
               )
             ] })
           ] })
-        ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-400 dark:text-slate-500", children: "\u2139\uFE0F Feedback is based on the text of what you said (speech-to-text). Pronunciation, intonation, rhythm and tempo are not assessed." })
       ]
     }
   );
@@ -49042,6 +49178,28 @@ var OralDrillQuestionSelector = ({
     ] })
   ] });
 };
+var KNOWN_HALLUCINATIONS = [
+  /ご視聴(いただき)?ありがとうございました/,
+  /チャンネル登録/,
+  /高評価/,
+  /字幕/,
+  /オーストラリアの高校生が/,
+  /VCE日本語の口頭試験の練習/
+];
+var normalize = (s2) => s2.replace(/<[^>]*>/g, "").replace(/[\s、。，．,.!?！？「」『』…・ー〜~]/g, "");
+function isLikelyHallucination(transcript, prompt) {
+  const t2 = normalize(transcript || "");
+  if (!t2)
+    return false;
+  if (KNOWN_HALLUCINATIONS.some((re2) => re2.test(transcript)))
+    return true;
+  if (prompt) {
+    const p2 = normalize(prompt);
+    if (p2.length >= 6 && (t2 === p2 || t2.includes(p2)))
+      return true;
+  }
+  return false;
+}
 function fallbackWebSpeech(text, speed = 1) {
   if (typeof window !== "undefined" && "speechSynthesis" in window) {
     try {
@@ -49282,6 +49440,7 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
     await playQuestion(q2);
   };
   const transcribeAudioManually = async (audioBlob) => {
+    var _a;
     setIsAnalyzing(true);
     try {
       const formData = new FormData();
@@ -49303,6 +49462,13 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
         throw new Error(`HTTP Error: ${res.status}`);
       const data2 = await res.json();
       const transcript = (data2.userText || data2.text || "").trim();
+      const askedQuestion = ((_a = followUpRef.current) == null ? void 0 : _a.question) || (currentQ == null ? void 0 : currentQ.questionOriginal) || (currentQ == null ? void 0 : currentQ.question) || "";
+      if (isLikelyHallucination(transcript, askedQuestion)) {
+        console.warn(`[oral] ignored a transcript that the student probably did not say: "${transcript}"`);
+        setInputMessage("");
+        alert("We couldn't hear you clearly. Please record again, a little closer to the microphone.");
+        return;
+      }
       if (isRepeatRequest(transcript)) {
         setInputMessage("");
         setIsAnalyzing(false);
@@ -49347,6 +49513,9 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestPayload)
         });
+        const creditError = await creditErrorFromResponse(res);
+        if (creditError)
+          throw creditError;
         if (!res.ok) {
           const errBody = await res.text();
           console.error(`\u274C [DEBUG] Backend HTTP Error ${res.status}:`, errBody);
@@ -49407,6 +49576,10 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
       } catch (err) {
         console.error("\u274C [DEBUG] Auto send error:", err);
         setIsAnalyzing(false);
+        if (err instanceof CreditError) {
+          setChatMessages((prev) => [...prev, { role: "assistant", content: err.message, isHtml: false }]);
+          return;
+        }
         setChatMessages((prev) => [
           ...prev,
           { role: "assistant", content: "\u901A\u4FE1\u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F\u3002\u3082\u3046\u4E00\u5EA6\u304A\u8A71\u3057\u304F\u3060\u3055\u3044\u3002", isHtml: false }
@@ -49619,6 +49792,9 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
           setIsPracticing(false);
         return;
       }
+      const creditError = await creditErrorFromResponse(res);
+      if (creditError)
+        throw creditError;
       if (!res.ok)
         throw new Error(`HTTP Error: ${res.status}`);
       const data2 = await res.json();
@@ -49664,7 +49840,11 @@ function useOralPracticeEngine(selectedLevel = "normal", speechSpeed = 1, userId
       console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong. Please send your answer again.", isHtml: false }
+        {
+          role: "assistant",
+          content: err instanceof CreditError ? err.message : "Sorry, something went wrong. Please send your answer again.",
+          isHtml: false
+        }
       ]);
     } finally {
       setIsAnalyzing(false);
@@ -50224,14 +50404,14 @@ var KanjiReadingsLine = ({ text, dict, contextHtml }) => {
     ] }, r2.base))
   ] });
 };
-async function loader$R({ request }) {
+async function loader$_({ request }) {
   const url = new URL(request.url);
   return dist$1.json({
     portalContent: null,
     currentPath: url.pathname
   });
 }
-var meta$M = ({ data: data2 }) => {
+var meta$X = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -50676,18 +50856,18 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (${st.sentences} sentence
             { id: "sec2", label: "Section 2 (Detailed)" },
             { id: "afterSec2", label: "After Sec 2 (Exit)" },
             { id: "custom", label: "\u2B50 My Custom Bank" }
-          ].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ].map((sec2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
               type: "button",
               onClick: () => {
-                setSelectedSection(sec.id);
+                setSelectedSection(sec2.id);
                 setSelectedTopics([]);
               },
-              className: `p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${selectedSection === sec.id ? "bg-purple-600 text-white border-purple-700 shadow-sm" : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"}`,
-              children: sec.label
+              className: `p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${selectedSection === sec2.id ? "bg-purple-600 text-white border-purple-700 shadow-sm" : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-purple-50"}`,
+              children: sec2.label
             },
-            sec.id
+            sec2.id
           )) })
         ] }),
         selectedSection !== "custom" && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -50929,8 +51109,8 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (${st.sentences} sentence
 var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralElaboratePage,
-  loader: loader$R,
-  meta: meta$M
+  loader: loader$_,
+  meta: meta$X
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -51203,16 +51383,16 @@ function ChatYamatoEoyWritingCustom({
           { key: "section2b", label: "Sec 2 Part B" },
           { key: "section3", label: "Sec 3 (400-500\u5B57)" },
           { key: "other", label: "Other" }
-        ].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ].map((sec2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
-            onClick: () => setWritingSection(sec.key),
-            style: writingSection === sec.key ? { backgroundColor: themeColor, color: "#ffffff" } : {},
-            className: `py-1 px-1 rounded-md text-[10px] font-bold transition text-center truncate cursor-pointer ${writingSection === sec.key ? "shadow-xs" : "bg-white text-slate-700 hover:opacity-80 border border-slate-200"}`,
-            children: sec.label
+            onClick: () => setWritingSection(sec2.key),
+            style: writingSection === sec2.key ? { backgroundColor: themeColor, color: "#ffffff" } : {},
+            className: `py-1 px-1 rounded-md text-[10px] font-bold transition text-center truncate cursor-pointer ${writingSection === sec2.key ? "shadow-xs" : "bg-white text-slate-700 hover:opacity-80 border border-slate-200"}`,
+            children: sec2.label
           },
-          sec.key
+          sec2.key
         )) })
       ]
     }
@@ -51248,7 +51428,7 @@ function ChatYamatoEoyWritingCustom({
     )
   ] });
 }
-async function loader$Q({ request }) {
+async function loader$Z({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -51261,7 +51441,7 @@ async function loader$Q({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$L = ({ data: data2 }) => {
+var meta$W = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -51605,8 +51785,8 @@ Details: ${assignedQuestionText}` : "";
 var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CustomDashboard,
-  loader: loader$Q,
-  meta: meta$L
+  loader: loader$Z,
+  meta: meta$W
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralDrill = ({
   systemPrompt = "",
@@ -51665,7 +51845,7 @@ var SEC1_EXTRA = [
   { label: "\u30C6\u30AF\u30CE\u30ED\u30B8\u30FC\u30FBSNS (technology)", categories: ["Technology"] }
 ];
 var SEC1_LAST = { label: "\u5C06\u6765 (future plans)", categories: ["Future"] };
-function shuffle$3(list2) {
+function shuffle$6(list2) {
   const a = [...list2];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -51675,7 +51855,7 @@ function shuffle$3(list2) {
 }
 function planSec1Topics(count = 7) {
   const extrasNeeded = Math.max(0, Math.min(SEC1_EXTRA.length, count - SEC1_CORE.length - 1));
-  const middle = shuffle$3([...SEC1_CORE, ...shuffle$3(SEC1_EXTRA).slice(0, extrasNeeded)]);
+  const middle = shuffle$6([...SEC1_CORE, ...shuffle$6(SEC1_EXTRA).slice(0, extrasNeeded)]);
   return [...middle, SEC1_LAST];
 }
 var SEC2_ANGLES = [
@@ -51742,6 +51922,9 @@ var OralRealtimeSession = ({ config, onStarted, onFinished, onCancel, themeColor
   const lastNudgeAtRef = reactExports.useRef(0);
   const [micLevel, setMicLevel] = reactExports.useState(0);
   const audioCtxRef = reactExports.useRef(null);
+  const aiStoppedAtRef = reactExports.useRef(0);
+  const aiSpeakingNowRef = reactExports.useRef(false);
+  const segmentRef = reactExports.useRef(null);
   const isRedoResponseRef = reactExports.useRef(false);
   const setLogBoth = (next) => {
     logRef.current = next;
@@ -51837,28 +52020,58 @@ var OralRealtimeSession = ({ config, onStarted, onFinished, onCancel, themeColor
     switch (msg.type) {
       case "input_audio_buffer.speech_started":
         setStudentSpeaking(true);
+        {
+          const t2 = Date.now();
+          const latency = aiSpeakingNowRef.current ? 0 : aiStoppedAtRef.current ? (t2 - aiStoppedAtRef.current) / 1e3 : void 0;
+          segmentRef.current = { start: t2, stop: 0, latency };
+        }
         lastActivityRef.current = Date.now();
         speechStoppedAtRef.current = 0;
         break;
       case "input_audio_buffer.speech_stopped":
         setStudentSpeaking(false);
+        if (closingRef.current === "due")
+          setTimeout(requestClosing, 400);
+        if (segmentRef.current)
+          segmentRef.current.stop = Date.now();
         lastActivityRef.current = Date.now();
         speechStoppedAtRef.current = Date.now();
         break;
       case "input_audio_buffer.committed":
-        if (msg.item_id)
-          setLogBoth([...logRef.current, { id: msg.item_id, speaker: "student", text: "\u2026" }]);
+        if (msg.item_id) {
+          const seg = segmentRef.current;
+          segmentRef.current = null;
+          setLogBoth([
+            ...logRef.current,
+            {
+              id: msg.item_id,
+              speaker: "student",
+              text: "\u2026",
+              latency: seg == null ? void 0 : seg.latency,
+              duration: seg && seg.stop > seg.start ? (seg.stop - seg.start) / 1e3 : void 0
+            }
+          ]);
+          aiStoppedAtRef.current = 0;
+        }
         break;
-      case "conversation.item.input_audio_transcription.completed":
-        setLogBoth(
-          logRef.current.map((l2) => l2.id === msg.item_id ? { ...l2, text: String(msg.transcript || "").trim() } : l2)
-        );
+      case "conversation.item.input_audio_transcription.completed": {
+        const heard = String(msg.transcript || "").trim();
+        const text = isLikelyHallucination(heard) ? "" : heard;
+        if (heard && !text)
+          console.warn(`[realtime] ignored a transcript that the student probably did not say: "${heard}"`);
+        setLogBoth(logRef.current.map((l2) => l2.id === msg.item_id ? { ...l2, text } : l2));
         break;
+      }
       case "conversation.item.input_audio_transcription.failed":
         setLogBoth(logRef.current.map((l2) => l2.id === msg.item_id ? { ...l2, text: "" } : l2));
         break;
       case "response.created":
         responseActiveRef.current = true;
+        if (closingRef.current === "due") {
+          send({ type: "response.cancel" });
+          send({ type: "output_audio_buffer.clear" });
+          closingRef.current = "pending";
+        }
         responseCreatedAtRef.current = Date.now();
         audioStartedRef.current = false;
         speechStoppedAtRef.current = 0;
@@ -51898,12 +52111,15 @@ var OralRealtimeSession = ({ config, onStarted, onFinished, onCancel, themeColor
         break;
       case "output_audio_buffer.started":
         setAiSpeaking(true);
+        aiSpeakingNowRef.current = true;
         audioStartedRef.current = true;
         lastActivityRef.current = Date.now();
         break;
       case "output_audio_buffer.stopped":
       case "output_audio_buffer.cleared":
         setAiSpeaking(false);
+        aiSpeakingNowRef.current = false;
+        aiStoppedAtRef.current = Date.now();
         lastActivityRef.current = Date.now();
         if (closingRef.current === "sent" && msg.type === "output_audio_buffer.stopped")
           setTimeout(finish, 800);
@@ -52045,12 +52261,27 @@ var OralRealtimeSession = ({ config, onStarted, onFinished, onCancel, themeColor
       return;
     if (remaining <= 60 && !warnedRef.current) {
       warnedRef.current = true;
-      systemNote("\u6B8B\u308A\u7D041\u5206\u3067\u3059\u3002\u65B0\u3057\u3044\u8A71\u984C\u306F\u59CB\u3081\u305A\u306B\u3001\u81EA\u7136\u306B\u4F1A\u8A71\u3092\u307E\u3068\u3081\u3066\u3044\u3063\u3066\u304F\u3060\u3055\u3044\u3002");
+      systemNote(
+        "\u6B8B\u308A\u7D041\u5206\u3067\u3059\u3002\u65B0\u3057\u3044\u8A71\u984C\u306F\u59CB\u3081\u305A\u306B\u3001\u4ECA\u306E\u8A71\u984C\u306E\u307E\u307E\u4F1A\u8A71\u3092\u7D9A\u3051\u3066\u304F\u3060\u3055\u3044\u3002\u7D42\u308F\u308A\u306E\u3042\u3044\u3055\u3064\uFF08\u300C\u4ECA\u65E5\u306F\u697D\u3057\u304B\u3063\u305F\u3067\u3059\u300D\u300C\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3057\u305F\u300D\u306A\u3069\uFF09\u306F\u3001\u300C\u6642\u9593\u306B\u306A\u308A\u307E\u3057\u305F\u300D\u3068\u77E5\u3089\u305B\u308B\u307E\u3067\u3001\u307E\u3060\u8A00\u308F\u306A\u3044\u3067\u304F\u3060\u3055\u3044\u3002"
+      );
     }
-    if (remaining <= 0) {
+    if (remaining <= 10 && closingRef.current === "none") {
+      closingRef.current = "due";
+      send({
+        type: "session.update",
+        session: {
+          type: "realtime",
+          audio: { input: { turn_detection: { type: "semantic_vad", eagerness: "low", create_response: false, interrupt_response: true } } }
+        }
+      });
+      if (!responseActiveRef.current && !aiSpeakingNowRef.current && !studentSpeaking && speechStoppedAtRef.current) {
+        requestClosing();
+      }
+    }
+    if (closingRef.current === "due" && remaining <= -20)
       requestClosing();
+    if (closingRef.current !== "none")
       return;
-    }
     const topics = topicsRef.current;
     const byTime = Math.min(Math.floor(elapsed / TOPIC_SECONDS), topics.length - 1);
     if (remaining > 60 && byTime > topicIdxRef.current) {
@@ -52206,8 +52437,10 @@ var OralMockReport = ({
   partnerName = "Examiner",
   hideStageHeadings = false,
   retryLabel = "\u{1F504} Take another mock exam",
-  reviewBeforeFeedback = false
+  reviewBeforeFeedback = false,
+  allowJapaneseFeedback = false
 }) => {
+  const [feedbackLanguage, setFeedbackLanguage] = reactExports.useState("en");
   const [transcript, setTranscript] = reactExports.useState(result.transcript);
   const [reviewing, setReviewing] = reactExports.useState(reviewBeforeFeedback);
   const [feedback, setFeedback] = reactExports.useState(null);
@@ -52224,7 +52457,8 @@ var OralMockReport = ({
         body: JSON.stringify({
           sessionId: result.sessionId,
           transcript: lines,
-          durations: result.durations
+          durations: result.durations,
+          feedbackLanguage
         })
       });
       const data2 = await res.json().catch(() => ({}));
@@ -52261,6 +52495,9 @@ var OralMockReport = ({
     loadFeedback(lines);
   };
   const avgLength = answers.length ? Math.round(answers.reduce((s2, a) => s2 + a.text.length, 0) / answers.length) : 0;
+  const latencies = answers.map((a) => a.latency).filter((x2) => typeof x2 === "number");
+  const lengths = answers.map((a) => a.duration).filter((x2) => typeof x2 === "number");
+  const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2 border-b border-slate-100 dark:border-slate-800 pb-5", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl", children: "\u{1F3C1}" }),
@@ -52272,10 +52509,12 @@ var OralMockReport = ({
         { steady: "easy", normal: "medium", accelerated: "hard" }[result.config.difficulty]
       ] }) })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-3 gap-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 gap-3", children: [
       { label: subtitle ? "Talk time" : "Exam time", value: `${Math.floor(total / 60)} min ${total % 60} s` },
       { label: "Your answers", value: `${answers.length}` },
-      { label: "Average answer", value: `${avgLength} characters` }
+      { label: "Average answer", value: `${avgLength} characters` },
+      ...latencies.length >= 2 ? [{ label: "Time to start answering", value: `${mean(latencies).toFixed(1)} s on average` }] : [],
+      ...lengths.length >= 2 ? [{ label: "Answer length", value: `${mean(lengths).toFixed(1)} s on average` }] : []
     ].map((m2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] font-semibold text-slate-400", children: m2.label }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-base font-extrabold text-slate-800 dark:text-slate-100", children: m2.value })
@@ -52303,6 +52542,18 @@ var OralMockReport = ({
           t2.text
         ] }, i)
       ) }),
+      allowJapaneseFeedback && /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "checkbox",
+            checked: feedbackLanguage === "ja",
+            onChange: (e) => setFeedbackLanguage(e.target.checked ? "ja" : "en"),
+            className: "cursor-pointer"
+          }
+        ),
+        "\u65E5\u672C\u8A9E\u3067\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF\u3092\u3082\u3089\u3046 (Get my feedback in Japanese)"
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
         {
@@ -52314,6 +52565,7 @@ var OralMockReport = ({
         }
       )
     ] }),
+    !reviewing && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400", children: "\u2139\uFE0F This feedback is based on the text of what you said (speech-to-text): how well your answers fit the questions, how much you elaborated, how you kept the conversation going, and your vocabulary and grammar. When available, it also uses timing measured by the app (how quickly you started answering and how long you spoke). Pronunciation, intonation and rhythm are not assessed, and tempo only partly, from those timing numbers." }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
       loading && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center space-y-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold animate-pulse", style: { color: themeColor }, children: "AI Yamato is reading your whole exam\u2026" }),
@@ -52365,11 +52617,11 @@ var OralMockReport = ({
     ) })
   ] });
 };
-async function loader$P({ request }) {
+async function loader$Y({ request }) {
   const url = new URL(request.url);
   return dist$1.json({ portalContent: null, currentPath: url.pathname });
 }
-var meta$K = ({ data: data2 }) => {
+var meta$V = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var THEME$1 = "#8b5cf6";
@@ -52453,7 +52705,13 @@ Find a quiet place and allow the microphone. Headphones work best.`))
   const reportData = result && config ? {
     config: { examSection: "section1", difficulty: "accelerated" },
     sessionId: result.sessionId,
-    transcript: result.transcript.map((t2) => ({ stage: "sec1", speaker: t2.speaker, text: t2.text })),
+    transcript: result.transcript.map((t2) => ({
+      stage: "sec1",
+      speaker: t2.speaker,
+      text: t2.text,
+      latency: t2.latency,
+      duration: t2.duration
+    })),
     durations: {},
     totalDurationSeconds: result.totalSeconds
   } : null;
@@ -52528,10 +52786,11 @@ Find a quiet place and allow the microphone. Headphones work best.`))
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-1", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-800 dark:text-slate-100", children: "How it works" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBYamato-sensei speaks only Japanese, at natural speed (about JLPT N4\u2013N3 level)." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBYamato-sensei speaks only Japanese, at the natural speed of a native Japanese speaker." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBNo buttons: just talk. You can even jump in while Yamato is speaking." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBUse headphones so Yamato doesn't hear its own voice." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBNo corrections during the talk \u2014 you get one feedback report at the end." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBFeedback is based on the text of what you said (speech-to-text) and on simple timing the app measures from your recordings (how quickly you start answering and how long you speak). Pronunciation, intonation and rhythm are not assessed, and tempo only partly." }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBCredits are used once, when the conversation starts." })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -52579,7 +52838,8 @@ Find a quiet place and allow the microphone. Headphones work best.`))
         partnerName: "Yamato",
         hideStageHeadings: true,
         retryLabel: "\u{1F504} Talk again",
-        reviewBeforeFeedback: true
+        reviewBeforeFeedback: true,
+        allowJapaneseFeedback: true
       }
     ),
     phase !== "talking" && /* @__PURE__ */ jsxRuntimeExports.jsx("aside", { "aria-label": "Floating Controls", className: "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChatYamatoEoyOralDrill, { userId: user == null ? void 0 : user.id, userNickname: nickname, credits }) })
@@ -52588,8 +52848,8 @@ Find a quiet place and allow the microphone. Headphones work best.`))
 var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingEoyOralSuperbPage,
-  loader: loader$P,
-  meta: meta$K
+  loader: loader$Y,
+  meta: meta$V
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -52727,14 +52987,14 @@ var OralUserAnswerList = ({
     ] })
   ] });
 };
-async function loader$O({ request }) {
+async function loader$X({ request }) {
   const url = new URL(request.url);
   return dist$1.json({
     portalContent: null,
     currentPath: url.pathname
   });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$U = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -53076,18 +53336,18 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${(answers[firs
           { id: "sec2", label: "Section 2 (Detailed)" },
           { id: "afterSec2", label: "After Sec 2 (Exit)" },
           { id: "custom", label: "\u2B50 My Custom Bank" }
-        ].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ].map((sec2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
             type: "button",
             onClick: () => {
-              setSelectedSection(sec.id);
+              setSelectedSection(sec2.id);
               setSelectedTopics([]);
             },
-            className: `p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${selectedSection === sec.id ? "bg-amber-500 text-white border-amber-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"}`,
-            children: sec.label
+            className: `p-3 rounded-2xl border text-xs font-bold transition cursor-pointer ${selectedSection === sec2.id ? "bg-amber-500 text-white border-amber-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-amber-50"}`,
+            children: sec2.label
           },
-          sec.id
+          sec2.id
         )) })
       ] }),
       selectedSection !== "custom" && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -53149,10 +53409,10 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${(answers[firs
 var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralDrillPage,
-  loader: loader$O,
-  meta: meta$J
+  loader: loader$X,
+  meta: meta$U
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$N({ request }) {
+async function loader$W({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -53166,7 +53426,7 @@ async function loader$N({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$I = ({ data: data2 }) => {
+var meta$T = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -53693,15 +53953,15 @@ function TestYamatoNotePage() {
 var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoNotePage,
-  loader: loader$N,
-  meta: meta$I
+  loader: loader$W,
+  meta: meta$T
 }, Symbol.toStringTag, { value: "Module" }));
 var MOCK_SECTION_COST = {
   section1: CREDIT_COSTS.mockSection1,
   section2: CREDIT_COSTS.mockSection2,
   both: CREDIT_COSTS.mockFull
 };
-var PACE_LABEL = { steady: "Steady", normal: "Normal", accelerated: "Accelerated" };
+var PACE_LABEL$1 = { steady: "Steady", normal: "Normal", accelerated: "Accelerated" };
 var OralMockConfig = ({
   onStartExam,
   learningPace = "normal",
@@ -53740,24 +54000,24 @@ var OralMockConfig = ({
         { id: "section1", label: "Section 1 only", desc: "General conversation (about 7 min)" },
         { id: "section2", label: "Section 2 only", desc: "Detailed study discussion (about 8 min)" },
         { id: "both", label: "Section 1 + 2", desc: "The full exam in one go (about 15 min)" }
-      ].map((sec) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      ].map((sec2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "button",
         {
           type: "button",
-          onClick: () => setExamSection(sec.id),
-          className: optionClass(examSection === sec.id),
-          style: { borderColor: examSection === sec.id ? themeColor : void 0 },
+          onClick: () => setExamSection(sec2.id),
+          className: optionClass(examSection === sec2.id),
+          style: { borderColor: examSection === sec2.id ? themeColor : void 0 },
           children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-sm text-slate-800 dark:text-slate-100", children: sec.label }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] text-slate-500 mt-1", children: sec.desc }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-sm text-slate-800 dark:text-slate-100", children: sec2.label }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] text-slate-500 mt-1", children: sec2.desc }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[11px] font-bold mt-1", style: { color: themeColor }, children: [
               "\u{1FA99} ",
-              MOCK_SECTION_COST[sec.id],
+              MOCK_SECTION_COST[sec2.id],
               " credits"
             ] })
           ]
         },
-        sec.id
+        sec2.id
       )) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-start gap-2 pt-1 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -53872,10 +54132,11 @@ var OralMockConfig = ({
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBTo hear the question again, say \u300C\u3059\u307F\u307E\u305B\u3093\u3002\u3082\u3046\u3044\u3061\u3069\u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002\u300D" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
         "\u30FBYour feedback report follows your Learning Pace (",
-        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: PACE_LABEL[learningPace] || "Normal" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: PACE_LABEL$1[learningPace] || "Normal" }),
         "). You can change it in My Account."
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBCredits are used once, when the exam starts." })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBCredits are used once, when the exam starts." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u30FBFeedback is based on the text of what you said (speech-to-text) and on simple timing the app measures from your recordings (how quickly you start answering and how long you speak). Pronunciation, intonation and rhythm are not assessed, and tempo only partly." })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       "button",
@@ -53962,7 +54223,7 @@ function pickIdeasByCategory(data2, section, difficulty, categories, count = 8) 
   }
   return list2.slice(0, count).map((q2) => (q2.text_original || q2.text || "").replace(/<[^>]+>/g, "")).filter(Boolean);
 }
-var formatTime$1 = (secs) => {
+var formatTime$2 = (secs) => {
   const s2 = Math.max(0, Math.floor(secs));
   return `${String(Math.floor(s2 / 60)).padStart(2, "0")}:${String(s2 % 60).padStart(2, "0")}`;
 };
@@ -54043,7 +54304,15 @@ var OralMockSession = ({
     u2.onerror = () => resolve();
     window.speechSynthesis.speak(u2);
   });
-  const say = (text, src) => new Promise((resolve) => {
+  const examinerDoneAtRef = reactExports.useRef(0);
+  const firstRecordStartRef = reactExports.useRef(null);
+  const lastRecordingSecondsRef = reactExports.useRef(void 0);
+  const say = (text, src) => new Promise((done) => {
+    const resolve = () => {
+      examinerDoneAtRef.current = Date.now();
+      firstRecordStartRef.current = null;
+      done();
+    };
     if (unmountedRef.current)
       return resolve();
     lastSpokenRef.current = { text, src };
@@ -54212,7 +54481,10 @@ var OralMockSession = ({
       return;
     setTranscript("");
     const stage2 = stages[stageIdxRef.current];
-    addLog({ stage: stage2, speaker: "student", text });
+    const latency = examinerDoneAtRef.current && firstRecordStartRef.current ? Math.max(0, (firstRecordStartRef.current - examinerDoneAtRef.current) / 1e3) : void 0;
+    addLog({ stage: stage2, speaker: "student", text, latency, duration: lastRecordingSecondsRef.current });
+    firstRecordStartRef.current = null;
+    lastRecordingSecondsRef.current = void 0;
     if (stage2 === "before" || stage2 === "after") {
       playScriptFrom(scriptPosRef.current);
       return;
@@ -54245,7 +54517,7 @@ var OralMockSession = ({
   };
   const lastBlobRef = reactExports.useRef(null);
   const transcribe = async (blob) => {
-    var _a, _b;
+    var _a, _b, _c;
     setStatus("transcribing");
     lastBlobRef.current = blob;
     try {
@@ -54265,8 +54537,10 @@ var OralMockSession = ({
       const text = String(data2.userText || data2.text || "").trim();
       if (unmountedRef.current || finishedRef.current)
         return;
-      if (!text) {
-        setNotice("We couldn't hear anything. Please try again.");
+      if (!text || isLikelyHallucination(text, (_b = lastSpokenRef.current) == null ? void 0 : _b.text)) {
+        if (text)
+          console.warn(`[mock] ignored a transcript that the student probably did not say: "${text}"`);
+        setNotice("We couldn't hear you clearly. Please try again, a little closer to the microphone.");
         setStatus("listening");
         return;
       }
@@ -54287,7 +54561,7 @@ var OralMockSession = ({
     } catch (err) {
       if (unmountedRef.current || finishedRef.current)
         return;
-      const reason = (err == null ? void 0 : err.name) === "AbortError" ? "It took too long (no reply for 45 seconds)." : ((_b = err == null ? void 0 : err.message) == null ? void 0 : _b.startsWith("The speech")) ? err.message : "Connection problem.";
+      const reason = (err == null ? void 0 : err.name) === "AbortError" ? "It took too long (no reply for 45 seconds)." : ((_c = err == null ? void 0 : err.message) == null ? void 0 : _c.startsWith("The speech")) ? err.message : "Connection problem.";
       setNotice(`We couldn't turn your answer into text. ${reason}`);
       setStatus("sttFailed");
     }
@@ -54320,6 +54594,7 @@ var OralMockSession = ({
           chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
+        lastRecordingSecondsRef.current = (Date.now() - recordStartRef.current) / 1e3;
         if (recordTimerRef.current)
           clearTimeout(recordTimerRef.current);
         stream.getTracks().forEach((t2) => t2.stop());
@@ -54329,6 +54604,8 @@ var OralMockSession = ({
       };
       recorder.start();
       recordStartRef.current = Date.now();
+      if (firstRecordStartRef.current === null)
+        firstRecordStartRef.current = recordStartRef.current;
       if (recordTimerRef.current)
         clearTimeout(recordTimerRef.current);
       recordTimerRef.current = setTimeout(() => {
@@ -54477,9 +54754,9 @@ var OralMockSession = ({
             title: overTime ? "Time is up \u2014 the examiner will close this section after your next answer" : void 0,
             children: [
               "\u23F1\uFE0F ",
-              formatTime$1(stageElapsed),
+              formatTime$2(stageElapsed),
               " / ",
-              formatTime$1(STAGE_LIMIT_SECONDS[stage])
+              formatTime$2(STAGE_LIMIT_SECONDS[stage])
             ]
           }
         ),
@@ -54578,7 +54855,7 @@ var OralMockSession = ({
                 className: `px-6 py-3 rounded-xl font-bold text-sm text-white shadow-md cursor-pointer flex items-center gap-2 ${status === "recording" ? "animate-pulse" : "bg-rose-600 hover:bg-rose-700"}`,
                 style: status === "recording" ? { backgroundColor: themeColor } : void 0,
                 children: [
-                  status === "recording" ? `\u23F9 Stop (${formatTime$1((now - recordStartRef.current) / 1e3)})` : "\u{1F399}\uFE0F Record",
+                  status === "recording" ? `\u23F9 Stop (${formatTime$2((now - recordStartRef.current) / 1e3)})` : "\u{1F399}\uFE0F Record",
                   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] bg-black/20 px-2 py-0.5 rounded-full", children: "[Spacebar]" })
                 ]
               }
@@ -54698,11 +54975,11 @@ var ChatYamatoEoyOralMock = ({
     }
   );
 };
-async function loader$M({ request }) {
+async function loader$V({ request }) {
   const url = new URL(request.url);
   return dist$1.json({ portalContent: null, currentPath: url.pathname });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$S = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var THEME = "#ef4444";
@@ -54898,8 +55175,8 @@ Find a quiet place and allow the microphone.`))
 var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
-  loader: loader$M,
-  meta: meta$H
+  loader: loader$V,
+  meta: meta$S
 }, Symbol.toStringTag, { value: "Module" }));
 var POLL_MS = 3e4;
 function sameTeacher(a, b) {
@@ -55254,8 +55531,8 @@ async function loadGamePage(request) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var loader$L = ({ request }) => loadGamePage(request);
-var meta$G = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$U = ({ request }) => loadGamePage(request);
+var meta$R = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function HiraganaSolitaireRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hiragana Solitaire", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -55271,8 +55548,8 @@ function HiraganaSolitaireRoute() {
 var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HiraganaSolitaireRoute,
-  loader: loader$L,
-  meta: meta$G
+  loader: loader$U,
+  meta: meta$R
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -55292,7 +55569,7 @@ async function fetchWritingStylesData(supabaseClient) {
     return null;
   }
 }
-async function loader$K({ request }) {
+async function loader$T({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55305,7 +55582,7 @@ async function loader$K({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$F = ({ data: data2 }) => {
+var meta$Q = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -55433,11 +55710,11 @@ function WritingStylesGuide() {
 var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WritingStylesGuide,
-  loader: loader$K,
-  meta: meta$F
+  loader: loader$T,
+  meta: meta$Q
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$J = ({ request }) => loadGamePage(request);
-var meta$E = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$S = ({ request }) => loadGamePage(request);
+var meta$P = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 var VARIANTS = [
   { key: "easy", label: "Easy", params: { version: "easy" } },
   { key: "hard", label: "Hard", params: { version: "hard" } }
@@ -55458,10 +55735,10 @@ function PrefecturePuzzleRoute() {
 var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrefecturePuzzleRoute,
-  loader: loader$J,
-  meta: meta$E
+  loader: loader$S,
+  meta: meta$P
 }, Symbol.toStringTag, { value: "Module" }));
-function shuffle$2(arr) {
+function shuffle$5(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -55484,7 +55761,7 @@ var RINGS_DATA = STAGES.map((s2, i) => [
   ...RING_OK[i].map((j) => [...s2[j], true]),
   ...RING_BAD[i].map(([k2, r2]) => [k2, r2, false])
 ]);
-async function loader$I({ request }) {
+async function loader$R({ request }) {
   let portalContent = null;
   try {
     const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -55493,7 +55770,7 @@ async function loader$I({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$D = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$O = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Rolling Character", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 py-8 space-y-6", children: [
@@ -55542,7 +55819,7 @@ function RollingCharacterArena() {
   const controlsRef = reactExports.useRef(null);
   const keysRef = reactExports.useRef({ left: false, right: false, up: false, down: false, space: false });
   const jumpRequestRef = reactExports.useRef(false);
-  const generateRandomKanaProblem = (st) => shuffle$2(STAGES[st - 1] || STAGES[0]).slice(0, 3);
+  const generateRandomKanaProblem = (st) => shuffle$5(STAGES[st - 1] || STAGES[0]).slice(0, 3);
   reactExports.useEffect(() => {
     if (lives <= 0 && gameState === "PLAYING")
       setGameState("GAMEOVER");
@@ -56036,8 +56313,357 @@ function RollingCharacterArena() {
 var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: RollingCharacterPage,
-  loader: loader$I,
-  meta: meta$D
+  loader: loader$R,
+  meta: meta$O
+}, Symbol.toStringTag, { value: "Module" }));
+var KANJI_GROUP_ORDER = [
+  "Numbers",
+  "Counters",
+  "Season",
+  "Days of the week",
+  "Day",
+  "Time",
+  "Parts of the body",
+  "Positions",
+  "Directions",
+  "School life",
+  "People/family",
+  "Adjectives/adverbs",
+  "Verbs (Movement)",
+  "Verbs (Body/Senses)",
+  "Verbs (Lifestyle)",
+  "Verbs (Activity)",
+  "Verbs",
+  "Country/city",
+  "Place",
+  "Travel/transport",
+  "Food",
+  "Nature",
+  "Animals",
+  "Colours",
+  "Repeat sign",
+  "Miscellaneous"
+];
+var EXTRA_ANSWERS = {
+  \u4E00: ["1"],
+  \u4E8C: ["2"],
+  \u4E09: ["3"],
+  \u56DB: ["4"],
+  \u4E94: ["5"],
+  \u516D: ["6"],
+  \u4E03: ["7"],
+  \u516B: ["8"],
+  \u4E5D: ["9"],
+  \u5341: ["10"],
+  \u767E: ["100"],
+  \u5343: ["1000"],
+  \u4E07: ["10000"],
+  \u4EBA: ["people", "counter for people"],
+  \u672C: ["counter for long things"],
+  \u56DE: ["time", "turn"],
+  \u624D: ["age"],
+  \u65E5: ["date", "sun"],
+  \u6708: ["moon", "month"],
+  \u571F: ["ground"],
+  \u66DC: ["weekday", "days of the week"],
+  \u6642: ["o'clock"],
+  \u5206: ["minutes"],
+  \u6BCE: ["each"],
+  \u9593: ["space", "gap"],
+  \u5148: ["before", "first", "last"],
+  \u663C: ["lunch", "midday"],
+  \u6669: ["night"],
+  \u591C: ["evening"],
+  \u53BB: ["go away", "last"],
+  \u5348: ["midday"],
+  \u4E0A: ["up", "on", "top"],
+  \u4E2D: ["in", "centre", "center"],
+  \u4E0B: ["under"],
+  \u524D: ["front", "in front"],
+  \u5F8C: ["back", "later"],
+  \u5916: ["out", "outside"],
+  \u5B66: ["learn"],
+  \u82F1: ["britain", "england"],
+  \u6587: ["text"],
+  \u6F22: ["chinese"],
+  \u52C9: ["exert"],
+  \u5F37: ["strength"],
+  \u5BB6: ["family"],
+  \u5144: ["elder brother", "big brother"],
+  \u5F1F: ["little brother"],
+  \u59C9: ["elder sister", "big sister"],
+  \u59B9: ["little sister"],
+  \u79C1: ["me"],
+  \u5973: ["girl"],
+  \u7537: ["boy"],
+  \u5B50: ["kid"],
+  \u5B89: ["peaceful", "inexpensive", "low price"],
+  \u9AD8: ["high"],
+  \u591A: ["a lot", "lots"],
+  \u697D: ["enjoyable", "easy", "enjoy"],
+  \u5C11: ["small amount"],
+  \u9577: ["chief"],
+  \u8FD1: ["nearby"],
+  \u5E83: ["spacious"],
+  \u660E: ["light"],
+  \u884C: ["go"],
+  \u6765: ["come"],
+  \u4F11: ["day off", "break"],
+  \u51FA: ["leave", "out"],
+  \u5165: ["in", "put in", "enter"],
+  \u751F: ["live", "born", "student"],
+  \u898B: ["watch"],
+  \u8A71: ["speak"],
+  \u98DF: ["eat"],
+  \u4F5C: ["create"],
+  \u4F4F: ["dwell"],
+  \u4F1A: ["meeting"],
+  \u767A: ["depart", "leave"],
+  \u5E30: ["go back", "come home"],
+  \u6301: ["carry"],
+  \u4E57: ["get on", "board"],
+  \u6CCA: ["stay"],
+  \u6B69: ["walk"],
+  \u7530: ["field", "rice paddy", "paddy"],
+  \u5929: ["heaven"],
+  \u90FD: ["city"],
+  \u56FD: ["nation"],
+  \u795E: ["spirit"],
+  \u5C4B: ["store"],
+  \u5834: ["location"],
+  \u5E97: ["store", "shop"],
+  \u96FB: ["electric"],
+  \u9053: ["street", "path"],
+  \u65C5: ["journey"],
+  \u8272: ["colour"],
+  \u3005: ["repeat", "repeat mark", "repeat sign", "repetition"],
+  \u6C17: ["energy", "mood", "feeling"],
+  \u793E: ["company", "society"],
+  \u65B9: ["way"],
+  \u98EF: ["rice", "meal"],
+  \u6D0B: ["west", "foreign"],
+  \u548C: ["japanese", "peace"],
+  \u75C5: ["disease", "sickness"],
+  \u70B9: ["mark", "score"],
+  \u5143: ["basis"]
+};
+var SPELLING = {
+  colour: "color",
+  colours: "colors",
+  centre: "center",
+  metre: "meter",
+  theatre: "theater",
+  grey: "gray",
+  favourite: "favorite",
+  neighbour: "neighbor",
+  practise: "practice",
+  travelling: "traveling",
+  traveller: "traveler",
+  harbour: "harbor",
+  honour: "honor",
+  programme: "program",
+  organise: "organize",
+  realise: "realize",
+  mum: "mom",
+  labour: "labor"
+};
+function normalizeAnswer(input2) {
+  let t2 = input2.normalize("NFKC").toLowerCase().replace(/[’‘`]/g, "'").replace(/(\d),(\d)/g, "$1$2").replace(/[-_/.,!?;:"()]/g, " ").replace(/\s+/g, " ").trim();
+  for (let i = 0; i < 2; i++)
+    t2 = t2.replace(/^(to|the|a|an) (?=\S)/, "");
+  return t2.split(" ").map((w2) => SPELLING[w2] ?? w2).join(" ");
+}
+function acceptedAnswers(kanji, meaning) {
+  const base = (meaning || "").split(/[,;]/).map((s2) => s2.trim()).filter(Boolean);
+  const all = [...base, ...EXTRA_ANSWERS[kanji] || []];
+  const seen = /* @__PURE__ */ new Set();
+  return all.filter((a) => {
+    const n2 = normalizeAnswer(a);
+    if (!n2 || seen.has(n2))
+      return false;
+    seen.add(n2);
+    return true;
+  });
+}
+function isCorrectMeaning(input2, accepted) {
+  const n2 = normalizeAnswer(input2);
+  if (!n2)
+    return false;
+  return accepted.some((a) => normalizeAnswer(a) === n2);
+}
+var LOOKALIKE_TEST_KEYS = {
+  hiragana: "lookalike-hiragana",
+  katakana: "lookalike-katakana",
+  kanji: "lookalike-kanji"
+};
+var LOOKALIKE_LABELS = {
+  hiragana: { title: "Hiragana", jp: "\u3072\u3089\u304C\u306A", answer: "romaji" },
+  katakana: { title: "Katakana", jp: "\u30AB\u30BF\u30AB\u30CA", answer: "romaji" },
+  kanji: { title: "Kanji", jp: "\u6F22\u5B57", answer: "English meaning" }
+};
+var LOOKALIKE_TARGETS = {
+  hiragana: { target: 2, good: 3 },
+  katakana: { target: 2, good: 3 },
+  kanji: { target: 3, good: 4 }
+};
+var s = (chars, byUser) => ({ chars: [...chars], byUser });
+var LOOKALIKE_SETS = {
+  hiragana: [
+    s("\u3057\u3064", true),
+    s("\u306F\u307B", true),
+    s("\u3057\u3082", true),
+    s("\u3044\u3053", true),
+    s("\u308F\u308C", true),
+    s("\u306D\u308C", false),
+    s("\u306C\u3081", false),
+    s("\u308B\u308D", false),
+    s("\u3055\u3061", false),
+    s("\u304D\u3055", false),
+    s("\u3042\u304A", false),
+    s("\u307E\u3082", false),
+    s("\u3044\u308A", false),
+    s("\u3051\u306F", false)
+  ],
+  katakana: [
+    s("\u30AF\u30EF\u30A6", true),
+    s("\u30CB\u30A8", true),
+    s("\u30B7\u30C4", true),
+    s("\u30B9\u30CC", true),
+    s("\u30DE\u30E0", true),
+    s("\u30CA\u30E1", true),
+    s("\u30BD\u30F3", false),
+    s("\u30B7\u30BD", false),
+    s("\u30C4\u30F3", false),
+    s("\u30C1\u30C6", false),
+    s("\u30B3\u30E6", false),
+    s("\u30A2\u30DE", false),
+    s("\u30EB\u30EC", false),
+    s("\u30BF\u30AF", false),
+    s("\u30D5\u30EF", false)
+  ],
+  kanji: [
+    s("\u7530\u53E3", true),
+    s("\u6301\u5F85\u5BFA", true),
+    s("\u805E\u9593", true),
+    s("\u81EA\u76EE\u65E5", true),
+    s("\u4EBA\u5165\u516B", true),
+    s("\u5341\u5343", true),
+    s("\u9031\u9053", true),
+    s("\u96FB\u96EA", true),
+    s("\u5927\u72AC\u5929", true),
+    s("\u5348\u725B", true),
+    s("\u767D\u767E", true),
+    s("\u6728\u672C\u4F11\u4F53", false),
+    s("\u6771\u8ECA", false),
+    s("\u8CB7\u58F2\u8AAD", false),
+    s("\u8A00\u8A71\u8A9E", false),
+    s("\u53F3\u5DE6", false),
+    s("\u4ECA\u4F1A", false)
+  ]
+};
+var KANA_ROWS = [
+  ["\u3042\u3044\u3046\u3048\u304A", "\u30A2\u30A4\u30A6\u30A8\u30AA", ["a", "i", "u", "e", "o"]],
+  ["\u304B\u304D\u304F\u3051\u3053", "\u30AB\u30AD\u30AF\u30B1\u30B3", ["ka", "ki", "ku", "ke", "ko"]],
+  ["\u3055\u3057\u3059\u305B\u305D", "\u30B5\u30B7\u30B9\u30BB\u30BD", ["sa", "shi", "su", "se", "so"]],
+  ["\u305F\u3061\u3064\u3066\u3068", "\u30BF\u30C1\u30C4\u30C6\u30C8", ["ta", "chi", "tsu", "te", "to"]],
+  ["\u306A\u306B\u306C\u306D\u306E", "\u30CA\u30CB\u30CC\u30CD\u30CE", ["na", "ni", "nu", "ne", "no"]],
+  ["\u306F\u3072\u3075\u3078\u307B", "\u30CF\u30D2\u30D5\u30D8\u30DB", ["ha", "hi", "fu", "he", "ho"]],
+  ["\u307E\u307F\u3080\u3081\u3082", "\u30DE\u30DF\u30E0\u30E1\u30E2", ["ma", "mi", "mu", "me", "mo"]],
+  ["\u3084\u3086\u3088", "\u30E4\u30E6\u30E8", ["ya", "yu", "yo"]],
+  ["\u3089\u308A\u308B\u308C\u308D", "\u30E9\u30EA\u30EB\u30EC\u30ED", ["ra", "ri", "ru", "re", "ro"]],
+  ["\u308F\u3092\u3093", "\u30EF\u30F2\u30F3", ["wa", "wo", "n"]]
+];
+var KANA_ROMAJI = (() => {
+  const map = {};
+  for (const [h, k2, r2] of KANA_ROWS) {
+    [...h].forEach((c, i) => map[c] = r2[i]);
+    [...k2].forEach((c, i) => map[c] = r2[i]);
+  }
+  return map;
+})();
+function normalizeRomaji(input2) {
+  return input2.normalize("NFKC").toLowerCase().replace(/\s+/g, "");
+}
+function isCorrectRomaji(kana, input2) {
+  const want = KANA_ROMAJI[kana];
+  return Boolean(want) && normalizeRomaji(input2) === want;
+}
+function lookalikeChars(type) {
+  return [...new Set(LOOKALIKE_SETS[type].flatMap((set) => set.chars))];
+}
+function isLookalikeType(v2) {
+  return v2 === "hiragana" || v2 === "katakana" || v2 === "kanji";
+}
+async function loader$Q({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$N = () => [
+  { title: "Look-alike Characters \u2013 Accepted Answers | JP Tutor AI Yamato" },
+  { name: "description", content: "The look-alike hiragana, katakana and kanji, with the answers accepted in the test." }
+];
+var TYPES$1 = ["hiragana", "katakana", "kanji"];
+function LookalikeAnswersPage() {
+  const [kanji, setKanji] = reactExports.useState(/* @__PURE__ */ new Map());
+  const [error, setError] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    (async () => {
+      try {
+        const { data: data2, error: error2 } = await supabase.from("kl_character").select("character, meaning").eq("char_type", "kanji").in("character", lookalikeChars("kanji"));
+        if (error2)
+          throw error2;
+        setKanji(new Map((data2 || []).map((r2) => [String(r2.character), acceptedAnswers(r2.character, r2.meaning)])));
+      } catch (e) {
+        setError((e == null ? void 0 : e.message) || "Could not load the kanji answers.");
+      }
+    })();
+  }, []);
+  const answer = (type, c) => type === "kanji" ? (kanji.get(c) ?? []).join(" / ") || "\u2026" : KANA_ROMAJI[c] ?? "";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test/lookalike", className: "text-sm text-indigo-600 hover:underline", children: "\u2190 Back to the look-alike test" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-2 text-2xl sm:text-3xl font-black text-slate-900", children: "Look-alike Characters \u2013 Accepted Answers" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-slate-600", children: "Check them before the test if you like." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Kana:" }),
+        " only one romaji is correct \u2014 ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "shi, chi, tsu, fu, ji, wo, n" }),
+        " (not si, ti, tu, hu, zi). Upper or lower case does not matter."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Kanji:" }),
+        ' any one of the English answers is correct. Upper or lower case, "to", "the", "a" or "an" at the start, and British or American spelling do not matter.'
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "Think a different answer should be accepted? Tell your teacher or contact us." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { "aria-label": "Character types", className: "flex flex-wrap gap-2", children: TYPES$1.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: `#${t2}`, className: "text-sm bg-white border border-slate-200 hover:bg-indigo-50 rounded-lg px-3 py-1", children: [
+      LOOKALIKE_LABELS[t2].title,
+      " ",
+      LOOKALIKE_LABELS[t2].jp
+    ] }, t2)) }),
+    TYPES$1.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: t2, className: "scroll-mt-20 bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2 mb-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "font-black text-slate-900", children: [
+          LOOKALIKE_LABELS[t2].title,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400", children: LOOKALIKE_LABELS[t2].jp })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: `/test/lookalike?type=${t2}`, className: "text-sm font-bold text-indigo-600 underline", children: "Start \u2192" })
+      ] }),
+      t2 === "kanji" && error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-rose-600 text-sm", children: error }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid sm:grid-cols-2 gap-3", children: LOOKALIKE_SETS[t2].map((set, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-xl border border-slate-200 divide-y divide-slate-100", children: set.chars.map((c) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 px-3 py-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl w-10 text-center shrink-0 text-slate-900", children: c }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-slate-700", children: answer(t2, c) })
+      ] }, c)) }, i)) })
+    ] }, t2))
+  ] }) }) });
+}
+var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: LookalikeAnswersPage,
+  loader: loader$Q,
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -56346,7 +56972,7 @@ async function fetchTextTypesData(supabaseClient) {
     return null;
   }
 }
-async function loader$H({ request }) {
+async function loader$P({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -56737,15 +57363,33 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$C = ({ data: data2 }) => {
+var meta$M = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$H,
-  meta: meta$C
+  loader: loader$P,
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
+var COLUMN_SETS = [
+  "id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school, catchup_until",
+  // SQL 48 の後
+  "id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school",
+  // SQL 47 の後
+  "id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at",
+  // SQL 42 の後
+  "id, title, lesson_id, task_keys, due_at"
+  // それより前
+];
+async function selectHomework(admin, classId, limit) {
+  for (let level = 0; level < COLUMN_SETS.length; level++) {
+    const { data: data2, error } = await admin.from("edu_homework").select(COLUMN_SETS[level]).eq("class_id", classId).order("due_at", { ascending: false }).limit(limit);
+    if (!error)
+      return { rows: data2 ?? [], level };
+  }
+  return { rows: [], level: 3 };
+}
 function toItem(h, studentIds) {
   return {
     id: String(h.id),
@@ -56757,7 +57401,9 @@ function toItem(h, studentIds) {
     quizId: h.quiz_id ? String(h.quiz_id) : null,
     assignTo: h.assign_to === "students" ? "students" : "class",
     studentIds,
-    dueAt: String(h.due_at)
+    dueAt: String(h.due_at),
+    allowDuringSchool: h.kind === "classwork" || h.allow_during_school === true,
+    catchupUntil: h.catchup_until ? String(h.catchup_until) : null
   };
 }
 function isAssignedTo(item, userId) {
@@ -56797,7 +57443,8 @@ async function loadQuizStats(admin, homeworkIds, userIds) {
         best: Number(a.score),
         total: Number(a.total),
         attempts: 1,
-        lastAt: String(a.created_at)
+        lastAt: String(a.created_at),
+        firstAt: String(a.created_at)
       });
     } else {
       s2.attempts += 1;
@@ -56807,29 +57454,32 @@ async function loadQuizStats(admin, homeworkIds, userIds) {
       }
       if (String(a.created_at) > s2.lastAt)
         s2.lastAt = String(a.created_at);
+      if (String(a.created_at) < s2.firstAt)
+        s2.firstAt = String(a.created_at);
     }
   }
   return [...stats.values()];
 }
 async function loadClassAssignments(admin, classId, teacherId) {
-  const { data: rows, error } = await admin.from("edu_homework").select("id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(200);
-  if (error) {
-    const { data: legacy } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(200);
+  const { rows, level } = await selectHomework(admin, classId, 200);
+  if (level === 3) {
     return {
       available: false,
-      items: (legacy ?? []).map((h) => toItem(h, [])),
+      schoolHoursAvailable: false,
+      catchupAvailable: false,
+      items: rows.map((h) => toItem(h, [])),
       quizzes: [],
       quizStats: []
     };
   }
-  const list2 = rows ?? [];
+  const list2 = rows;
   const targets = await loadTargets(admin, list2.filter((h) => h.assign_to === "students").map((h) => String(h.id)));
   const items = list2.map((h) => toItem(h, targets.get(String(h.id)) ?? []));
   const [quizzes, quizStats] = await Promise.all([
     loadTeacherQuizzes(admin, teacherId),
     loadQuizStats(admin, items.filter((i) => i.itemType === "vocab_quiz").map((i) => i.id))
   ]);
-  return { available: true, items, quizzes, quizStats };
+  return { available: true, schoolHoursAvailable: level <= 1, catchupAvailable: level === 0, items, quizzes, quizStats };
 }
 async function loadTeacherQuizzes(admin, teacherId) {
   const { data: quizzes } = await admin.from("edu_teacher_quizzes").select("id, title, created_at").eq("teacher_id", teacherId).order("created_at", { ascending: false }).limit(VOCAB_QUIZ_LIMITS.maxQuizzesPerTeacher);
@@ -56848,13 +57498,12 @@ async function loadTeacherQuizzes(admin, teacherId) {
   }));
 }
 async function loadStudentAssignments(admin, classId, userId) {
-  const { data: rows, error } = await admin.from("edu_homework").select("id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(60);
+  const { rows, level } = await selectHomework(admin, classId, 60);
   let items;
-  if (error) {
-    const { data: legacy } = await admin.from("edu_homework").select("id, title, lesson_id, task_keys, due_at").eq("class_id", classId).order("due_at", { ascending: false }).limit(60);
-    items = (legacy ?? []).map((h) => toItem(h, []));
+  if (level === 3) {
+    items = rows.map((h) => toItem(h, []));
   } else {
-    const list2 = rows ?? [];
+    const list2 = rows;
     const studentOnly = list2.filter((h) => h.assign_to === "students").map((h) => String(h.id));
     const mine = /* @__PURE__ */ new Set();
     if (studentOnly.length) {
@@ -56869,7 +57518,7 @@ async function loadStudentAssignments(admin, classId, userId) {
 async function getStudentQuizAssignment(admin, homeworkId, userId) {
   if (!/^[0-9a-f-]{36}$/i.test(homeworkId))
     return null;
-  const { data: hw } = await admin.from("edu_homework").select("id, class_id, title, kind, item_type, quiz_id, assign_to, due_at").eq("id", homeworkId).maybeSingle();
+  const { data: hw } = await admin.from("edu_homework").select("*").eq("id", homeworkId).maybeSingle();
   if (!hw || hw.item_type !== "vocab_quiz" || !hw.quiz_id)
     return null;
   const { data: member } = await admin.from("edu_class_members").select("user_id").eq("class_id", hw.class_id).eq("user_id", userId).eq("role", "student").maybeSingle();
@@ -56886,7 +57535,8 @@ async function getStudentQuizAssignment(admin, homeworkId, userId) {
       id: String(hw.id),
       title: String(hw.title),
       kind: isAssignmentKind(hw.kind) ? hw.kind : "homework",
-      dueAt: String(hw.due_at)
+      dueAt: String(hw.due_at),
+      catchupUntil: hw.catchup_until ? String(hw.catchup_until) : null
     },
     items: (items ?? []).map((it) => ({
       id: String(it.id),
@@ -56897,6 +57547,70 @@ async function getStudentQuizAssignment(admin, homeworkId, userId) {
     }))
   };
 }
+var UNLOCKED = { locked: false, until: null };
+function toLock(data2) {
+  return data2 && data2.locked ? { locked: true, until: typeof data2.until === "string" ? data2.until : null } : UNLOCKED;
+}
+async function getTaskLocks(admin, userId, lessonId, taskKeys) {
+  const entries = await Promise.all(
+    taskKeys.map(async (key) => {
+      const { data: data2, error } = await admin.rpc("homework_task_lock", { p_user_id: userId, p_lesson_id: lessonId, p_task: key });
+      return [key, error ? UNLOCKED : toLock(data2)];
+    })
+  );
+  return Object.fromEntries(entries);
+}
+async function getItemLock(admin, userId, homeworkId) {
+  const { data: data2, error } = await admin.rpc("homework_item_lock", { p_user_id: userId, p_homework_id: homeworkId });
+  return error ? UNLOCKED : toLock(data2);
+}
+async function getClassLockUntil(admin, classId, userId) {
+  const { data: data2, error } = await admin.rpc("school_hours_lock_until", { p_class_id: classId, p_user_id: userId });
+  return error || !data2 ? null : String(data2);
+}
+function closesAt(item) {
+  return item.catchupUntil ?? item.dueAt;
+}
+function countsAsDone(item, finishedAt) {
+  return Boolean(finishedAt) && new Date(finishedAt).getTime() <= new Date(closesAt(item)).getTime();
+}
+function homeworkStatus(item, finishedAt, now = Date.now()) {
+  const due = new Date(item.dueAt).getTime();
+  const close = new Date(closesAt(item)).getTime();
+  if (finishedAt) {
+    const t2 = new Date(finishedAt).getTime();
+    if (t2 <= due)
+      return "ontime";
+    if (t2 <= close)
+      return "late";
+  }
+  if (now <= due)
+    return "open";
+  if (now <= close)
+    return "catchup";
+  return "missed";
+}
+var STATUS_LABEL = {
+  ontime: "Done on time",
+  late: "Done late",
+  open: "Not done yet",
+  catchup: "Overdue \u2013 catch-up period",
+  missed: "Closed \u2013 not done"
+};
+var STATUS_STYLE = {
+  ontime: "bg-emerald-50 border-emerald-200 text-emerald-700",
+  late: "bg-amber-50 border-amber-200 text-amber-800",
+  open: "bg-slate-50 border-slate-200 text-slate-600",
+  catchup: "bg-orange-50 border-orange-300 text-orange-800",
+  missed: "bg-red-50 border-red-200 text-red-700"
+};
+var CATCHUP_OPTIONS = [
+  { days: 0, label: "No catch-up (closes at the due time)" },
+  { days: 3, label: "3 days after the due time" },
+  { days: 7, label: "7 days after the due time" },
+  { days: 14, label: "14 days after the due time" }
+];
+var DEFAULT_CATCHUP_DAYS = 7;
 var BUCKET = "sound-effect-audio";
 var DEFAULT_FILE = "correct-answer-1.mp3";
 var COMPLETE_FILE = "completed-sound-2.mp3";
@@ -56996,7 +57710,7 @@ function playFallbackBeep() {
     console.error("[useSoundEffect] fallback sound error:", e);
   }
 }
-function shuffle$1(list2) {
+function shuffle$4(list2) {
   const a = [...list2];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -57004,7 +57718,7 @@ function shuffle$1(list2) {
   }
   return a;
 }
-async function loader$G({ request, context, params }) {
+async function loader$O({ request, context, params }) {
   const { user, headers } = await getSessionUser(request, context);
   if (!user)
     return dist$1.json({ status: "signin" }, { headers });
@@ -57012,10 +57726,16 @@ async function loader$G({ request, context, params }) {
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ""), user.id);
   if (!found || found.items.length < 2)
     return dist$1.json({ status: "notfound" }, { headers });
+  if (Date.now() > new Date(closesAt(found.homework)).getTime()) {
+    return dist$1.json({ status: "closed", title: found.homework.title }, { headers });
+  }
+  const lock = await getItemLock(admin, user.id, found.homework.id);
+  if (lock.locked)
+    return dist$1.json({ status: "locked", title: found.homework.title, until: lock.until }, { headers });
   const meanings = found.items.map((i) => i.english);
-  const questions = shuffle$1(found.items).map((it) => {
-    const others = shuffle$1(meanings.filter((m2) => m2.toLowerCase() !== it.english.toLowerCase())).slice(0, 3);
-    return { id: it.id, jp: it.jp, kana: it.kana, audioUrl: it.audioUrl, options: shuffle$1([it.english, ...others]) };
+  const questions = shuffle$4(found.items).map((it) => {
+    const others = shuffle$4(meanings.filter((m2) => m2.toLowerCase() !== it.english.toLowerCase())).slice(0, 3);
+    return { id: it.id, jp: it.jp, kana: it.kana, audioUrl: it.audioUrl, options: shuffle$4([it.english, ...others]) };
   });
   const [stat] = await loadQuizStats(admin, [found.homework.id], [user.id]);
   return dist$1.json(
@@ -57028,7 +57748,7 @@ async function loader$G({ request, context, params }) {
     { headers }
   );
 }
-async function action$8({ request, context, params }) {
+async function action$a({ request, context, params }) {
   const { user } = await getSessionUser(request, context);
   if (!user)
     return dist$1.json({ ok: false, error: "Please sign in again." }, { status: 401 });
@@ -57036,6 +57756,13 @@ async function action$8({ request, context, params }) {
   const found = await getStudentQuizAssignment(admin, String(params.homeworkId ?? ""), user.id);
   if (!found)
     return dist$1.json({ ok: false, error: "This quiz is no longer available." }, { status: 404 });
+  if (Date.now() > new Date(closesAt(found.homework)).getTime()) {
+    return dist$1.json({ ok: false, error: "This quiz has closed, so your answers could not be saved." }, { status: 410 });
+  }
+  const lock = await getItemLock(admin, user.id, found.homework.id);
+  if (lock.locked) {
+    return dist$1.json({ ok: false, error: "This is homework, so it can't be done during school hours. Please try again after school." }, { status: 423 });
+  }
   let answers = {};
   try {
     const parsed = JSON.parse(String((await request.formData()).get("answers") ?? "{}"));
@@ -57101,6 +57828,19 @@ function ClassQuizPage() {
       var _a, _b;
       return (_b = (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal) == null ? void 0 : _b.call(_a, "signin");
     }, className: "text-blue-700 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer", children: "Sign in" })
+  ] }) : data2.status === "closed" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Notice, { title: `\u{1F512} ${data2.title}`, children: [
+    "This quiz has closed (the due time and any catch-up period have passed). Your teacher can see your record.",
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/my-account", className: "text-blue-700 font-semibold hover:underline", children: "Back to My Account" })
+  ] }) : data2.status === "locked" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Notice, { title: `\u{1F512} ${data2.title}`, children: [
+    "This is homework, so it can't be done during school hours. Please come back",
+    data2.until ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      " after ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { suppressHydrationWarning: true, children: new Date(data2.until).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" }) }),
+      "."
+    ] }) : " after school.",
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/my-account", className: "text-blue-700 font-semibold hover:underline", children: "Back to My Account" })
   ] }) : data2.status === "notfound" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Notice, { title: "Quiz not found", children: [
     "This quiz may have been removed by your teacher, or it was not set for you.",
     " ",
@@ -57119,7 +57859,7 @@ function QuizRunner({ data: data2 }) {
   const audioRef = reactExports.useRef(null);
   const [round, setRound] = reactExports.useState(0);
   const questions = reactExports.useMemo(
-    () => round === 0 ? data2.questions : shuffle$1(data2.questions).map((q2) => ({ ...q2, options: shuffle$1(q2.options) })),
+    () => round === 0 ? data2.questions : shuffle$4(data2.questions).map((q2) => ({ ...q2, options: shuffle$4(q2.options) })),
     [data2.questions, round]
   );
   const [started, setStarted] = reactExports.useState(false);
@@ -57162,6 +57902,9 @@ function QuizRunner({ data: data2 }) {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
       "Due ",
       new Date(data2.homework.dueAt).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" }),
+      ",",
+      " ",
+      new Date(data2.homework.dueAt).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" }),
       record && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
         " \xB7 Your best score: ",
         /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { children: [
@@ -57294,22 +58037,22 @@ function QuizRunner({ data: data2 }) {
     ] })
   ] });
 }
-var meta$B = () => [
+var meta$L = () => [
   { title: "Vocabulary Quiz | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
-var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$8,
+  action: action$a,
   default: ClassQuizPage,
-  loader: loader$G,
-  meta: meta$B
+  loader: loader$O,
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$F({ request }) {
+async function loader$N({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$A = () => {
+var meta$K = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -57704,11 +58447,11 @@ function TestYamatoPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { style: { textAlign: "center", fontSize: "12px", color: "#94a3b8", marginTop: "32px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\xA9 2026 JPTutor AI Yamato." }) })
   ] });
 }
-var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoPage,
-  loader: loader$F,
-  meta: meta$A
+  loader: loader$N,
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -57744,7 +58487,7 @@ var SOUND_DIR = "/game-assets/ogre-star-sword";
 var SWORD_SOUND = `${SOUND_DIR}/sword-sound.mp3`;
 var COUNT_SOUNDS = Array.from({ length: 10 }, (_2, i) => `${SOUND_DIR}/count-${i + 1}.mp3`);
 var COUNT_FALLBACK_MS = 1500;
-async function loader$E({ request }) {
+async function loader$M({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57757,7 +58500,7 @@ async function loader$E({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$z = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
@@ -58124,11 +58867,11 @@ function OgreStarSwordArena() {
     ] })
   ] });
 }
-var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OgreStarSwordPage,
-  loader: loader$E,
-  meta: meta$z
+  loader: loader$M,
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -58140,7 +58883,7 @@ var handleScrollToSection = (e, anchorId) => {
 var getAnchorId = (text) => {
   return `cat-${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 };
-async function loader$D({ request }) {
+async function loader$L({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   let grammarCategories = [];
@@ -58166,7 +58909,7 @@ async function loader$D({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$y = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -58315,16 +59058,16 @@ function VceGrammarComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceGrammarComponent,
-  loader: loader$D,
-  meta: meta$y
+  loader: loader$L,
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$C() {
+async function loader$K() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
 }
-async function action$7({ request, context }) {
+async function action$9({ request, context }) {
   var _a;
   if (request.method !== "POST") {
     return dist$1.json({ error: "Method not allowed." }, { status: 405 });
@@ -58370,12 +59113,12 @@ async function action$7({ request, context }) {
   }
   return dist$1.json({ success: true, status: (current == null ? void 0 : current.is_teacher) ? "approved" : (current == null ? void 0 : current.teacher_status) ?? "pending" });
 }
-var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$7,
-  loader: loader$C
+  action: action$9,
+  loader: loader$K
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$B({ request, context }) {
+async function loader$J({ request, context }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -58446,16 +59189,16 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$x = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
-  loader: loader$B,
-  meta: meta$x
+  loader: loader$J,
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$A({ request }) {
+async function loader$I({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -58469,7 +59212,7 @@ async function loader$A({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$w = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -58814,11 +59557,11 @@ function TestAudioPage() {
     ] })
   ] }) }) });
 }
-var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestAudioPage,
-  loader: loader$A,
-  meta: meta$w
+  loader: loader$I,
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
 function useGameSounds(files, volume = 0.8) {
   const baseRef = reactExports.useRef(null);
@@ -58931,7 +59674,7 @@ var KANA_SETS$1 = [
   { key: "all", label: "All", example: { hiragana: "\u3042\u301C\u3074\u3087", katakana: "\u30A2\u301C\u30D4\u30E7" } }
 ];
 var clean$2 = (v2) => typeof v2 === "string" ? v2.trim() : "";
-async function loader$z({ request }) {
+async function loader$H({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58979,7 +59722,7 @@ async function loader$z({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: url.pathname, pools, loadError });
 }
-var meta$v = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CharacterMazePage() {
@@ -59061,8 +59804,8 @@ function CharacterMazeArena({ pools }) {
   const startGame = () => {
     sounds.load();
     clearTimers();
-    const chars = shuffle$2(selectedPool).slice(0, ITEM_COUNT);
-    const cells = shuffle$2(FREE_CELLS);
+    const chars = shuffle$5(selectedPool).slice(0, ITEM_COUNT);
+    const cells = shuffle$5(FREE_CELLS);
     const itemCells = cells.slice(0, chars.length);
     const used = new Set(itemCells.map(keyOf));
     setItems(chars.map((c, i) => ({ ...c, id: i + 1, ...itemCells[i] })));
@@ -59437,13 +60180,13 @@ function CharacterMazeArena({ pools }) {
     ] }) })
   ] });
 }
-var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CharacterMazePage,
-  loader: loader$z,
-  meta: meta$v
+  loader: loader$H,
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$y({ request }) {
+async function loader$G({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59456,7 +60199,7 @@ async function loader$y({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$u = ({ data: data2 }) => {
+var meta$E = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -59549,11 +60292,72 @@ function TextTypesComponent() {
     }
   );
 }
-var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TextTypesComponent,
-  loader: loader$y,
-  meta: meta$u
+  loader: loader$G,
+  meta: meta$E
+}, Symbol.toStringTag, { value: "Module" }));
+var UUID = /^[0-9a-f-]{36}$/i;
+var BROWSER_TASKS = ["vocabulary", "listening", "reading", "speaking", "culture"];
+async function loader$F({ request, context }) {
+  const { user, headers } = await getSessionUser(request, context);
+  const lessonId = new URL(request.url).searchParams.get("lessonId") ?? "";
+  if (!user || !UUID.test(lessonId))
+    return dist$1.json({ locks: {} }, { headers });
+  const admin = createAdminSupabaseClient(context);
+  const locks = await getTaskLocks(admin, user.id, lessonId, [...BROWSER_TASKS, "writing"]);
+  return dist$1.json({ locks }, { headers });
+}
+async function action$8({ request, context }) {
+  if (request.method !== "POST")
+    return dist$1.json({ error: "Method not allowed" }, { status: 405 });
+  const { user, headers } = await getSessionUser(request, context);
+  if (!user)
+    return dist$1.json({ error: "Please sign in." }, { status: 401, headers });
+  const body = await request.json().catch(() => ({}));
+  const items = Array.isArray(body == null ? void 0 : body.items) ? body.items : [{ lessonId: body == null ? void 0 : body.lessonId, taskKeys: body == null ? void 0 : body.taskKeys }];
+  const admin = createAdminSupabaseClient(context);
+  const saved = [];
+  const locked = [];
+  for (const item of items.slice(0, 20)) {
+    const lessonId = typeof (item == null ? void 0 : item.lessonId) === "string" ? item.lessonId : "";
+    if (!UUID.test(lessonId))
+      continue;
+    const keys = [...new Set(Array.isArray(item.taskKeys) ? item.taskKeys : [])].filter((k2) => isLessonTaskKey(k2) && BROWSER_TASKS.includes(k2));
+    if (keys.length === 0)
+      continue;
+    const { data: lesson } = await admin.from("edu_lessons").select("id").eq("id", lessonId).maybeSingle();
+    if (!lesson)
+      continue;
+    const locks = await getTaskLocks(admin, user.id, lessonId, keys);
+    const allowed = keys.filter((k2) => {
+      var _a;
+      return !((_a = locks[k2]) == null ? void 0 : _a.locked);
+    });
+    keys.filter((k2) => {
+      var _a;
+      return (_a = locks[k2]) == null ? void 0 : _a.locked;
+    }).forEach((k2) => locked.push({ lessonId, taskKey: k2, until: locks[k2].until }));
+    if (allowed.length) {
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const { error } = await admin.from("edu_student_progress").upsert(
+        allowed.map((k2) => ({ user_id: user.id, lesson_id: lessonId, task_key: k2, is_completed: true, updated_at: now })),
+        { onConflict: "user_id,lesson_id,task_key" }
+      );
+      if (error) {
+        console.error("[api.lesson-progress] save failed:", error.message);
+        return dist$1.json({ error: "Could not save your progress. Please try again." }, { status: 500, headers });
+      }
+      allowed.forEach((k2) => saved.push({ lessonId, taskKey: k2 }));
+    }
+  }
+  return dist$1.json({ saved, locked }, { headers });
+}
+var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$8,
+  loader: loader$F
 }, Symbol.toStringTag, { value: "Module" }));
 var TICKET_TTL_MS = 10 * 6e4;
 async function getUserIdFromBearer(request, admin) {
@@ -59687,10 +60491,10 @@ async function getLessonTaskSettingsForUser(admin, userId, lessonId) {
 }
 var NO_STORE$1 = { "Cache-Control": "no-store" };
 var NO_LIMIT = { vocabWordsPerMode: null };
-async function loader$x() {
+async function loader$E() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE$1 });
 }
-async function action$6({ request, context }) {
+async function action$7({ request, context }) {
   if (request.method !== "POST") {
     return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE$1 });
   }
@@ -59708,10 +60512,10 @@ async function action$6({ request, context }) {
     return dist$1.json(NO_LIMIT, { headers: NO_STORE$1 });
   }
 }
-var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$6,
-  loader: loader$x
+  action: action$7,
+  loader: loader$E
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -59730,7 +60534,7 @@ var CHAR_POOL = [
   { char: "\u305B", kana: "\u30BB", romaji: "se" },
   { char: "\u305D", kana: "\u30BD", romaji: "so" }
 ];
-async function loader$w({ request }) {
+async function loader$D({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59743,7 +60547,7 @@ async function loader$w({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$t = ({ data: data2 }) => {
+var meta$D = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
@@ -59791,8 +60595,8 @@ function GameArena() {
       typeHint = `Character recognition`;
     }
     const wrongPool = CHAR_POOL.filter((p2) => (isKana ? p2.kana : p2.char) !== targetSymbol);
-    const shuffledWrong = shuffle$2(wrongPool).slice(0, 3);
-    const options = shuffle$2([
+    const shuffledWrong = shuffle$5(wrongPool).slice(0, 3);
+    const options = shuffle$5([
       correctAnswer,
       ...shuffledWrong.map((w2) => isKana && modeType >= 0.4 ? w2.kana : w2.char)
     ]);
@@ -59933,11 +60737,91 @@ function GameArena() {
     )
   ] });
 }
-var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: StudentTunnelEscapePage,
-  loader: loader$w,
-  meta: meta$t
+  loader: loader$D,
+  meta: meta$D
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$C({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$C = () => [
+  { title: "VCE Kanji Test \u2013 Accepted Answers | JP Tutor AI Yamato" },
+  { name: "description", content: "The 200 VCE kanji and the English answers accepted in the kanji test." }
+];
+function KanjiAnswersPage() {
+  const [rows, setRows] = reactExports.useState([]);
+  const [error, setError] = reactExports.useState(null);
+  const [loading, setLoading] = reactExports.useState(true);
+  reactExports.useEffect(() => {
+    (async () => {
+      try {
+        const { data: data2, error: error2 } = await supabase.from("kl_character").select("character, meaning, category").eq("char_type", "kanji").order("sort_order", { ascending: true });
+        if (error2)
+          throw error2;
+        setRows(data2 || []);
+      } catch (e) {
+        setError((e == null ? void 0 : e.message) || "Could not load the kanji list.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+  const groups = reactExports.useMemo(() => {
+    const map = /* @__PURE__ */ new Map();
+    for (const r2 of rows) {
+      const g = r2.category || "Miscellaneous";
+      if (!map.has(g))
+        map.set(g, []);
+      map.get(g).push(r2);
+    }
+    const rank = (g) => {
+      const i = KANJI_GROUP_ORDER.indexOf(g);
+      return i === -1 ? KANJI_GROUP_ORDER.length : i;
+    };
+    return [...map.entries()].sort((a, b) => rank(a[0]) - rank(b[0]));
+  }, [rows]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test/kanji", className: "text-sm text-indigo-600 hover:underline", children: "\u2190 Back to the kanji test" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-2 text-2xl sm:text-3xl font-black text-slate-900", children: "VCE Kanji Test \u2013 Accepted Answers" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-slate-600", children: "Any one of the English answers for a kanji is correct. Check them before the test if you like." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "These do not matter:" }),
+        ' upper or lower case, spaces at the start or end, "to", "the", "a" or "an" at the start ("to eat" = "eat"), hyphens, and British or American spelling (colour = color).'
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "Numbers can be typed as digits (\u4E00 = one or 1, \u4E07 = ten thousand or 10000)." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "Think a different answer should be accepted? Tell your teacher or contact us \u2014 we add good answers to the list." })
+    ] }),
+    groups.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { "aria-label": "Kanji groups", className: "flex flex-wrap gap-1.5", children: groups.map(([g, list2]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: `#g-${encodeURIComponent(g)}`, className: "text-xs bg-white border border-slate-200 hover:bg-indigo-50 rounded-lg px-2.5 py-1", children: [
+      g,
+      " ",
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-400", children: [
+        "(",
+        list2.length,
+        ")"
+      ] })
+    ] }, g)) }),
+    loading && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500", children: "Loading kanji\u2026" }),
+    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-rose-600", children: error }),
+    groups.map(([g, list2]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: `g-${encodeURIComponent(g)}`, className: "scroll-mt-20 bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-black text-slate-900 mb-2", children: g }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "divide-y divide-slate-100", children: list2.map((r2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 py-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl w-12 text-center shrink-0 text-slate-900", children: r2.character }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-slate-700", children: acceptedAnswers(r2.character, r2.meaning).join(" / ") })
+      ] }, r2.character)) })
+    ] }, g)),
+    groups.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test/kanji", className: "inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-6 py-3", children: "Start the kanji test \u2192" }) })
+  ] }) }) });
+}
+var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: KanjiAnswersPage,
+  loader: loader$C,
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -59999,7 +60883,7 @@ function useVceSpeakingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$v({ request }) {
+async function loader$B({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60069,17 +60953,17 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$s = ({ data: data2 }) => {
+var meta$B = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
-  loader: loader$v,
-  meta: meta$s
+  loader: loader$B,
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$u = ({ request }) => loadGamePage(request);
-var meta$r = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$A = ({ request }) => loadGamePage(request);
+var meta$A = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function KanjiSudokuRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Kanji Sudoku", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -60092,11 +60976,11 @@ function KanjiSudokuRoute() {
     }
   ) });
 }
-var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSudokuRoute,
-  loader: loader$u,
-  meta: meta$r
+  loader: loader$A,
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -60503,7 +61387,7 @@ function buildPools(rows) {
   kanjiMeaning.sort(byCategoryThenSortOrder);
   return { hiragana, katakana, kanjiReading, kanjiMeaning };
 }
-async function loader$t({ request }) {
+async function loader$z({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60545,7 +61429,7 @@ async function loader$t({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$q = ({
+var meta$z = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -60585,7 +61469,7 @@ function uniqueByAnswer(items) {
   return out;
 }
 function buildDeck(pool, pairCount) {
-  const chosen = shuffle$2(uniqueByAnswer(pool)).slice(0, pairCount);
+  const chosen = shuffle$5(uniqueByAnswer(pool)).slice(0, pairCount);
   const cards = [];
   for (const p2 of chosen) {
     cards.push({
@@ -60602,9 +61486,9 @@ function buildDeck(pool, pairCount) {
       sub: p2.backSub
     });
   }
-  return shuffle$2(cards);
+  return shuffle$5(cards);
 }
-function formatTime(totalSeconds) {
+function formatTime$1(totalSeconds) {
   const m2 = Math.floor(totalSeconds / 60);
   const s2 = totalSeconds % 60;
   return `${m2}:${s2.toString().padStart(2, "0")}`;
@@ -60881,7 +61765,7 @@ function MemoryMatchGame({
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mx-auto mb-4 grid max-w-xl grid-cols-4 gap-2 text-center", children: [
       ["Pairs Found", `${matchedIds.size} / ${pairTarget}`],
       ["Moves", `${moves}`],
-      ["Time", formatTime(elapsed)],
+      ["Time", formatTime$1(elapsed)],
       ["Accuracy", `${moves === 0 ? 100 : accuracy}%`]
     ].map(([label, value]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
@@ -60983,7 +61867,7 @@ function MemoryMatchGame({
         moves,
         " ",
         "moves in ",
-        formatTime(elapsed),
+        formatTime$1(elapsed),
         " \xB7 ",
         accuracy,
         "% accuracy"
@@ -61077,11 +61961,11 @@ function MemoryMatchGame({
       ` })
   ] });
 }
-var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MemoryMatchPage,
-  loader: loader$t,
-  meta: meta$q
+  loader: loader$z,
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -61110,7 +61994,7 @@ var CATEGORY_ORDER = [
   "Repeat sign",
   "Miscellaneous"
 ];
-async function loader$s({ request }) {
+async function loader$y({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -61123,7 +62007,7 @@ async function loader$s({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$p = ({ data: data2 }) => {
+var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -61274,11 +62158,11 @@ function Kanji200Component() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-400 shadow-xl" })
   ] }) });
 }
-var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Kanji200Component,
-  loader: loader$s,
-  meta: meta$p
+  loader: loader$y,
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -61340,7 +62224,7 @@ function useVceWritingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$r({ request }) {
+async function loader$x({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -61407,16 +62291,16 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$o = ({ data: data2 }) => {
+var meta$x = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
-  loader: loader$r,
-  meta: meta$o
+  loader: loader$x,
+  meta: meta$x
 }, Symbol.toStringTag, { value: "Module" }));
-async function action$5({ request, context }) {
+async function action$6({ request, context }) {
   try {
     const body = await request.json().catch(() => ({}));
     const { accessToken, refreshToken } = body;
@@ -61436,11 +62320,11 @@ async function action$5({ request, context }) {
     return dist$1.json({ success: false, error: err.message || "Internal Error" }, { status: 500 });
   }
 }
-var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  action: action$5
+  action: action$6
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$q({ request, context }) {
+async function loader$w({ request, context }) {
   const { admin } = await requireTeacher(request, context);
   const lessonId = new URL(request.url).searchParams.get("lessonId") ?? "";
   if (!/^[0-9a-f-]{36}$/i.test(lessonId))
@@ -61459,9 +62343,74 @@ async function loader$q({ request, context }) {
     }))
   });
 }
-var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$q
+  loader: loader$w
+}, Symbol.toStringTag, { value: "Module" }));
+var MAX_ITEMS = 300;
+var MAX_MS = 6e5;
+async function action$5({ request, context }) {
+  if (request.method !== "POST")
+    return dist$1.json({ error: "Method not allowed" }, { status: 405 });
+  const { user, headers } = await getSessionUser(request, context);
+  if (!user)
+    return dist$1.json({ error: "Please sign in to save your results." }, { status: 401, headers });
+  const body = await request.json().catch(() => ({}));
+  const testKey = String((body == null ? void 0 : body.testKey) ?? "");
+  const lookalikeType = Object.keys(LOOKALIKE_TEST_KEYS).find((t2) => LOOKALIKE_TEST_KEYS[t2] === testKey) ?? null;
+  if (testKey !== "kanji-vce200" && !lookalikeType)
+    return dist$1.json({ error: "Unknown test." }, { status: 400, headers });
+  const isKana = lookalikeType === "hiragana" || lookalikeType === "katakana";
+  const allowed = lookalikeType ? new Set(lookalikeChars(lookalikeType)) : null;
+  const scope = String((body == null ? void 0 : body.scope) ?? "all").slice(0, 300) || "all";
+  const raw = Array.isArray(body == null ? void 0 : body.items) ? body.items.slice(0, MAX_ITEMS) : [];
+  const items = raw.map((i) => ({
+    c: typeof (i == null ? void 0 : i.c) === "string" ? i.c.slice(0, 4) : "",
+    typed: typeof (i == null ? void 0 : i.typed) === "string" ? i.typed.slice(0, 100) : "",
+    ms: Math.round(Number(i == null ? void 0 : i.ms)),
+    passed: Boolean(i == null ? void 0 : i.passed),
+    left: Boolean(i == null ? void 0 : i.left)
+  })).filter((i) => i.c && Number.isFinite(i.ms) && i.ms >= 0 && (!allowed || allowed.has(i.c))).map((i) => ({ ...i, ms: Math.min(i.ms, MAX_MS) }));
+  if (items.length === 0)
+    return dist$1.json({ error: "No answers to save." }, { status: 400, headers });
+  const admin = createAdminSupabaseClient(context);
+  let details;
+  if (isKana) {
+    details = items.map((i) => ({ c: i.c, ms: i.ms, ok: !i.passed && !i.left && isCorrectRomaji(i.c, i.typed) }));
+  } else {
+    const chars = [...new Set(items.map((i) => i.c))];
+    const { data: rows, error: readError } = await admin.from("kl_character").select("character, meaning").eq("char_type", "kanji").in("character", chars);
+    if (readError)
+      return dist$1.json({ error: "Could not check your answers. Please try again." }, { status: 503, headers });
+    const meaning = new Map((rows ?? []).map((r2) => [String(r2.character), r2.meaning]));
+    details = items.filter((i) => meaning.has(i.c)).map((i) => ({
+      c: i.c,
+      ms: i.ms,
+      ok: !i.passed && !i.left && isCorrectMeaning(i.typed, acceptedAnswers(i.c, meaning.get(i.c)))
+    }));
+  }
+  if (details.length === 0)
+    return dist$1.json({ error: "No answers to save." }, { status: 400, headers });
+  const totalMs = details.reduce((n2, d) => n2 + d.ms, 0);
+  const { error } = await admin.from("test_attempts").insert({
+    user_id: user.id,
+    test_key: testKey,
+    scope,
+    item_count: details.length,
+    correct_count: details.filter((d) => d.ok).length,
+    total_ms: Math.min(totalMs, 36e6),
+    avg_ms: Math.round(totalMs / details.length),
+    details
+  });
+  if (error) {
+    console.error("[test-attempts] insert failed:", error.message);
+    return dist$1.json({ error: "Your results could not be saved this time." }, { status: 503, headers });
+  }
+  return dist$1.json({ ok: true, correct: details.filter((d) => d.ok).length, total: details.length }, { headers });
+}
+var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  action: action$5
 }, Symbol.toStringTag, { value: "Module" }));
 var __vite_import_meta_env__ = {};
 function enabledProviders() {
@@ -61542,26 +62491,23 @@ function SchoolAccountLink({ verifiedEmails, returnPath, teacherHelp = false, cl
   ] });
 }
 var VOCAB_LIMIT_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 15, 20];
-var card = "bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4";
+var card$3 = "bg-white border border-slate-200 rounded-xl shadow-sm p-5 space-y-4";
 var h2 = "text-base font-bold text-slate-800 flex items-center gap-2";
 var input = "px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none";
-var btn = "px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50";
+var btn$1 = "px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition cursor-pointer disabled:opacity-50";
 var btnGhost = "text-xs font-semibold text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50 cursor-pointer inline-flex items-center gap-1";
 var taskLabel$1 = (key) => {
   var _a;
   return ((_a = LESSON_TASKS.find((t2) => t2.key === key)) == null ? void 0 : _a.label) ?? key;
 };
 var studentName = (s2) => s2.nickname || s2.email || "Student";
-function formatDate$1(iso) {
+function formatDate$2(iso) {
   return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
 }
 function useTzOffset() {
   const [tz, setTz] = reactExports.useState(0);
   reactExports.useEffect(() => setTz((/* @__PURE__ */ new Date()).getTimezoneOffset()), []);
   return tz;
-}
-function useDoneSet(progress) {
-  return reactExports.useMemo(() => new Set(progress.map((p2) => `${p2.userId}:${p2.lessonId}:${p2.taskKey}`)), [progress]);
 }
 function classHref(data2, classId) {
   const q2 = new URLSearchParams({ class: classId, from: data2.period.from, to: data2.period.to, tz: String(data2.period.tz) });
@@ -61570,7 +62516,7 @@ function classHref(data2, classId) {
 function ClassBar({ data: data2 }) {
   const nav = useNavigation();
   const canCreate = data2.classes.length < data2.limits.maxClasses;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Classes", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Classes", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-5 h-5 text-indigo-600" }),
       " Your Classes"
@@ -61598,7 +62544,7 @@ function ClassBar({ data: data2 }) {
         "@",
         e.domain
       ] }, e.domain)) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "schoolDomain", value: data2.schoolEmails[0].domain }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, disabled: nav.state !== "idle", children: "Create Class" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, disabled: nav.state !== "idle", children: "Create Class" })
     ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
       "The free teacher plan includes ",
       data2.limits.maxClasses,
@@ -61614,7 +62560,7 @@ function GamesCard({ data: data2 }) {
   const nav = useNavigation();
   const busy = nav.state !== "idle";
   const unlocked = new Set(cls.gameUnlockedIds);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card} ${cls.gamesLocked ? "border-amber-300" : ""}`, "aria-label": "Games", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card$3} ${cls.gamesLocked ? "border-amber-300" : ""}`, "aria-label": "Games", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-start justify-between gap-3", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
@@ -61691,7 +62637,7 @@ function LessonTaskSettingsCard({ data: data2 }) {
   const sortedOverrides = data2.lessons.filter((l2) => overridden.has(l2.id)).map((l2) => v2.lessons.find((o) => o.lessonId === l2.id));
   const studentLimitOf = new Map(v2.students.map((s2) => [s2.userId, s2.limit]));
   const studentsWithLimit = data2.students.filter((s2) => studentLimitOf.has(s2.id));
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Lesson task settings", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Lesson task settings", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "w-5 h-5 text-indigo-600" }),
@@ -61714,7 +62660,7 @@ function LessonTaskSettingsCard({ data: data2 }) {
             ] }, n2))
           ] }, `default-${v2.classDefault ?? "all"}`)
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn, children: "Save" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn$1, children: "Save" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-slate-100 pt-4 space-y-3", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-bold text-slate-700", children: "One lesson" }),
@@ -61738,7 +62684,7 @@ function LessonTaskSettingsCard({ data: data2 }) {
               ] }, n2))
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn, children: "Set for this lesson" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn$1, children: "Set for this lesson" })
         ] }),
         sortedOverrides.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No lesson settings yet. Every lesson uses the setting for all lessons." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2", children: sortedOverrides.map((o) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
@@ -61783,7 +62729,7 @@ function LessonTaskSettingsCard({ data: data2 }) {
               ] }, n2))
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn, children: "Set for this student" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", disabled: busy, className: btn$1, children: "Set for this student" })
         ] }),
         studentsWithLimit.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-1 sm:grid-cols-2 gap-2", children: studentsWithLimit.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center justify-between gap-2 border border-slate-100 rounded-md px-3 py-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
@@ -61812,7 +62758,7 @@ function JoinRequestsCard({ data: data2 }) {
   const cls = data2.selectedClass;
   if (data2.joinRequests.length === 0)
     return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card} border-amber-300`, "aria-label": "Join requests", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card$3} border-amber-300`, "aria-label": "Join requests", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { className: "w-5 h-5 text-amber-600" }),
       " Join Requests (",
@@ -61828,7 +62774,7 @@ function JoinRequestsCard({ data: data2 }) {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 truncate", suppressHydrationWarning: true, children: [
             proof,
             " \xB7 ",
-            formatDate$1(r2.createdAt)
+            formatDate$2(r2.createdAt)
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 shrink-0", children: [
@@ -61836,7 +62782,7 @@ function JoinRequestsCard({ data: data2 }) {
             /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "approve-request" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "requestId", value: r2.id }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: `${btn} inline-flex items-center gap-1`, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: `${btn$1} inline-flex items-center gap-1`, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4" }),
               " Approve"
             ] })
@@ -61870,8 +62816,8 @@ function InviteCodesCard({ data: data2 }) {
       window.prompt("Copy these codes:", text);
     }
   };
-  const statusText = (i) => i.status === "used" ? `Used by ${i.usedByName ?? "a student"}` : i.status === "expired" ? "Expired" : `Unused \xB7 expires ${formatDate$1(i.expiresAt)}`;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Personal invite codes", children: [
+  const statusText = (i) => i.status === "used" ? `Used by ${i.usedByName ?? "a student"}` : i.status === "expired" ? "Expired" : `Unused \xB7 expires ${formatDate$2(i.expiresAt)}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Personal invite codes", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Ticket, { className: "w-5 h-5 text-indigo-600" }),
       " Personal Invite Codes"
@@ -61898,7 +62844,7 @@ function InviteCodesCard({ data: data2 }) {
           /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "number", name: "count", min: 1, max: data2.limits.maxStudentsPerClass, defaultValue: 1, className: `${input} w-20` }),
           "codes"
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: `${btn} sm:ml-auto`, disabled: nav.state !== "idle", children: "Make Codes" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: `${btn$1} sm:ml-auto`, disabled: nav.state !== "idle", children: "Make Codes" })
       ] })
     ] }),
     data2.invites.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No invite codes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
@@ -61939,7 +62885,7 @@ function InviteCodesCard({ data: data2 }) {
 function ClassSettingsCard({ data: data2 }) {
   const cls = data2.selectedClass;
   const [confirmName, setConfirmName] = reactExports.useState("");
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Class settings", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Class settings", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-5", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
@@ -61950,7 +62896,7 @@ function ClassSettingsCard({ data: data2 }) {
         /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
           "Students sign up for free, open ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "My Account" }),
-          ', verify their school account and enter this code under "My Class & Homework". Only school accounts ending in',
+          ', verify their school account and enter this code under "My Class, Homework & Classwork". Only school accounts ending in',
           " ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: cls.allowedDomains.map((d) => `@${d}`).join(" or ") }),
           " can ask to join, and you approve each request. Students without a school Google account can use a personal invite code (below)."
@@ -61977,7 +62923,7 @@ function ClassSettingsCard({ data: data2 }) {
           /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-retention" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("select", { name: "retention", defaultValue: data2.retention, className: `${input} flex-1`, children: HANDWRITING_RETENTION_OPTIONS.map((o) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: o.value, children: o.label }, o.value)) }, data2.retention),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Save" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Save" })
         ] })
       ] })
     ] }),
@@ -62020,7 +62966,7 @@ function HandwritingCard({ data: data2 }) {
     return ((_a = data2.lessons.find((l2) => l2.id === id2)) == null ? void 0 : _a.title) ?? "Lesson";
   };
   const items = data2.handwriting.filter((h) => !studentFilter || h.userId === studentFilter);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Handwritten writing", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Handwritten writing", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(PenLine, { className: "w-5 h-5 text-indigo-600" }),
@@ -62039,7 +62985,7 @@ function HandwritingCard({ data: data2 }) {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
             lessonTitle(h.lessonId),
             " \xB7 ",
-            formatDate$1(h.createdAt),
+            formatDate$2(h.createdAt),
             h.attemptNo ? ` \xB7 Attempt ${h.attemptNo}` : "",
             " \xB7 ",
             CLASSIFICATION_LABEL[h.classification] ?? h.classification
@@ -62057,14 +63003,191 @@ function HandwritingCard({ data: data2 }) {
     ] }, h.id)) })
   ] });
 }
+var DAY_LABELS = [
+  { value: 1, label: "Mon" },
+  { value: 2, label: "Tue" },
+  { value: 3, label: "Wed" },
+  { value: 4, label: "Thu" },
+  { value: 5, label: "Fri" },
+  { value: 6, label: "Sat" },
+  { value: 7, label: "Sun" }
+];
+function formatDay(date) {
+  const d = /* @__PURE__ */ new Date(`${date}T12:00:00Z`);
+  return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+}
+function formatClock$1(hhmm) {
+  const [h, m2] = hhmm.split(":").map(Number);
+  const d = new Date(Date.UTC(2e3, 0, 1, h, m2));
+  return d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+}
+function schoolHoursSummary(hours) {
+  const days = [...hours.days].sort();
+  const isWeekdays = days.join(",") === "1,2,3,4,5";
+  const dayText = isWeekdays ? "Mon\u2013Fri" : days.map((d) => {
+    var _a;
+    return (_a = DAY_LABELS.find((x2) => x2.value === d)) == null ? void 0 : _a.label;
+  }).filter(Boolean).join(", ");
+  return `${dayText} ${formatClock$1(hours.start)} \u2013 ${formatClock$1(hours.end)}`;
+}
+function HomeworkUnlockControl({ data: data2, studentId, compact = false }) {
+  const cls = data2.selectedClass;
+  const [open, setOpen] = reactExports.useState(false);
+  const [until, setUntil] = reactExports.useState(data2.schoolHours.today);
+  if (!data2.schoolHours.available)
+    return null;
+  const unlock = data2.homeworkUnlocks.find((u2) => u2.userId === studentId);
+  if (unlock) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 text-[11px]", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(LockOpen, { className: "w-3 h-3" }),
+        "Homework allowed in school hours ",
+        unlock.untilDate === data2.schoolHours.today ? "today" : `until ${formatDay(unlock.untilDate)}`
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "relock-student-homework" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "studentId", value: studentId }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "text-slate-500 hover:text-slate-800 underline bg-transparent border-none p-0 cursor-pointer", children: "Lock again" })
+      ] })
+    ] });
+  }
+  if (!open) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", onClick: () => setOpen(true), className: `${btnGhost} ${compact ? "!px-2 !py-1 !text-[11px]" : ""}`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LockOpen, { className: "w-3 h-3" }),
+      " Absent? Allow homework in school hours"
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 rounded-md p-2 text-xs", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "unlock-student-homework" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "studentId", value: studentId }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "until", value: "today" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Today only" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400", children: "or" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex items-center gap-1.5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "unlock-student-homework" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "studentId", value: studentId }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "text-slate-600", children: "until" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "until", value: until, min: data2.schoolHours.today, onChange: (e) => setUntil(e.target.value), className: `${input} !py-1` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btnGhost, children: "Save" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setOpen(false), className: "text-slate-500 underline bg-transparent border-none p-0 cursor-pointer", children: "Cancel" })
+  ] });
+}
+function DayOffToggle({ data: data2 }) {
+  const cls = data2.selectedClass;
+  if (!data2.schoolHours.available)
+    return null;
+  return data2.schoolHours.offToday ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex flex-wrap items-center gap-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "school-day-on" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(CalendarOff, { className: "w-3.5 h-3.5" }),
+      " Today: homework is open all day for the whole class"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Lock, { className: "w-3 h-3" }),
+      " Lock in school hours again"
+    ] })
+  ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    Form,
+    {
+      method: "post",
+      onSubmit: (e) => {
+        if (!window.confirm("No school today? Homework will be open all day today for the whole class."))
+          e.preventDefault();
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "school-day-off-today" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btnGhost, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CalendarOff, { className: "w-3.5 h-3.5" }),
+          " No school today (open homework all day)"
+        ] })
+      ]
+    }
+  );
+}
+function SchoolHoursCard({ data: data2 }) {
+  const cls = data2.selectedClass;
+  const hours = data2.schoolHours;
+  const zones = reactExports.useMemo(() => {
+    var _a;
+    let all = [];
+    try {
+      all = ((_a = Intl.supportedValuesOf) == null ? void 0 : _a.call(Intl, "timeZone")) ?? [];
+    } catch {
+      all = [];
+    }
+    return [.../* @__PURE__ */ new Set([hours.timezone, ...all])].sort();
+  }, [hours.timezone]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "School hours", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "w-5 h-5 text-indigo-600" }),
+      " School Hours (Homework Lock)"
+    ] }),
+    !hours.available ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2", children: "Locking homework during school hours will be available after a database update (SQL 47)." }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Homework can't be done during these hours (classwork is not affected). You can allow a homework item in school hours when you set it, allow one student (for example, a student who is absent) in the Students list, or open homework for the whole class on a day with no school." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "space-y-3 bg-slate-50 border border-slate-200 rounded-lg p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-school-hours" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Starts" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "time", name: "start", defaultValue: hours.start, required: true, className: `${input} w-full` })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Ends" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "time", name: "end", defaultValue: hours.end, required: true, className: `${input} w-full` })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Time zone" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("select", { name: "timezone", defaultValue: hours.timezone, className: `${input} w-full`, children: zones.map((z2) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: z2, children: z2.replace(/_/g, " ") }, z2)) })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("fieldset", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("legend", { className: "text-xs font-semibold text-slate-600 mb-1", children: "School days" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-3", children: DAY_LABELS.map((d) => /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "inline-flex items-center gap-1.5 text-sm text-slate-700", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", name: "days", value: d.value, defaultChecked: hours.days.includes(d.value) }),
+            " ",
+            d.label
+          ] }, d.value)) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Save school hours" }) })
+      ] }, `${hours.timezone}-${hours.start}-${hours.end}-${hours.days.join()}`),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DayOffToggle, { data: data2 })
+    ] })
+  ] });
+}
 var isTarget = (hw, studentId) => hw.assignTo === "class" || hw.studentIds.includes(studentId);
 var unitsOf = (hw) => hw.itemType === "lesson" ? hw.taskKeys.length : 1;
 function useAssignmentHelpers(data2) {
-  const done = useDoneSet(data2.progress);
+  const completedAt = reactExports.useMemo(
+    () => new Map(data2.progress.map((p2) => [`${p2.userId}:${p2.lessonId}:${p2.taskKey}`, p2.completedAt ?? "1970-01-01T00:00:00Z"])),
+    [data2.progress]
+  );
   const stats = reactExports.useMemo(() => new Map(data2.quizStats.map((s2) => [`${s2.homeworkId}:${s2.userId}`, s2])), [data2.quizStats]);
   const statOf = (hw, studentId) => stats.get(`${hw.id}:${studentId}`) ?? null;
-  const taskDone = (hw, studentId, key) => done.has(`${studentId}:${hw.lessonId}:${key}`);
-  const doneUnits = (hw, studentId) => hw.itemType === "lesson" ? hw.taskKeys.filter((k2) => taskDone(hw, studentId, k2)).length : statOf(hw, studentId) ? 1 : 0;
+  const taskAt = (hw, studentId, key) => completedAt.get(`${studentId}:${hw.lessonId}:${key}`) ?? null;
+  const taskDone = (hw, studentId, key) => countsAsDone(hw, taskAt(hw, studentId, key));
+  const doneUnits = (hw, studentId) => {
+    var _a;
+    return hw.itemType === "lesson" ? hw.taskKeys.filter((k2) => taskDone(hw, studentId, k2)).length : countsAsDone(hw, ((_a = statOf(hw, studentId)) == null ? void 0 : _a.firstAt) ?? null) ? 1 : 0;
+  };
+  const finishedAt = (hw, studentId) => {
+    var _a;
+    if (hw.itemType === "vocab_quiz")
+      return ((_a = statOf(hw, studentId)) == null ? void 0 : _a.firstAt) ?? null;
+    const times = hw.taskKeys.map((k2) => taskAt(hw, studentId, k2));
+    if (times.some((t2) => !t2))
+      return null;
+    return times.reduce((a, b) => a > b ? a : b) ?? null;
+  };
+  const statusOf = (hw, studentId) => homeworkStatus(hw, finishedAt(hw, studentId));
   const targets = (hw) => data2.students.filter((s2) => isTarget(hw, s2.id));
   const lessonTitle = (id2) => {
     var _a;
@@ -62074,9 +63197,29 @@ function useAssignmentHelpers(data2) {
     var _a;
     return ((_a = data2.quizzes.find((q2) => q2.id === id2)) == null ? void 0 : _a.title) ?? "Vocabulary quiz";
   };
-  return { statOf, taskDone, doneUnits, targets, lessonTitle, quizTitle };
+  return { statOf, taskDone, doneUnits, finishedAt, statusOf, targets, lessonTitle, quizTitle };
 }
-var pct = (score, total) => total > 0 ? Math.round(score / total * 100) : 0;
+function StatusBadge({ status }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `inline-block whitespace-nowrap text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[status]}`, children: STATUS_LABEL[status] });
+}
+function DeadlineText({ hw }) {
+  const now = Date.now();
+  const closed = new Date(closesAt(hw)).getTime() < now;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { suppressHydrationWarning: true, children: [
+    "Due ",
+    formatDueDateTime(hw.dueAt),
+    hw.catchupUntil && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      " \xB7 Catch-up until ",
+      formatDueDateTime(hw.catchupUntil)
+    ] }),
+    closed && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ml-1 font-semibold text-slate-700", children: "\xB7 Closed" })
+  ] });
+}
+var pct$1 = (score, total) => total > 0 ? Math.round(score / total * 100) : 0;
+function formatDueDateTime(iso) {
+  const d = new Date(iso);
+  return `${formatDate$2(iso)}, ${d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
+}
 function todayInput() {
   const d = /* @__PURE__ */ new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
@@ -62148,7 +63291,7 @@ function StudentsCard({ data: data2 }) {
     const done = mine.filter((hw) => h.doneUnits(hw, studentId) === unitsOf(hw)).length;
     return { done, total: mine.length };
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Students", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Students", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-5 h-5 text-indigo-600" }),
       " Students",
@@ -62161,6 +63304,14 @@ function StudentsCard({ data: data2 }) {
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Click a name to see all of that student's homework and classwork." }),
+    data2.schoolHours.available && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "Homework is locked in school hours (",
+        schoolHoursSummary(data2.schoolHours),
+        ")."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DayOffToggle, { data: data2 })
+    ] }),
     data2.students.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No students yet. Share the class code (below) or personal invite codes." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2", children: data2.students.map((s2) => {
       const hwSum = summary(s2.id, "homework");
       const cwSum = summary(s2.id, "classwork");
@@ -62179,7 +63330,8 @@ function StudentsCard({ data: data2 }) {
               "/",
               cwSum.total
             ] })
-          ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HomeworkUnlockControl, { data: data2, studentId: s2.id, compact: true }) })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
           if (!window.confirm(`Remove ${studentName(s2)} from this class?`))
@@ -62216,7 +63368,6 @@ function StudentProgressDialog({ data: data2 }) {
   }, [student == null ? void 0 : student.id]);
   if (!student)
     return null;
-  const now = Date.now();
   const section = (kind) => {
     const items = data2.homework.filter((hw) => hw.kind === kind && isTarget(hw, student.id));
     const fullDone = items.filter((hw) => h.doneUnits(hw, student.id) === unitsOf(hw)).length;
@@ -62242,12 +63393,13 @@ function StudentProgressDialog({ data: data2 }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-slate-500 bg-slate-50", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1.5 px-2", children: "Title" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1.5 px-2", children: "Due" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1.5 px-2", children: "Status" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1.5 px-2", children: "Progress" })
         ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: items.map((hw) => {
           const doneUnits = h.doneUnits(hw, student.id);
           const finished = doneUnits === unitsOf(hw);
-          const overdue = !finished && new Date(hw.dueAt).getTime() < now;
+          const status = h.statusOf(hw, student.id);
           const stat = h.statOf(hw, student.id);
           return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-t border-slate-100 align-top", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 px-2", children: [
@@ -62257,10 +63409,14 @@ function StudentProgressDialog({ data: data2 }) {
                 h.quizTitle(hw.quizId)
               ] }) })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 px-2 whitespace-nowrap text-slate-700", suppressHydrationWarning: true, children: [
-              formatDate$1(hw.dueAt),
-              overdue && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block font-semibold text-red-600", children: "Overdue" })
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 px-2 text-slate-700", suppressHydrationWarning: true, children: [
+              formatDueDateTime(hw.dueAt),
+              hw.catchupUntil && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "block text-slate-500", children: [
+                "Catch-up until ",
+                formatDueDateTime(hw.catchupUntil)
+              ] })
             ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 px-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatusBadge, { status }) }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 px-2", children: hw.itemType === "lesson" ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-1", children: [
               hw.taskKeys.map((k2) => {
                 const done = h.taskDone(hw, student.id, k2);
@@ -62284,14 +63440,14 @@ function StudentProgressDialog({ data: data2 }) {
                 stat.total
               ] }),
               " (",
-              pct(stat.best, stat.total),
+              pct$1(stat.best, stat.total),
               "%)",
               " \xB7 ",
               stat.attempts,
               " ",
               stat.attempts === 1 ? "try" : "tries",
               " \xB7 Last ",
-              formatDate$1(stat.lastAt)
+              formatDate$2(stat.lastAt)
             ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(Circle, { className: "w-3.5 h-3.5 inline -mt-0.5" }),
               " Not started"
@@ -62317,7 +63473,8 @@ function StudentProgressDialog({ data: data2 }) {
               " ",
               studentName(student)
             ] }),
-            student.nickname && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 truncate", children: student.email })
+            student.nickname && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 truncate", children: student.email }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HomeworkUnlockControl, { data: data2, studentId: student.id }) })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: close, className: "p-1.5 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer", "aria-label": "Close", children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-4 h-4" }) })
         ] }),
@@ -62327,6 +63484,44 @@ function StudentProgressDialog({ data: data2 }) {
     }
   ) });
 }
+function CatchupEditor({ data: data2, hw }) {
+  const cls = data2.selectedClass;
+  const tz = useTzOffset();
+  const [open, setOpen] = reactExports.useState(false);
+  const toInputs = (iso) => {
+    const d = new Date(iso);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString();
+    return { date: local.slice(0, 10), time: local.slice(11, 16) };
+  };
+  const base = toInputs(hw.catchupUntil ?? new Date(new Date(hw.dueAt).getTime() + DEFAULT_CATCHUP_DAYS * 864e5).toISOString());
+  const [date, setDate] = reactExports.useState(base.date);
+  const [time, setTime] = reactExports.useState(base.time);
+  if (!open) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: btnGhost, onClick: () => setOpen(true), children: hw.catchupUntil ? "Change catch-up period" : "Add a catch-up period" });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-end gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "flex flex-wrap items-end gap-2", onSubmit: () => setOpen(false), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-catchup" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "homeworkId", value: hw.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "tz", value: tz }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Catch-up until" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "catchupDate", value: date, onChange: (e) => setDate(e.target.value), required: true, className: input })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "time", name: "catchupTime", value: time, onChange: (e) => setTime(e.target.value), required: true, className: input }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Save" })
+    ] }),
+    hw.catchupUntil && /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: () => setOpen(false), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-catchup" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "homeworkId", value: hw.id }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "none", value: "on" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btnGhost, children: "No catch-up (close at due time)" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: "text-xs text-slate-500 underline bg-transparent border-none p-0 cursor-pointer", onClick: () => setOpen(false), children: "Cancel" })
+  ] });
+}
 function AssignCard({ data: data2 }) {
   const cls = data2.selectedClass;
   const tz = useTzOffset();
@@ -62334,11 +63529,15 @@ function AssignCard({ data: data2 }) {
   const [kind, setKind] = reactExports.useState("homework");
   const [itemType, setItemType] = reactExports.useState("lesson");
   const [dueDate, setDueDate] = reactExports.useState("");
+  const [dueTime, setDueTime] = reactExports.useState("23:59");
+  const [timeTouched, setTimeTouched] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (kind === "classwork" && !dueDate)
       setDueDate(todayInput());
-  }, [kind, dueDate]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Set homework or classwork", children: [
+    if (!timeTouched)
+      setDueTime(kind === "classwork" ? "15:15" : "23:59");
+  }, [kind, dueDate, timeTouched]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Set homework or classwork", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardList, { className: "w-5 h-5 text-indigo-600" }),
       " Set Homework or Classwork"
@@ -62407,10 +63606,43 @@ function AssignCard({ data: data2 }) {
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(TargetPicker, { students: data2.students, disabled: !available }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3", children: [
+      data2.catchupAvailable && /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1 block", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Catch-up period for students who haven't finished" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("select", { name: "catchupDays", defaultValue: DEFAULT_CATCHUP_DAYS, className: `${input} w-full sm:w-auto`, children: CATCHUP_OPTIONS.map((o) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: o.days, children: o.label }, o.days)) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block font-normal text-slate-500", children: 'Whether each student finished by the due time is recorded. Students who finish in the catch-up period are marked "late". After that it closes.' })
+      ] }),
+      kind === "homework" && data2.schoolHours.available && /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-start gap-2 text-sm text-slate-700", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", name: "allowDuringSchool", className: "mt-1" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Students may also do this homework during school hours",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "block text-xs text-slate-500", children: [
+            "If unticked, students can't do it during school hours (",
+            schoolHoursSummary(data2.schoolHours),
+            "). Change the hours in Class settings."
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-4 gap-3", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Due date" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "dueDate", required: true, value: dueDate, onChange: (e) => setDueDate(e.target.value), className: `${input} w-full` })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Due time" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              type: "time",
+              name: "dueTime",
+              required: true,
+              value: dueTime,
+              onChange: (e) => {
+                setDueTime(e.target.value);
+                setTimeTouched(true);
+              },
+              className: `${input} w-full`
+            }
+          )
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "text-xs font-semibold text-slate-600 space-y-1 sm:col-span-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "Title (optional)" }),
@@ -62425,7 +63657,7 @@ function AssignCard({ data: data2 }) {
           )
         ] })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btn, disabled: itemType === "vocab_quiz" && data2.quizzes.length === 0, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "submit", className: btn$1, disabled: itemType === "vocab_quiz" && data2.quizzes.length === 0, children: [
         "Set ",
         assignmentKindLabel(kind)
       ] }) })
@@ -62441,7 +63673,7 @@ function AssignmentListCard({ data: data2, kind }) {
   const label = assignmentKindLabel(kind);
   if (kind === "classwork" && !data2.assignmentsAvailable && list2.length === 0)
     return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": label, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": label, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
       kind === "classwork" ? /* @__PURE__ */ jsxRuntimeExports.jsx(PencilLine, { className: "w-5 h-5 text-teal-600" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(School, { className: "w-5 h-5 text-indigo-600" }),
       label,
@@ -62459,7 +63691,10 @@ function AssignmentListCard({ data: data2, kind }) {
     ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: list2.map((hw) => {
       const targets = h.targets(hw);
       const units = unitsOf(hw);
-      const finished = targets.filter((s2) => h.doneUnits(hw, s2.id) === units).length;
+      const statuses = targets.map((s2) => h.statusOf(hw, s2.id));
+      const onTime = statuses.filter((st) => st === "ontime").length;
+      const late2 = statuses.filter((st) => st === "late").length;
+      const notDone = statuses.length - onTime - late2;
       const isOpen = openId === hw.id;
       return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 space-y-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
@@ -62472,33 +63707,40 @@ function AssignmentListCard({ data: data2, kind }) {
               "aria-expanded": isOpen,
               children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-semibold text-slate-800", children: hw.title }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
-                  hw.itemType === "lesson" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                    h.lessonTitle(hw.lessonId),
-                    " \xB7 ",
-                    hw.taskKeys.map(taskLabel$1).join(", ")
-                  ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(Languages, { className: "w-3 h-3 inline -mt-0.5" }),
-                    " Vocabulary quiz: ",
-                    h.quizTitle(hw.quizId)
-                  ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: hw.itemType === "lesson" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                  h.lessonTitle(hw.lessonId),
                   " \xB7 ",
-                  "Due ",
-                  formatDate$1(hw.dueAt)
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1", children: [
+                  hw.taskKeys.map(taskLabel$1).join(", ")
+                ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Languages, { className: "w-3 h-3 inline -mt-0.5" }),
+                  " Vocabulary quiz: ",
+                  h.quizTitle(hw.quizId)
+                ] }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: /* @__PURE__ */ jsxRuntimeExports.jsx(DeadlineText, { hw }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1 flex-wrap", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-3 h-3" }),
-                  hw.assignTo === "class" ? "Whole class" : `${targets.length} selected student${targets.length === 1 ? "" : "s"}`
+                  hw.assignTo === "class" ? "Whole class" : `${targets.length} selected student${targets.length === 1 ? "" : "s"}`,
+                  hw.kind === "homework" && data2.schoolHours.available && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `ml-1 px-1.5 rounded-full border ${hw.allowDuringSchool ? "border-emerald-200 text-emerald-700 bg-emerald-50" : "border-slate-200 text-slate-500 bg-slate-50"}`, children: hw.allowDuringSchool ? "Allowed in school hours" : "Not in school hours" })
                 ] })
               ]
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 shrink-0", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-700", children: [
-              finished,
-              "/",
-              targets.length,
-              " finished"
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-700 text-right", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-emerald-700", children: [
+                onTime,
+                " on time"
+              ] }),
+              late2 > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-amber-700", children: [
+                " \xB7 ",
+                late2,
+                " late"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
+                " \xB7 ",
+                notDone,
+                " not done"
+              ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", onSubmit: (e) => {
               if (!window.confirm(`Delete this ${label.toLowerCase()}?`))
@@ -62515,6 +63757,7 @@ function AssignmentListCard({ data: data2, kind }) {
           targets.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No students are assigned." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "min-w-full text-xs", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-slate-500", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-1 pr-3", children: "Student" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold px-2 py-1", children: "Status" }),
               hw.itemType === "lesson" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
                 hw.taskKeys.map((k2) => /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold px-2 py-1", children: taskLabel$1(k2) }, k2)),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold px-2 py-1", children: "Done" })
@@ -62529,6 +63772,7 @@ function AssignmentListCard({ data: data2, kind }) {
               const stat = h.statOf(hw, s2.id);
               return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-t border-slate-100", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1 pr-3 text-slate-800 whitespace-nowrap", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StudentLink, { student: s2 }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatusBadge, { status: h.statusOf(hw, s2.id) }) }),
                 hw.itemType === "lesson" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
                   hw.taskKeys.map((k2) => /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center", children: h.taskDone(hw, s2.id, k2) ? /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "w-4 h-4 text-emerald-600 inline", "aria-label": "done" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Circle, { className: "w-4 h-4 text-slate-300 inline", "aria-label": "not done" }) }, k2)),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "px-2 py-1 text-center font-semibold text-slate-700", children: [
@@ -62538,13 +63782,14 @@ function AssignmentListCard({ data: data2, kind }) {
                   ] })
                 ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center", children: stat ? /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { className: "w-4 h-4 text-emerald-600 inline", "aria-label": "done" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Circle, { className: "w-4 h-4 text-slate-300 inline", "aria-label": "not done" }) }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center font-semibold text-slate-700", children: stat ? `${stat.best}/${stat.total} (${pct(stat.best, stat.total)}%)` : "\u2013" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center font-semibold text-slate-700", children: stat ? `${stat.best}/${stat.total} (${pct$1(stat.best, stat.total)}%)` : "\u2013" }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center text-slate-700", children: (stat == null ? void 0 : stat.attempts) ?? 0 }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center text-slate-500", suppressHydrationWarning: true, children: stat ? formatDate$1(stat.lastAt) : "\u2013" })
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "px-2 py-1 text-center text-slate-500", suppressHydrationWarning: true, children: stat ? formatDate$2(stat.lastAt) : "\u2013" })
                 ] })
               ] }, s2.id);
             }) })
           ] }) }),
+          data2.catchupAvailable && /* @__PURE__ */ jsxRuntimeExports.jsx(CatchupEditor, { data: data2, hw }),
           data2.assignmentsAvailable && (editingId === hw.id ? /* @__PURE__ */ jsxRuntimeExports.jsxs(Form, { method: "post", className: "space-y-2 bg-slate-50 border border-slate-200 rounded-lg p-3", onSubmit: () => setEditingId(null), children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "intent", value: "update-homework-targets" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "classId", value: cls.id }),
@@ -62552,7 +63797,7 @@ function AssignmentListCard({ data: data2, kind }) {
             /* @__PURE__ */ jsxRuntimeExports.jsx(TargetPicker, { students: data2.students, defaultAssignTo: hw.assignTo, defaultIds: hw.studentIds }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: btnGhost, onClick: () => setEditingId(null), children: "Cancel" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Save students" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Save students" })
             ] })
           ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", className: btnGhost, onClick: () => setEditingId(hw.id), children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Users, { className: "w-3.5 h-3.5" }),
@@ -62576,21 +63821,33 @@ function CompletionCard({ data: data2 }) {
     const unitsSet = mine.reduce((sum, hw) => sum + unitsOf(hw), 0);
     const unitsDone = mine.reduce((sum, hw) => sum + h.doneUnits(hw, s2.id), 0);
     const fullDone = mine.filter((hw) => h.doneUnits(hw, s2.id) === unitsOf(hw)).length;
-    const quizScores = mine.filter((hw) => hw.itemType === "vocab_quiz").map((hw) => h.statOf(hw, s2.id)).filter((st) => Boolean(st)).map((st) => pct(st.best, st.total));
+    const onTime = mine.filter((hw) => h.statusOf(hw, s2.id) === "ontime").length;
+    const quizScores = mine.filter((hw) => hw.itemType === "vocab_quiz").map((hw) => h.statOf(hw, s2.id)).filter((st) => Boolean(st)).map((st) => pct$1(st.best, st.total));
     const quizAverage = quizScores.length ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length) : null;
     const percent = unitsSet === 0 ? null : Math.round(unitsDone / unitsSet * 100);
-    return { student: s2, unitsSet, unitsDone, fullDone, assigned: mine.length, quizAverage, percent };
+    return { student: s2, unitsSet, unitsDone, fullDone, onTime, assigned: mine.length, quizAverage, percent };
   });
   const scored = rows.filter((r2) => r2.percent !== null);
   const average = scored.length ? Math.round(scored.reduce((a, r2) => a + (r2.percent ?? 0), 0) / scored.length) : null;
   const downloadCsv = () => {
-    const header = ["Student", "Email", "Completion %", "Tasks done", "Tasks set", `${label} fully done`, `${label} set`, "Quiz best score average %"];
+    const header = [
+      "Student",
+      "Email",
+      "Completion %",
+      "Tasks done",
+      "Tasks set",
+      `${label} done on time`,
+      `${label} done (incl. late)`,
+      `${label} set`,
+      "Quiz best score average %"
+    ];
     const lines = rows.map((r2) => [
       r2.student.nickname ?? "",
       r2.student.email,
       r2.percent ?? "",
       r2.unitsDone,
       r2.unitsSet,
+      r2.onTime,
       r2.fullDone,
       r2.assigned,
       r2.quizAverage ?? ""
@@ -62603,7 +63860,7 @@ function CompletionCard({ data: data2 }) {
     a.click();
     URL.revokeObjectURL(a.href);
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "Completion", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "Completion", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "w-5 h-5 text-indigo-600" }),
@@ -62641,14 +63898,14 @@ function CompletionCard({ data: data2 }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block", children: "To" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "date", name: "to", defaultValue: data2.period.to, className: input }, `t-${data2.period.to}`)
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, children: "Show" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, children: "Show" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
       "Counts ",
       label.toLowerCase(),
       " due between these dates (",
       inPeriod.length,
-      " set). Each student is counted only for what was assigned to them. A lesson task counts as done when the student has completed it on AI Yamato; a vocabulary quiz counts as done after one try.",
+      " set). Each student is counted only for what was assigned to them. A lesson task counts as done when the student completed it on AI Yamato by the due time or within the catch-up period; a vocabulary quiz counts as done after one try in that time. Work finished after it closed is not counted.",
       average !== null && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
         " Class average: ",
         /* @__PURE__ */ jsxRuntimeExports.jsxs("strong", { className: "text-slate-800", children: [
@@ -62663,6 +63920,7 @@ function CompletionCard({ data: data2 }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-2 pr-3", children: "Student" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold py-2 px-2 w-1/2", children: "Completion" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold py-2 px-2", children: "Tasks" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "font-semibold py-2 px-2", children: "On time" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("th", { className: "font-semibold py-2 px-2", children: [
           label,
           " done"
@@ -62688,6 +63946,11 @@ function CompletionCard({ data: data2 }) {
           r2.unitsDone,
           "/",
           r2.unitsSet
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-2 px-2 text-center text-xs text-emerald-700 font-semibold", children: [
+          r2.onTime,
+          "/",
+          r2.assigned
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-2 px-2 text-center text-xs text-slate-700", children: [
           r2.fullDone,
@@ -62738,7 +64001,7 @@ function VocabQuizCard({ data: data2 }) {
   const remove2 = (key) => setWords((prev) => prev.filter((w2) => w2.key !== key));
   const duplicateMeaning = new Set(words.map((w2) => w2.english.toLowerCase())).size !== words.length;
   const canSave = title.trim() && words.length >= VOCAB_QUIZ_LIMITS.minWords && !duplicateMeaning;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card, "aria-label": "My vocabulary quizzes", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: card$3, "aria-label": "My vocabulary quizzes", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: h2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(Languages, { className: "w-5 h-5 text-indigo-600" }),
@@ -62889,7 +64152,7 @@ function VocabQuizCard({ data: data2 }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "title", value: title }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "hidden", name: "items", value: JSON.stringify(words.map(({ vocabularyId, jp, kana, english }) => ({ vocabularyId, jp, kana, english }))) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", className: btnGhost, onClick: () => setIsOpen(false), children: "Cancel" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn, disabled: !canSave, children: "Save quiz" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: btn$1, disabled: !canSave, children: "Save quiz" })
       ] })
     ] }),
     data2.quizzes.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "No quizzes yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "divide-y divide-slate-100 border border-slate-100 rounded-lg", children: data2.quizzes.map((q2) => {
@@ -62900,7 +64163,7 @@ function VocabQuizCard({ data: data2 }) {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", suppressHydrationWarning: true, children: [
             q2.wordCount,
             " words \xB7 Made ",
-            formatDate$1(q2.createdAt),
+            formatDate$2(q2.createdAt),
             usedBy > 0 && ` \xB7 Set ${usedBy} time${usedBy === 1 ? "" : "s"} in this class`
           ] })
         ] }),
@@ -62937,9 +64200,10 @@ function DashboardJumpNav({ data: data2 }) {
     { id: "td-students", label: `Students (${data2.students.length})` }
   ];
   const settings = [
-    { id: "td-games", label: "Games" },
     { id: "td-class-code", label: "Class Code" },
     { id: "td-invites", label: "Personal Invite Codes" },
+    { id: "td-games", label: "Games" },
+    { id: "td-school-hours", label: "School Hours" },
     { id: "td-vocab-length", label: "Vocabulary Drill Length" }
   ];
   const row = (title, items, style) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3", children: [
@@ -62947,9 +64211,45 @@ function DashboardJumpNav({ data: data2 }) {
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: items.filter((j) => j.show !== false).map((j) => /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: `#${j.id}`, className: `text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${style}`, children: j.label }, j.id)) })
   ] });
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("nav", { "aria-label": "Jump to a section", className: "bg-white border border-slate-200 rounded-xl shadow-sm p-3 space-y-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] font-bold uppercase tracking-wider text-slate-400 sm:w-20 shrink-0", children: "Tests" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/test",
+            className: "text-xs font-bold px-3 py-1.5 rounded-full border bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors",
+            children: "\u{1F4DD} Tests: typing, kana, kanji, vocabulary, sentences \u2192"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[11px] text-slate-400", children: "For formative or summative assessment in class" })
+      ] })
+    ] }),
     row("Daily", daily, "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"),
     row("Settings", settings, "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")
   ] });
+}
+function BackToTopButton() {
+  const [visible, setVisible] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 400);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!visible)
+    return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      type: "button",
+      onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+      className: "fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 flex items-center justify-center cursor-pointer",
+      "aria-label": "Back to top",
+      title: "Back to top",
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowUp, { className: "w-5 h-5" })
+    }
+  );
 }
 var DAY_MS = 864e5;
 function localDayStart(date, tzOffsetMinutes) {
@@ -62959,6 +64259,26 @@ function localDayStart(date, tzOffsetMinutes) {
   if (Number.isNaN(utcMidnight))
     return null;
   return new Date(utcMidnight + tzOffsetMinutes * 6e4);
+}
+var DEFAULT_SCHOOL_HOURS = { timezone: "Australia/Melbourne", start: "08:45", end: "15:15", days: [1, 2, 3, 4, 5] };
+function localDateIn(timeZone, date = /* @__PURE__ */ new Date()) {
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  } catch {
+    return date.toISOString().slice(0, 10);
+  }
+}
+function isValidTimeZone(tz) {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: tz });
+    return tz.length > 0 && tz.length <= 64;
+  } catch {
+    return false;
+  }
+}
+async function classTimeZone(admin, classId) {
+  const { data: data2 } = await admin.from("edu_classes").select("school_timezone").eq("id", classId).maybeSingle();
+  return String((data2 == null ? void 0 : data2.school_timezone) || DEFAULT_SCHOOL_HOURS.timezone);
 }
 function parseTz(raw) {
   const n2 = Number(raw);
@@ -62972,7 +64292,7 @@ function memberSubtitle(schoolEmail, inviteLabel) {
     return schoolEmail;
   return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
 }
-async function loader$p({ request, context }) {
+async function loader$v({ request, context }) {
   var _a;
   const { user, profile, admin } = await getTeacherOrApplicant(request, context);
   const url = new URL(request.url);
@@ -63020,7 +64340,10 @@ async function loader$p({ request, context }) {
     vocabLimits: { available: false, classDefault: null, lessons: [], students: [] },
     assignmentsAvailable: false,
     quizzes: [],
-    quizStats: []
+    quizStats: [],
+    catchupAvailable: false,
+    schoolHours: { ...DEFAULT_SCHOOL_HOURS, available: false, offToday: false, today: localDateIn(DEFAULT_SCHOOL_HOURS.timezone) },
+    homeworkUnlocks: []
   };
   if (!selected)
     return dist$1.json(base);
@@ -63063,17 +64386,42 @@ async function loader$p({ request, context }) {
     usedByName: i.used_by ? nicknameOf.get(i.used_by) ?? "A student" : null
   }));
   const assignments = await loadClassAssignments(admin, selected.id, user.id);
+  let schoolHours = base.schoolHours;
+  let homeworkUnlocks = [];
+  if (assignments.schoolHoursAvailable) {
+    const { data: hours } = await admin.from("edu_classes").select("school_timezone, school_start, school_end, school_days, homework_lock_off_date").eq("id", selected.id).maybeSingle();
+    if (hours) {
+      const timezone = String(hours.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
+      const today = localDateIn(timezone);
+      schoolHours = {
+        available: true,
+        timezone,
+        start: String(hours.school_start).slice(0, 5),
+        end: String(hours.school_end).slice(0, 5),
+        days: hours.school_days ?? DEFAULT_SCHOOL_HOURS.days,
+        offToday: hours.homework_lock_off_date === today,
+        today
+      };
+      const { data: unlockRows2 } = await admin.from("edu_class_homework_unlocks").select("user_id, until_date").eq("class_id", selected.id).gte("until_date", today);
+      homeworkUnlocks = (unlockRows2 ?? []).map((u2) => ({ userId: String(u2.user_id), untilDate: String(u2.until_date) }));
+    }
+  }
   const homework = assignments.items.map((h) => ({
     ...h,
     inPeriod: new Date(h.dueAt) >= periodStart && new Date(h.dueAt) <= periodEnd
   }));
   const lessonIds = [...new Set(homework.map((h) => h.lessonId).filter((id2) => Boolean(id2)))];
-  const { data: progressRows } = studentIds.length && lessonIds.length ? await admin.from("edu_student_progress").select("user_id, lesson_id, task_key, is_completed, updated_at").in("user_id", studentIds).in("lesson_id", lessonIds).eq("is_completed", true) : { data: [] };
-  const progress = (progressRows ?? []).map((p2) => ({
+  const readProgress = async (columns) => admin.from("edu_student_progress").select(columns).in("user_id", studentIds).in("lesson_id", lessonIds).eq("is_completed", true);
+  let progressRows = [];
+  if (studentIds.length && lessonIds.length) {
+    const withCompletedAt = await readProgress("user_id, lesson_id, task_key, updated_at, completed_at");
+    progressRows = withCompletedAt.error ? (await readProgress("user_id, lesson_id, task_key, updated_at")).data ?? [] : withCompletedAt.data ?? [];
+  }
+  const progress = progressRows.map((p2) => ({
     userId: p2.user_id,
     lessonId: String(p2.lesson_id),
     taskKey: p2.task_key,
-    completedAt: p2.updated_at ?? null
+    completedAt: p2.completed_at ?? p2.updated_at ?? null
   }));
   const { data: writingRows } = studentIds.length ? await admin.from("edu_writing_submissions").select("id, user_id, lesson_id, attempt_no, transcription, classification, created_at, image_path, image_delete_after, image_deleted_at").in("user_id", studentIds).eq("kind", "submission").order("created_at", { ascending: false }).limit(50) : { data: [] };
   const handwriting = (writingRows ?? []).map((w2) => ({
@@ -63124,7 +64472,10 @@ async function loader$p({ request, context }) {
     vocabLimits,
     assignmentsAvailable: assignments.available,
     quizzes: assignments.quizzes,
-    quizStats: assignments.quizStats
+    quizStats: assignments.quizStats,
+    catchupAvailable: assignments.catchupAvailable,
+    schoolHours,
+    homeworkUnlocks
   });
 }
 async function action$4({ request, context }) {
@@ -63282,6 +64633,7 @@ async function action$4({ request, context }) {
     const hwIds = (classHw ?? []).map((h) => h.id);
     if (hwIds.length)
       await admin.from("edu_homework_students").delete().eq("user_id", studentId).in("homework_id", hwIds);
+    await admin.from("edu_class_homework_unlocks").delete().eq("class_id", cls.id).eq("user_id", studentId);
     return backTo(cls.id);
   }
   if (intent === "lock-games" || intent === "unlock-games") {
@@ -63444,11 +64796,27 @@ async function action$4({ request, context }) {
       return fail(`Free teacher accounts can have up to ${TEACHER_LIMITS.maxActiveHomeworkPerClass} upcoming homework and classwork per class.`);
     }
     row.title = (title || `${defaultTitle} ${assignmentKindLabel(kind).toLowerCase()}`).slice(0, 100);
-    row.due_at = new Date(due.getTime() + DAY_MS - 1e3).toISOString();
+    const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get("dueTime") ?? ""));
+    row.due_at = timeMatch ? new Date(due.getTime() + Number(timeMatch[1]) * 36e5 + Number(timeMatch[2]) * 6e4).toISOString() : new Date(due.getTime() + DAY_MS - 1e3).toISOString();
     row.kind = kind;
     row.item_type = itemType;
     row.assign_to = assignTo;
+    const allowDuringSchool = kind === "homework" && form.get("allowDuringSchool") === "on";
+    if (allowDuringSchool)
+      row.allow_during_school = true;
+    const catchupDays = Number(form.get("catchupDays") ?? 0);
+    if ([3, 7, 14].includes(catchupDays)) {
+      row.catchup_until = new Date(new Date(String(row.due_at)).getTime() + catchupDays * DAY_MS).toISOString();
+    }
     let { data: created, error } = await admin.from("edu_homework").insert(row).select("id").single();
+    if (error && /catchup_until/.test(error.message)) {
+      delete row.catchup_until;
+      ({ data: created, error } = await admin.from("edu_homework").insert(row).select("id").single());
+    }
+    if (error && /allow_during_school/.test(error.message)) {
+      delete row.allow_during_school;
+      ({ data: created, error } = await admin.from("edu_homework").insert(row).select("id").single());
+    }
     if (error && !isNewShape && /kind|item_type|assign_to/.test(error.message)) {
       delete row.kind;
       delete row.item_type;
@@ -63494,6 +64862,78 @@ async function action$4({ request, context }) {
     const { error } = await admin.from("edu_homework").update({ assign_to: assignTo }).eq("id", hw.id);
     if (error)
       return fail("Could not save the students. Please try again.", 500);
+    return backTo(cls.id);
+  }
+  if (intent === "update-school-hours") {
+    const timezone = String(form.get("timezone") ?? "");
+    const start = String(form.get("start") ?? "");
+    const end = String(form.get("end") ?? "");
+    const days = [...new Set(form.getAll("days").map(Number))].filter((d) => Number.isInteger(d) && d >= 1 && d <= 7).sort();
+    const timeOk = (t2) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t2);
+    if (!isValidTimeZone(timezone))
+      return fail("Choose a time zone.");
+    if (!timeOk(start) || !timeOk(end) || start >= end)
+      return fail("School hours must start before they end.");
+    const { error } = await admin.from("edu_classes").update({ school_timezone: timezone, school_start: start, school_end: end, school_days: days }).eq("id", cls.id);
+    if (error) {
+      console.error("[teacher-dashboard] school hours failed:", error.message);
+      return fail("Could not save school hours. This needs a database update (SQL 47).", 500);
+    }
+    return backTo(cls.id);
+  }
+  if (intent === "school-day-off-today" || intent === "school-day-on") {
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const { error } = await admin.from("edu_classes").update({ homework_lock_off_date: intent === "school-day-off-today" ? today : null }).eq("id", cls.id);
+    if (error)
+      return fail("Could not change this. This needs a database update (SQL 47).", 500);
+    return backTo(cls.id);
+  }
+  if (intent === "unlock-student-homework" || intent === "relock-student-homework") {
+    const studentId = String(form.get("studentId") ?? "");
+    const { data: member } = await admin.from("edu_class_members").select("user_id").eq("class_id", cls.id).eq("user_id", studentId).eq("role", "student").maybeSingle();
+    if (!member)
+      return fail("Student not found.", 404);
+    if (intent === "relock-student-homework") {
+      await admin.from("edu_class_homework_unlocks").delete().eq("class_id", cls.id).eq("user_id", studentId);
+      return backTo(cls.id);
+    }
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const raw = String(form.get("until") ?? "");
+    const until = raw === "today" || raw === "" ? today : raw;
+    const maxDate = localDateIn("UTC", new Date(Date.now() + 90 * DAY_MS));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(until) || until < today || until > maxDate) {
+      return fail("Choose a date from today up to 90 days ahead.");
+    }
+    const { error } = await admin.from("edu_class_homework_unlocks").upsert(
+      { class_id: cls.id, user_id: studentId, until_date: until, created_at: (/* @__PURE__ */ new Date()).toISOString(), created_by: user.id },
+      { onConflict: "class_id,user_id" }
+    );
+    if (error) {
+      console.error("[teacher-dashboard] unlock homework failed:", error.message);
+      return fail("Could not change this. This needs a database update (SQL 47).", 500);
+    }
+    return backTo(cls.id);
+  }
+  if (intent === "update-catchup") {
+    const { data: hw } = await admin.from("edu_homework").select("id, due_at").eq("id", String(form.get("homeworkId") ?? "")).eq("class_id", cls.id).maybeSingle();
+    if (!hw)
+      return fail("Not found.", 404);
+    let catchupUntil = null;
+    if (form.get("none") !== "on") {
+      const day2 = localDayStart(String(form.get("catchupDate") ?? ""), parseTz(form.get("tz")));
+      const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get("catchupTime") ?? ""));
+      if (!day2 || !timeMatch)
+        return fail("Choose a date and time for the catch-up period.");
+      const at = new Date(day2.getTime() + Number(timeMatch[1]) * 36e5 + Number(timeMatch[2]) * 6e4);
+      if (at.getTime() <= new Date(hw.due_at).getTime())
+        return fail("The catch-up period must end after the due time.");
+      catchupUntil = at.toISOString();
+    }
+    const { error } = await admin.from("edu_homework").update({ catchup_until: catchupUntil }).eq("id", hw.id);
+    if (error) {
+      console.error("[teacher-dashboard] update-catchup failed:", error.message);
+      return fail("Could not save this. The catch-up period needs a database update (SQL 48).", 500);
+    }
     return backTo(cls.id);
   }
   if (intent === "delete-homework") {
@@ -63614,12 +65054,16 @@ function TeacherDashboardPage() {
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-handwriting", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HandwritingCard, { data: data2 }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-students", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StudentsCard, { data: data2 }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xs font-bold uppercase tracking-wider text-slate-400 pt-4 border-t border-slate-200", children: "Class settings" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-games", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GamesCard, { data: data2 }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-class-code", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ClassSettingsCard, { data: data2 }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-invites", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(InviteCodesCard, { data: data2 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6 items-start", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-invites", className: "scroll-mt-20 min-w-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx(InviteCodesCard, { data: data2 }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-games", className: "scroll-mt-20 min-w-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GamesCard, { data: data2 }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-school-hours", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(SchoolHoursCard, { data: data2 }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "td-vocab-length", className: "scroll-mt-20", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LessonTaskSettingsCard, { data: data2 }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StudentProgressDialog, { data: data2 })
-    ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(BackToTopButton, {})
   ] }) });
 }
 var shouldRevalidate = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalidate }) => {
@@ -63635,16 +65079,16 @@ var shouldRevalidate = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalida
   };
   return strip(currentUrl) === strip(nextUrl) ? false : defaultShouldRevalidate;
 };
-var meta$n = () => [
+var meta$w = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
-var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$4,
   default: TeacherDashboardPage,
-  loader: loader$p,
-  meta: meta$n,
+  loader: loader$v,
+  meta: meta$w,
   shouldRevalidate
 }, Symbol.toStringTag, { value: "Module" }));
 var shogi = `<!doctype html>
@@ -70539,7 +71983,7 @@ function messagePage(message, status) {
 </head><body><p>${message}</p></body></html>`;
   return new Response(html, { status, headers: BASE_HEADERS });
 }
-async function loader$o({ request, context, params }) {
+async function loader$u({ request, context, params }) {
   const html = FRAMES[params.name ?? ""];
   if (!html)
     return messagePage("This game could not be found.", 404);
@@ -70554,9 +71998,9 @@ async function loader$o({ request, context, params }) {
     return messagePage("Games are locked by your teacher right now.", 403);
   return new Response(html.replace(/<head>/i, `<head>${FRAME_BRIDGE}`), { headers: BASE_HEADERS });
 }
-var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$o
+  loader: loader$u
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -70576,7 +72020,7 @@ async function fetchLegalContentData(supabaseClient) {
     return null;
   }
 }
-async function loader$n({ request }) {
+async function loader$t({ request }) {
   const url = new URL(request.url);
   const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
   return dist$1.json({
@@ -70584,7 +72028,7 @@ async function loader$n({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$m = ({ data: data2 }) => {
+var meta$v = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Disclaimer() {
@@ -70682,11 +72126,11 @@ function Disclaimer() {
     }
   );
 }
-var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Disclaimer,
-  loader: loader$n,
-  meta: meta$m
+  loader: loader$t,
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 async function fetchTextbookRefs(lessonIds) {
   var _a;
@@ -70727,7 +72171,10 @@ function formatTextbookRef(ref) {
   return `${book} \xB7 ${unit}${partial}`;
 }
 var TEXTBOOK_DISCLAIMER = "Textbook references are for convenience only. This site is not affiliated with the publishers of these textbooks.";
-var EduLessonHeader = ({ lesson, topic, textbookRefs = [], heroImage = null }) => {
+var EduLessonHeader = ({ lesson, topic, textbookRefs = [], heroImage: heroImageProp = null }) => {
+  const [imageFailed, setImageFailed] = reactExports.useState(false);
+  reactExports.useEffect(() => setImageFailed(false), [heroImageProp == null ? void 0 : heroImageProp.src]);
+  const heroImage = heroImageProp && !imageFailed ? heroImageProp : null;
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 border-2 border-orange-400 dark:border-orange-500/70 rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm font-sans", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: heroImage ? "flex flex-col md:flex-row md:items-center gap-6 md:gap-8" : "", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 min-w-0 flex-1", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 text-xs font-extrabold uppercase tracking-wider bg-orange-500 text-white w-fit px-4 py-1.5 rounded-full shadow-xs", children: [
@@ -70764,6 +72211,7 @@ var EduLessonHeader = ({ lesson, topic, textbookRefs = [], heroImage = null }) =
           src: heroImage.src,
           alt: heroImage.alt,
           loading: "eager",
+          onError: () => setImageFailed(true),
           className: "w-full aspect-[4/3] object-cover rounded-2xl border border-orange-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
         }
       ),
@@ -71108,6 +72556,11 @@ var EduVocabularySidebar = ({
     }) })
   ] });
 };
+function formatTime(iso) {
+  if (!iso)
+    return "after school";
+  return `after ${new Date(iso).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
+}
 var TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing", "culture"];
 function EduLessonTaskManager({
   lessonId,
@@ -71124,6 +72577,7 @@ function EduLessonTaskManager({
   onStartCultureTask,
   externalTaskStatus = {}
 }) {
+  var _a, _b, _c, _d, _e, _f, _g;
   const [taskProgress, setTaskProgress] = reactExports.useState({
     vocabulary: false,
     listening: false,
@@ -71132,15 +72586,33 @@ function EduLessonTaskManager({
     writing: false,
     culture: false
   });
+  const [locks, setLocks] = reactExports.useState({});
+  const isLocked = (k2) => {
+    var _a2;
+    return Boolean((_a2 = locks[k2]) == null ? void 0 : _a2.locked) && !taskProgress[k2];
+  };
+  reactExports.useEffect(() => {
+    if (!userId || !lessonId)
+      return;
+    let cancelled = false;
+    fetch(`/api/lesson-progress?lessonId=${encodeURIComponent(lessonId)}`, { credentials: "same-origin" }).then((r2) => r2.ok ? r2.json() : { locks: {} }).then((d) => {
+      if (!cancelled)
+        setLocks((d == null ? void 0 : d.locks) ?? {});
+    }).catch(() => {
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lessonId, userId]);
   const onProgressChangeRef = reactExports.useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
   const onAllCompletedChangeRef = reactExports.useRef(onAllCompletedChange);
   onAllCompletedChangeRef.current = onAllCompletedChange;
   const externalKey = TASK_KEYS.map((k2) => externalTaskStatus[k2] ? "1" : "0").join("");
   const publishProgress = (progress) => {
-    var _a, _b;
-    (_a = onProgressChangeRef.current) == null ? void 0 : _a.call(onProgressChangeRef, progress);
-    (_b = onAllCompletedChangeRef.current) == null ? void 0 : _b.call(onAllCompletedChangeRef, Object.values(progress).every(Boolean));
+    var _a2, _b2;
+    (_a2 = onProgressChangeRef.current) == null ? void 0 : _a2.call(onProgressChangeRef, progress);
+    (_b2 = onAllCompletedChangeRef.current) == null ? void 0 : _b2.call(onAllCompletedChangeRef, Object.values(progress).every(Boolean));
   };
   reactExports.useEffect(() => {
     let cancelled = false;
@@ -71163,13 +72635,35 @@ function EduLessonTaskManager({
         });
         const newlyCompleted = TASK_KEYS.filter((k2) => k2 !== "writing" && externalTaskStatus[k2] && !saved[k2]);
         if (newlyCompleted.length > 0) {
-          const now = (/* @__PURE__ */ new Date()).toISOString();
-          const { error: upsertError } = await supabase.from("edu_student_progress").upsert(
-            newlyCompleted.map((k2) => ({ user_id: userId, lesson_id: lessonId, task_key: k2, is_completed: true, updated_at: now })),
-            { onConflict: "user_id,lesson_id,task_key" }
-          );
-          if (upsertError)
-            console.error("Failed to save task completion:", upsertError);
+          try {
+            const res = await fetch("/api/lesson-progress", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lessonId, taskKeys: newlyCompleted })
+            });
+            const result = await res.json().catch(() => ({}));
+            const refused = Array.isArray(result == null ? void 0 : result.locked) ? result.locked : [];
+            if (refused.length) {
+              refused.forEach((r2) => {
+                if (r2.taskKey in merged)
+                  merged[r2.taskKey] = false;
+              });
+              if (!cancelled) {
+                setLocks((prev) => {
+                  const next = { ...prev };
+                  refused.forEach((r2) => {
+                    next[r2.taskKey] = { locked: true, until: r2.until };
+                  });
+                  return next;
+                });
+              }
+            }
+            if (!res.ok)
+              console.error("Failed to save task completion:", result == null ? void 0 : result.error);
+          } catch (saveErr) {
+            console.error("Failed to save task completion:", saveErr);
+          }
         }
         if (cancelled)
           return;
@@ -71196,15 +72690,21 @@ function EduLessonTaskManager({
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-right flex items-center gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-4 py-2 rounded-xl border shadow-sm ${allTasksCompleted ? "bg-emerald-300 text-slate-950 border-emerald-200" : "bg-amber-400 text-slate-950 border-amber-300"}`, children: allTasksCompleted ? "\u{1F389} All Tasks Completed!" : "\u23F3 In Progress" }) })
     ] }),
+    TASK_KEYS.some((k2) => isLocked(k2)) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 bg-amber-100 text-amber-900 border border-amber-300 rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold", children: [
+      "\u{1F512} Some tasks here are homework. Homework can't be done during school hours. Please come back",
+      " ",
+      formatTime(((_a = TASK_KEYS.map((k2) => locks[k2]).find((l2) => l2 == null ? void 0 : l2.locked)) == null ? void 0 : _a.until) ?? null),
+      "."
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.vocabulary ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg", children: "Task 1" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.vocabulary ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.vocabulary ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.vocabulary ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.vocabulary ? "\u2705 Completed" : isLocked("vocabulary") ? `\u{1F512} Homework \u2013 ${formatTime(((_b = locks.vocabulary) == null ? void 0 : _b.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F4D6} Vocabulary Drill" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Clear all four modes (Japanese \u2192 English, Audio \u2192 English, English \u2192 Japanese, and Speaking practice) to complete this task." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartVocabularyDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartVocabularyDrill && !isLocked("vocabulary") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71220,11 +72720,11 @@ function EduLessonTaskManager({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.listening ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-sky-100 text-sky-800 rounded-lg", children: "Task 2" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.listening ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.listening ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.listening ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.listening ? "\u2705 Completed" : isLocked("listening") ? `\u{1F512} Homework \u2013 ${formatTime(((_c = locks.listening) == null ? void 0 : _c.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F3A7} Listening Task" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Listen to short conversations and type your answers. Answer 5 questions correctly to complete this task." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartListeningDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartListeningDrill && !isLocked("listening") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71240,11 +72740,11 @@ function EduLessonTaskManager({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.reading ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg", children: "Task 3" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.reading ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.reading ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.reading ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.reading ? "\u2705 Completed" : isLocked("reading") ? `\u{1F512} Homework \u2013 ${formatTime(((_d = locks.reading) == null ? void 0 : _d.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F4DA} Reading Task" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Read the Japanese on the screen aloud into your microphone, then type its meaning in English. Clear the drill to complete this task." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartReadingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartReadingDrill && !isLocked("reading") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71260,11 +72760,11 @@ function EduLessonTaskManager({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.speaking ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg", children: "Task 4" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.speaking ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.speaking ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.speaking ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.speaking ? "\u2705 Completed" : isLocked("speaking") ? `\u{1F512} Homework \u2013 ${formatTime(((_e = locks.speaking) == null ? void 0 : _e.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F3A4} Speaking Task" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Have a question-and-answer voice conversation with AI Yamato. Finish the session to complete this task." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartSpeakingDrill && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartSpeakingDrill && !isLocked("speaking") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71280,11 +72780,11 @@ function EduLessonTaskManager({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.writing ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg", children: "Task 5" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.writing ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.writing ? "\u2705 Completed" : isLocked("writing") ? `\u{1F512} Homework \u2013 ${formatTime(((_f = locks.writing) == null ? void 0 : _f.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u270D\uFE0F Writing Task & AI Feedback" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Write a message in Japanese for a reader (on paper and upload a photo, or on the digital genk\u014D y\u014Dshi) and submit it. You complete this task when you receive a reply and feedback." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartWritingTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartWritingTask && !isLocked("writing") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71300,11 +72800,11 @@ function EduLessonTaskManager({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-2xl border transition ${taskProgress.culture ? "bg-emerald-50/95 border-emerald-400 shadow-md" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"}`, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-3", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-extrabold uppercase px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg", children: "Task 6" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.culture ? "\u2705 Completed" : "\u{1F512} Not completed" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`, children: taskProgress.culture ? "\u2705 Completed" : isLocked("culture") ? `\u{1F512} Homework \u2013 ${formatTime(((_g = locks.culture) == null ? void 0 : _g.until) ?? null)}` : "\u{1F512} Not completed" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-black text-slate-900 dark:text-slate-100 text-base mb-1", children: "\u{1F38E} Culture Task" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4", children: "Learn about Japanese culture through a picture story with narration and subtitles. Answer every Quick Check question correctly to complete this task." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartCultureTask && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap items-center gap-4", children: onStartCultureTask && !isLocked("culture") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "button",
           {
             type: "button",
@@ -71494,12 +72994,128 @@ var numberWordsToDigits = (input2) => {
 var katakanaToHiragana = (str) => (str || "").replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 96));
 var cleanJapaneseAnswer = (str) => (str || "").normalize("NFKC").trim().replace(/[\s。、.,!?！？〜~]/g, "");
 var cleanRomajiAnswer = (str) => (str || "").normalize("NFKC").trim().toLowerCase().replace(/[\s'’\-.,!?]/g, "");
+var KANJI_DIGITS = { "\u3007": 0, \u96F6: 0, \u4E00: 1, \u4E8C: 2, \u4E09: 3, \u56DB: 4, \u4E94: 5, \u516D: 6, \u4E03: 7, \u516B: 8, \u4E5D: 9 };
+function kanjiNumberToInt(run) {
+  if (!/[十百千]/.test(run)) {
+    const digits = [...run].map((c) => KANJI_DIGITS[c]);
+    return digits.every((d) => d !== void 0) ? Number(digits.join("")) : null;
+  }
+  let total = 0;
+  let current = 0;
+  for (const ch2 of run) {
+    if (ch2 in KANJI_DIGITS) {
+      current = KANJI_DIGITS[ch2];
+    } else {
+      const unit = ch2 === "\u5341" ? 10 : ch2 === "\u767E" ? 100 : ch2 === "\u5343" ? 1e3 : 0;
+      if (!unit)
+        return null;
+      total += (current || 1) * unit;
+      current = 0;
+    }
+  }
+  return total + current;
+}
+function unifyJapaneseNumbers(str) {
+  return (str || "").normalize("NFKC").replace(/[〇零一二三四五六七八九十百千]+/g, (run) => {
+    const n2 = kanjiNumberToInt(run);
+    return n2 === null ? run : String(n2);
+  });
+}
+var DIGIT_READINGS = {
+  0: ["\u308C\u3044", "\u305C\u308D"],
+  1: ["\u3044\u3061"],
+  2: ["\u306B"],
+  3: ["\u3055\u3093"],
+  4: ["\u3088\u3093", "\u3057", "\u3088"],
+  5: ["\u3054"],
+  6: ["\u308D\u304F"],
+  7: ["\u306A\u306A", "\u3057\u3061"],
+  8: ["\u306F\u3061"],
+  9: ["\u304D\u3085\u3046", "\u304F"]
+};
+var TENS_PREFIX = {
+  1: [""],
+  2: ["\u306B"],
+  3: ["\u3055\u3093"],
+  4: ["\u3088\u3093"],
+  5: ["\u3054"],
+  6: ["\u308D\u304F"],
+  7: ["\u306A\u306A"],
+  8: ["\u306F\u3061"],
+  9: ["\u304D\u3085\u3046"]
+};
+var GEMINATE = { \u3044\u3061: "\u3044\u3063", \u306F\u3061: "\u306F\u3063", \u3058\u3085\u3046: "\u3058\u3085\u3063" };
+var READING_TO_NUMBER = (() => {
+  const map = /* @__PURE__ */ new Map();
+  const add = (reading, n2) => {
+    if (!map.has(reading))
+      map.set(reading, n2);
+    for (const [from, to] of Object.entries(GEMINATE)) {
+      if (reading.endsWith(from)) {
+        const g = reading.slice(0, -from.length) + to;
+        if (!map.has(g))
+          map.set(g, n2);
+      }
+    }
+    if (reading.endsWith("\u3058\u3085\u3046"))
+      map.set(reading.slice(0, -3) + "\u3058\u3063", n2);
+  };
+  for (let n2 = 0; n2 <= 9; n2++)
+    DIGIT_READINGS[n2].forEach((r2) => add(r2, n2));
+  for (let t2 = 1; t2 <= 9; t2++) {
+    for (const prefix of TENS_PREFIX[t2]) {
+      add(`${prefix}\u3058\u3085\u3046`, t2 * 10);
+      for (let d = 1; d <= 9; d++)
+        DIGIT_READINGS[d].forEach((r2) => add(`${prefix}\u3058\u3085\u3046${r2}`, t2 * 10 + d));
+    }
+  }
+  return map;
+})();
+var COUNTERS = [
+  [/(さい|歳|才)$/, "\u3055\u3044"],
+  [/(にん|人)$/, "\u306B\u3093"]
+];
+var SPECIAL_NUMBER_WORDS = {
+  \u306F\u305F\u3061: "20:\u3055\u3044",
+  \u3072\u3068\u308A: "1:\u306B\u3093",
+  \u3075\u305F\u308A: "2:\u306B\u3093"
+};
+function japaneseNumberKey(raw) {
+  let s2 = katakanaToHiragana(unifyJapaneseNumbers(raw || "")).toLowerCase().replace(/[\s。、.,!?！？〜~]/g, "").replace(/です$/, "");
+  if (!s2)
+    return null;
+  if (SPECIAL_NUMBER_WORDS[s2])
+    return SPECIAL_NUMBER_WORDS[s2];
+  let counter = "";
+  for (const [re2, name] of COUNTERS) {
+    if (re2.test(s2)) {
+      s2 = s2.replace(re2, "");
+      counter = name;
+      break;
+    }
+  }
+  if (!s2)
+    return null;
+  if (/^\d+$/.test(s2))
+    return `${Number(s2)}:${counter}`;
+  const n2 = READING_TO_NUMBER.get(s2);
+  return n2 === void 0 ? null : `${n2}:${counter}`;
+}
+function sameJapaneseNumber(a, b) {
+  const ka2 = japaneseNumberKey(a);
+  return ka2 !== null && ka2 === japaneseNumberKey(b);
+}
 var matchesJapaneseAnswer = (input2, item) => {
   const jp = cleanJapaneseAnswer(input2);
   if (!jp)
     return false;
   const kanaCandidates = [item.jp_text, item.jp_kana, katakanaToHiragana(item.jp_kana || "")].map((c) => cleanJapaneseAnswer(c || "")).filter(Boolean);
   if (kanaCandidates.includes(jp))
+    return true;
+  const jpNum = unifyJapaneseNumbers(jp);
+  if (kanaCandidates.some((c) => unifyJapaneseNumbers(c) === jpNum))
+    return true;
+  if (kanaCandidates.some((c) => sameJapaneseNumber(jp, c)))
     return true;
   const romaji = cleanRomajiAnswer(input2);
   const romajiCandidates = (item.romaji || "").split("/").map(cleanRomajiAnswer).filter(Boolean);
@@ -71637,13 +73253,13 @@ var EduVocabularyDrillModal = ({
       playVocabAudio(currentItem);
     }
   };
-  const normalizeAnswer = (str) => normalizeEnglish(str);
+  const normalizeAnswer2 = (str) => normalizeEnglish(str);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim() || feedback !== null)
       return;
     let isCorrect = false;
-    normalizeAnswer(userInput);
+    normalizeAnswer2(userInput);
     if (currentMode === "jp_to_en" || currentMode === "audio_to_en") {
       isCorrect = matchesEnglishAnswer(userInput, currentItem.english_text || "");
     } else if (currentMode === "en_to_jp") {
@@ -71724,9 +73340,10 @@ var EduVocabularyDrillModal = ({
     if (!speechResult || feedback !== null)
       return;
     setPendingSpoken(null);
-    const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")].map((t2) => (t2 || "").trim()).filter(Boolean);
-    const spokenHira = katakanaToHiragana(speechResult);
-    if (matchesJapaneseAnswer(speechResult, currentItem) || targets.some((t2) => speechResult.includes(t2) || spokenHira.includes(t2) || t2.includes(speechResult))) {
+    const targets = [currentItem.jp_text, katakanaToHiragana(currentItem.jp_kana || "")].map((t2) => unifyJapaneseNumbers((t2 || "").trim())).filter(Boolean);
+    const spoken = unifyJapaneseNumbers(speechResult.trim());
+    const spokenHira = katakanaToHiragana(spoken);
+    if (matchesJapaneseAnswer(speechResult, currentItem) || sameJapaneseNumber(speechResult, currentItem.jp_text || "") || sameJapaneseNumber(speechResult, currentItem.jp_kana || "") || targets.some((t2) => spoken.includes(t2) || spokenHira.includes(t2) || t2.includes(spoken))) {
       setFeedback("correct");
       playSound();
       setSpeechStatusMessage(`Recognised: "${speechResult}" - Correct!`);
@@ -71955,6 +73572,15 @@ var EduVocabularyDrillModal = ({
     )
   ] }) });
 };
+function normalizeTableAnswer(raw) {
+  return normalizeEnglish(raw || "").replace(/\s*(people|persons|person)$/, "").replace(/[\s-]*(san|kun|chan)$/, "").replace(/\s+/g, "");
+}
+function isTableAnswerCorrect(cell, input2) {
+  if (!("answers" in cell))
+    return true;
+  const clean2 = normalizeTableAnswer(input2);
+  return !!clean2 && cell.answers.some((a) => normalizeTableAnswer(a) === clean2);
+}
 function normalizeListeningAnswer(raw) {
   return (raw || "").normalize("NFKC").toLowerCase().replace(/[ァ-ヶ]/g, (ch2) => String.fromCharCode(ch2.charCodeAt(0) - 96)).replace(/[\s。、.,!?！？「」"'’\-]/g, "");
 }
@@ -72006,6 +73632,8 @@ function familyAnswers(n2) {
   ].filter(Boolean);
 }
 var FAMILY_COUNT = {
+  id: "family-count",
+  tabLabel: "Q&A: How many?",
   title: "How many people are in the family?",
   instruction: "Listen to the conversation and type the number of people.",
   placeholder: "e.g. 4 / 4\u4EBA / \u3088\u306B\u3093",
@@ -72025,6 +73653,46 @@ var FAMILY_COUNT = {
     };
   })
 };
+var FAMILY_MY_HOW_MANY = {
+  id: "family-my-how-many",
+  tabLabel: "My family",
+  title: "How many people are in my family?",
+  instruction: "Listen to the person talking about their family and type the number of people.",
+  placeholder: "e.g. 4 / 4\u4EBA / \u3088\u306B\u3093",
+  correctMessage: "{answer}",
+  stripPatterns: [/(です|だ)$/, /(かぞく|家族|kazoku)$/, /(people|persons|person)$/],
+  questionsPerTask: 6,
+  items: Array.from({ length: 9 }, (_2, i) => {
+    const n2 = i + 2;
+    return {
+      id: `my_family_${n2}`,
+      lines: [
+        { speaker: "B", text: `\u308F\u305F\u3057\u306E\u304B\u305E\u304F\u306F${FAMILY_HIRAGANA[n2][0]}\u304B\u305E\u304F\u3067\u3059\u3002`, audioPath: `family-my-how-many/my_family_${n2}.mp3` }
+      ],
+      answers: familyAnswers(n2),
+      answerLabel: `${n2}\u4EBA\u5BB6\u65CF (${FAMILY_HIRAGANA[n2][0]}\u304B\u305E\u304F)`
+    };
+  })
+};
+var FAMILY_LISTENING_COMPREHENSION = {
+  kind: "table",
+  id: "family-1-lc",
+  tabLabel: "Fill in the table",
+  title: "Whose family is it?",
+  instruction: "Listen to the talk and fill in every empty box in English (names and numbers).",
+  audio: {
+    bucket: "listening-comprehension",
+    path: "family-1-lc.mp3",
+    text: "\u308F\u305F\u3057\u306E\u304B\u305E\u304F\u306F\u4E94\u4EBA\u5BB6\u65CF\u3067\u3059\u3002\u305F\u3051\u3057\u306E\u304B\u305E\u304F\u306F\u4E09\u4EBA\u5BB6\u65CF\u3067\u3059\u3002\u307E\u3086\u307F\u306E\u304B\u305E\u304F\u306F\u516B\u4EBA\u5BB6\u65CF\u3067\u3059\u3002\u30EA\u30B5\u306E\u304B\u305E\u304F\u306F\u516D\u4EBA\u5BB6\u65CF\u3067\u3059\u3002\u30B8\u30E7\u30FC\u30B8\u306E\u304B\u305E\u304F\u306F\u56DB\u4EBA\u5BB6\u65CF\u3067\u3059\u3002"
+  },
+  rowLabel: "how many people",
+  columns: [
+    { header: { answers: ["Mayumi"], placeholder: "name" }, value: { text: "8" } },
+    { header: { text: "Lisa" }, value: { answers: ["6", "six"], placeholder: "number" } },
+    { header: { answers: ["Takeshi"], placeholder: "name" }, value: { text: "3" } },
+    { header: { text: "George" }, value: { answers: ["4", "four"], placeholder: "number" } }
+  ]
+};
 var COUNTRIES = [
   { id: "japan", jp: "\u65E5\u672C", en: "Japan", answers: ["japan", "\u65E5\u672C", "\u306B\u307B\u3093", "\u306B\u3063\u307D\u3093", "nihon", "nippon"] },
   { id: "america", jp: "\u30A2\u30E1\u30EA\u30AB", en: "USA", answers: ["usa", "the usa", "us", "america", "united states", "the united states", "\u30A2\u30E1\u30EA\u30AB", "amerika"] },
@@ -72035,6 +73703,8 @@ var COUNTRIES = [
   { id: "england", jp: "\u30A4\u30AE\u30EA\u30B9", en: "England", answers: ["england", "uk", "the uk", "britain", "great britain", "united kingdom", "\u30A4\u30AE\u30EA\u30B9", "igirisu"] }
 ];
 var COUNTRIES_WHERE_FROM = {
+  id: "where-from",
+  tabLabel: "Where from?",
   title: "Where are they from?",
   instruction: "Listen to the conversation and type the country B comes from (in English or Japanese).",
   placeholder: "e.g. Australia / \u30AA\u30FC\u30B9\u30C8\u30E9\u30EA\u30A2",
@@ -72053,11 +73723,12 @@ var COUNTRIES_WHERE_FROM = {
   }))
 };
 var LISTENING_TASKS = {
-  "family-1": FAMILY_COUNT,
-  "countries-1": COUNTRIES_WHERE_FROM
+  "family-1": [FAMILY_COUNT, FAMILY_MY_HOW_MANY, FAMILY_LISTENING_COMPREHENSION],
+  "countries-1": [COUNTRIES_WHERE_FROM]
 };
 function findListeningTaskForLesson(lessonSlug) {
-  return LISTENING_TASKS[lessonSlug] ?? null;
+  const parts = LISTENING_TASKS[lessonSlug];
+  return parts && parts.length > 0 ? parts : null;
 }
 var AUDIO_BUCKET = "dialogue-audio";
 var MAX_ATTEMPTS_BEFORE_REVEAL = 2;
@@ -72164,12 +73835,7 @@ var DialogueIllustration = ({ activeSpeaker }) => /* @__PURE__ */ jsxRuntimeExpo
     ]
   }
 );
-var EduListeningTaskModal = ({
-  isOpen,
-  onClose,
-  onCompleted,
-  task
-}) => {
+var ListeningDialoguePart = ({ isOpen, task, onFinished }) => {
   const questions = task.items;
   const [taskQuestions, setTaskQuestions] = reactExports.useState([]);
   const [currentIndex, setCurrentIndex] = reactExports.useState(0);
@@ -72185,9 +73851,7 @@ var EduListeningTaskModal = ({
   const isPlayingRef = reactExports.useRef(false);
   isPlayingRef.current = isPlaying;
   const [audioError, setAudioError] = reactExports.useState("");
-  const { playSound, playCompleteSound } = useSoundEffect();
-  const playCompleteSoundRef = reactExports.useRef(playCompleteSound);
-  playCompleteSoundRef.current = playCompleteSound;
+  const { playSound } = useSoundEffect();
   const audioRef = reactExports.useRef(null);
   const gapTimerRef = reactExports.useRef(null);
   const playbackIdRef = reactExports.useRef(0);
@@ -72197,8 +73861,8 @@ var EduListeningTaskModal = ({
   const focusTimerRef = reactExports.useRef(null);
   const modalRef = reactExports.useRef(null);
   const completedRef = reactExports.useRef(false);
-  const onCompletedRef = reactExports.useRef(onCompleted);
-  onCompletedRef.current = onCompleted;
+  const onFinishedRef = reactExports.useRef(onFinished);
+  onFinishedRef.current = onFinished;
   const questionsRef = reactExports.useRef(questions);
   questionsRef.current = questions;
   const isFinishedRef = reactExports.useRef(isFinished);
@@ -72245,8 +73909,6 @@ var EduListeningTaskModal = ({
   reactExports.useEffect(() => {
     if (!isOpen)
       return;
-    if (isFinishedRef.current)
-      return;
     const source = questionsRef.current;
     if (source.length === 0)
       return;
@@ -72276,8 +73938,7 @@ var EduListeningTaskModal = ({
   reactExports.useEffect(() => {
     if (isFinished && !completedRef.current) {
       completedRef.current = true;
-      playCompleteSoundRef.current();
-      onCompletedRef.current();
+      onFinishedRef.current(firstTryCorrect, totalQuestions);
     }
   }, [isFinished]);
   const playDialogue = () => {
@@ -72421,26 +74082,342 @@ var EduListeningTaskModal = ({
       }, 1500);
     }
   };
-  if (!isOpen || totalQuestions === 0 && !isFinished)
+  if (!isOpen || totalQuestions === 0 || isFinished || !currentQuestion)
     return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { ref: modalRef, className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 sm:p-10 shadow-2xl space-y-6", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: modalRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "bg-orange-500 h-full transition-all duration-300",
+        style: { width: `${Math.min(100, answeredCount / totalQuestions * 100)}%` }
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 sm:p-10 text-center space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-500 dark:text-slate-400", children: [
+        "Question ",
+        currentIndex + 1,
+        " of ",
+        totalQuestions
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DialogueIllustration, { activeSpeaker }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          onClick: (e) => {
+            if (e.detail === 0 && isPlayingRef.current)
+              return;
+            playDialogue();
+          },
+          className: `mx-auto py-4 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${isPlaying ? "bg-amber-500 animate-pulse" : "bg-emerald-600 hover:bg-emerald-700"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "\u{1F50A}" : "\u25B6\uFE0F" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "Playing..." : "Play conversation (Space)" })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400", children: "Press Space or click the button. You can replay the audio as many times as you like." }),
+      audioError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-rose-600", children: audioError })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          ref: inputRef,
+          type: "text",
+          value: userInput,
+          onChange: (e) => setUserInput(e.target.value),
+          disabled: feedback === "correct",
+          placeholder: task.placeholder,
+          className: `w-full px-6 py-5 rounded-2xl border font-bold text-lg sm:text-xl transition shadow-sm ${feedback === "correct" ? "border-emerald-500 ring-2 ring-emerald-500 bg-emerald-50/20 text-emerald-900" : feedback === "incorrect" ? "border-rose-500 ring-2 ring-rose-500 bg-rose-50/20 animate-shake text-rose-900" : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-orange-500"}`,
+          autoComplete: "off"
+        }
+      ),
+      feedback !== "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "submit",
+          className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer flex items-center justify-center gap-2",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Check answer" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs opacity-80 font-normal", children: "(Enter)" })
+          ]
+        }
+      ),
+      feedback === "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-sm font-bold text-emerald-600 dark:text-emerald-400 animate-pulse", children: [
+        "\u2728 Correct! ",
+        (task.correctMessage ?? "{answer}").replace("{answer}", currentQuestion.answerLabel),
+        " Moving to next..."
+      ] }),
+      feedback === "incorrect" && !isRevealed && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-rose-600 dark:text-rose-400", children: "\u274C Not quite. Listen again and try once more." }),
+      isRevealed && feedback !== "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-amber-800 dark:text-amber-300", children: [
+          "Answer: ",
+          currentQuestion.answerLabel
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line", children: currentQuestion.lines.map((l2) => `${l2.speaker}: ${l2.text}`).join("\n") }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: goToNext,
+            className: "text-sm font-black text-orange-600 hover:text-orange-700 underline cursor-pointer",
+            children: "Next question \u2794"
+          }
+        )
+      ] })
+    ] })
+  ] }) });
+};
+var MAX_TABLE_CHECKS_BEFORE_REVEAL = 3;
+var ListeningTablePartView = ({ isOpen, part, onFinished }) => {
+  const blanks = reactExports.useMemo(
+    () => part.columns.flatMap((c, i) => [
+      ..."answers" in c.header ? [{ key: `h${i}`, cell: c.header }] : [],
+      ..."answers" in c.value ? [{ key: `v${i}`, cell: c.value }] : []
+    ]),
+    [part]
+  );
+  const [values, setValues] = reactExports.useState({});
+  const [checked, setChecked] = reactExports.useState(null);
+  const [checks, setChecks] = reactExports.useState(0);
+  const [revealed, setRevealed] = reactExports.useState(false);
+  const [done, setDone] = reactExports.useState(false);
+  const [isPlaying, setIsPlaying] = reactExports.useState(false);
+  const [hasPlayed, setHasPlayed] = reactExports.useState(false);
+  const audioRef = reactExports.useRef(null);
+  const playIdRef = reactExports.useRef(0);
+  const { playSound } = useSoundEffect();
+  const stopAudio = () => {
+    playIdRef.current += 1;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window)
+      window.speechSynthesis.cancel();
+    setIsPlaying(false);
+  };
+  reactExports.useEffect(() => {
+    if (!isOpen)
+      return;
+    setValues({});
+    setChecked(null);
+    setChecks(0);
+    setRevealed(false);
+    setDone(false);
+    setHasPlayed(false);
+    return () => stopAudio();
+  }, [isOpen, part.id]);
+  const play = () => {
+    stopAudio();
+    const id2 = playIdRef.current;
+    const stale = () => playIdRef.current !== id2;
+    setIsPlaying(true);
+    setHasPlayed(true);
+    const speak2 = () => {
+      if (stale())
+        return;
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+        setIsPlaying(false);
+        return;
+      }
+      const u2 = new SpeechSynthesisUtterance(part.audio.text);
+      u2.lang = "ja-JP";
+      u2.rate = 0.9;
+      u2.onend = () => !stale() && setIsPlaying(false);
+      u2.onerror = () => !stale() && setIsPlaying(false);
+      window.speechSynthesis.speak(u2);
+    };
+    const url = supabase.storage.from(part.audio.bucket).getPublicUrl(part.audio.path).data.publicUrl;
+    const audio2 = new Audio(url);
+    audioRef.current = audio2;
+    let fellBack = false;
+    const fallback = (err) => {
+      if (fellBack || stale())
+        return;
+      fellBack = true;
+      console.warn(`Listening audio could not be played, using speech synthesis instead: ${part.audio.bucket}/${part.audio.path}`, err);
+      audioRef.current = null;
+      speak2();
+    };
+    audio2.onended = () => {
+      if (stale())
+        return;
+      audioRef.current = null;
+      setIsPlaying(false);
+    };
+    audio2.onerror = () => fallback(audio2.error);
+    audio2.play().catch(fallback);
+  };
+  const allFilled = blanks.every((b) => (values[b.key] ?? "").trim() !== "");
+  const check = () => {
+    if (!allFilled || done)
+      return;
+    const result = {};
+    blanks.forEach((b) => result[b.key] = isTableAnswerCorrect(b.cell, values[b.key] ?? ""));
+    setChecked(result);
+    const nextChecks = checks + 1;
+    setChecks(nextChecks);
+    if (Object.values(result).every(Boolean)) {
+      playSound();
+      stopAudio();
+      setDone(true);
+      onFinished(nextChecks === 1 ? 1 : 0, 1);
+    } else if (nextChecks >= MAX_TABLE_CHECKS_BEFORE_REVEAL) {
+      setRevealed(true);
+    }
+  };
+  const finishAfterReveal = () => {
+    stopAudio();
+    setDone(true);
+    onFinished(0, 1);
+  };
+  if (!isOpen || done)
+    return null;
+  const answerOf = (cell) => "answers" in cell ? cell.answers[0] : cell.text;
+  const renderCell = (cell, key, isHeader) => {
+    if ("text" in cell) {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: isHeader ? "font-black text-slate-900 dark:text-slate-100" : "font-bold text-lg text-slate-900 dark:text-slate-100", children: cell.text });
+    }
+    const state = checked ? checked[key] ? "ok" : "ng" : null;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          type: "text",
+          value: values[key] ?? "",
+          onChange: (e) => {
+            setValues((prev) => ({ ...prev, [key]: e.target.value }));
+            setChecked((prev) => prev ? { ...prev, [key]: false } : prev);
+          },
+          onKeyDown: (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              check();
+            }
+          },
+          placeholder: cell.placeholder ?? "",
+          "aria-label": cell.placeholder ? `Type the ${cell.placeholder}` : "Type your answer",
+          autoComplete: "off",
+          className: `w-full min-w-[5rem] px-3 py-2 rounded-xl border-2 text-center font-bold text-base bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-orange-500 ${state === "ok" ? "border-emerald-500 bg-emerald-50/40" : state === "ng" ? "border-rose-500 bg-rose-50/40" : "border-slate-300 dark:border-slate-600"}`
+        }
+      ),
+      revealed && state !== "ok" && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] font-bold text-amber-700 dark:text-amber-300", children: [
+        "Answer: ",
+        answerOf(cell)
+      ] })
+    ] });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 sm:p-8 text-center space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", "aria-hidden": "true", children: "\u{1F4FB}" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: play,
+            disabled: isPlaying,
+            className: `py-4 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:cursor-not-allowed ${isPlaying ? "bg-amber-500 animate-pulse" : "bg-emerald-600 hover:bg-emerald-700"}`,
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "\u{1F50A}" : hasPlayed ? "\u{1F501}" : "\u25B6\uFE0F" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "Playing..." : hasPlayed ? "Listen again" : "Play the audio" })
+            ]
+          }
+        ),
+        isPlaying && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: stopAudio,
+            className: "py-4 px-6 rounded-2xl font-bold text-sm bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 cursor-pointer",
+            children: "\u23F9 Stop"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400", children: "You can listen as many times as you like." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("table", { className: "w-full border-collapse text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tbody", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "border border-slate-300 dark:border-slate-600 p-2 bg-slate-50 dark:bg-slate-800" }),
+        part.columns.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "border border-slate-300 dark:border-slate-600 p-2 bg-slate-50 dark:bg-slate-800 text-center align-top", children: renderCell(c.header, `h${i}`, true) }, i))
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "border border-slate-300 dark:border-slate-600 p-2 text-left font-bold text-slate-700 dark:text-slate-300 align-middle", children: part.rowLabel }),
+        part.columns.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "border border-slate-300 dark:border-slate-600 p-2 text-center align-top", children: renderCell(c.value, `v${i}`, false) }, i))
+      ] })
+    ] }) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+      !revealed ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: check,
+          disabled: !allFilled,
+          className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-base transition shadow cursor-pointer",
+          children: allFilled ? "Check answers (Enter)" : "Fill in every empty box to check"
+        }
+      ) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-amber-800 dark:text-amber-300", children: "The answers are shown under the boxes." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300", children: part.audio.text }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: finishAfterReveal, className: "text-sm font-black text-orange-600 hover:text-orange-700 underline cursor-pointer", children: "Finish this part \u2794" })
+      ] }),
+      checked && !revealed && !Object.values(checked).every(Boolean) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-rose-600 dark:text-rose-400", children: "\u274C The red boxes are not right yet. Listen again and fix them." })
+    ] })
+  ] });
+};
+var EduListeningTaskModal = ({ isOpen, onClose, onCompleted, parts }) => {
+  var _a, _b;
+  const [activeId, setActiveId] = reactExports.useState(((_a = parts[0]) == null ? void 0 : _a.id) ?? "");
+  const [doneIds, setDoneIds] = reactExports.useState([]);
+  const [justFinished, setJustFinished] = reactExports.useState(null);
+  const [runKey, setRunKey] = reactExports.useState(0);
+  const [allDone, setAllDone] = reactExports.useState(false);
+  const completedRef = reactExports.useRef(false);
+  const { playCompleteSound } = useSoundEffect();
+  const active = parts.find((p2) => p2.id === activeId) ?? parts[0];
+  const showTabs = parts.length > 1;
+  reactExports.useEffect(() => {
+    if (!parts.some((p2) => p2.id === activeId) && parts[0])
+      setActiveId(parts[0].id);
+  }, [parts, activeId]);
+  const selectPart = (id2) => {
+    setActiveId(id2);
+    setJustFinished(null);
+    setAllDone(false);
+    setRunKey((k2) => k2 + 1);
+  };
+  const handlePartFinished = (partId) => {
+    const nextDone = doneIds.includes(partId) ? doneIds : [...doneIds, partId];
+    setDoneIds(nextDone);
+    if (parts.every((p2) => nextDone.includes(p2.id))) {
+      setAllDone(true);
+      if (!completedRef.current) {
+        completedRef.current = true;
+        playCompleteSound();
+        onCompleted();
+      }
+    } else {
+      setJustFinished(partId);
+    }
+  };
+  if (!isOpen || !active)
+    return null;
+  const nextPart = parts.find((p2) => !doneIds.includes(p2.id) && p2.id !== justFinished);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-6 sm:p-10 shadow-2xl space-y-6 my-auto", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F3A7}" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Listening Task: ",
-            task.title
+            active.title
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5", children: [
-          task.instruction,
-          " (",
-          answeredCount,
-          " / ",
-          totalQuestions,
-          ")"
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5", children: active.instruction })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "button",
@@ -72452,95 +74429,57 @@ var EduListeningTaskModal = ({
         }
       )
     ] }),
-    !isFinished && currentQuestion ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "div",
+    showTabs && !allDone && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `grid gap-2 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl ${parts.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"}`, children: parts.map((p2, i) => {
+      const isActive = p2.id === active.id;
+      const isDone = doneIds.includes(p2.id);
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
         {
-          className: "bg-orange-500 h-full transition-all duration-300",
-          style: { width: `${Math.min(100, answeredCount / totalQuestions * 100)}%` }
-        }
-      ) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 sm:p-10 text-center space-y-4", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-500 dark:text-slate-400", children: [
-          "Question ",
-          currentIndex + 1
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(DialogueIllustration, { activeSpeaker }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: (e) => {
-              if (e.detail === 0 && isPlayingRef.current)
-                return;
-              playDialogue();
-            },
-            className: `mx-auto py-4 px-8 rounded-2xl font-black text-base text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${isPlaying ? "bg-amber-500 animate-pulse" : "bg-emerald-600 hover:bg-emerald-700"}`,
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "\u{1F50A}" : "\u25B6\uFE0F" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: isPlaying ? "Playing..." : "Play conversation (Space)" })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400", children: "Press Space or click the button. You can replay the audio as many times as you like." }),
-        audioError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-rose-600", children: audioError })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            ref: inputRef,
-            type: "text",
-            value: userInput,
-            onChange: (e) => setUserInput(e.target.value),
-            disabled: feedback === "correct",
-            placeholder: task.placeholder,
-            className: `w-full px-6 py-5 rounded-2xl border font-bold text-lg sm:text-xl transition shadow-sm ${feedback === "correct" ? "border-emerald-500 ring-2 ring-emerald-500 bg-emerald-50/20 text-emerald-900" : feedback === "incorrect" ? "border-rose-500 ring-2 ring-rose-500 bg-rose-50/20 animate-shake text-rose-900" : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-orange-500"}`,
-            autoComplete: "off"
-          }
-        ),
-        feedback !== "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "submit",
-            className: "w-full py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-base transition shadow cursor-pointer flex items-center justify-center gap-2",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Check answer" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs opacity-80 font-normal", children: "(Enter)" })
-            ]
-          }
-        ),
-        feedback === "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-sm font-bold text-emerald-600 dark:text-emerald-400 animate-pulse", children: [
-          "\u2728 Correct! ",
-          (task.correctMessage ?? "{answer}").replace("{answer}", currentQuestion.answerLabel),
-          " Moving to next..."
-        ] }),
-        feedback === "incorrect" && !isRevealed && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-rose-600 dark:text-rose-400", children: "\u274C Not quite. Listen again and try once more." }),
-        isRevealed && feedback !== "correct" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-amber-800 dark:text-amber-300", children: [
-            "Answer: ",
-            currentQuestion.answerLabel
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line", children: currentQuestion.lines.map((l2) => `${l2.speaker}: ${l2.text}`).join("\n") }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              type: "button",
-              onClick: goToNext,
-              className: "text-sm font-black text-orange-600 hover:text-orange-700 underline cursor-pointer",
-              children: "Next question \u2794"
-            }
-          )
-        ] })
-      ] })
-    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+          type: "button",
+          onClick: () => selectPart(p2.id),
+          className: `py-3 px-2 text-xs sm:text-sm font-bold rounded-xl transition cursor-pointer ${isActive ? "bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"}`,
+          children: [
+            isDone ? "\u2705" : `${i + 1}.`,
+            " ",
+            p2.tabLabel
+          ]
+        },
+        p2.id
+      );
+    }) }),
+    allDone ? /* @__PURE__ */ jsxRuntimeExports.jsx(
       EduFinishedView,
       {
-        taskName: "listening questions",
-        description: `You answered ${firstTryCorrect} of ${totalQuestions} correctly on the first try. Your progress has been saved and this task is now marked as complete.`,
+        taskName: "listening tasks",
+        description: "You have finished every part of the listening task. Your progress has been saved and this task is now marked as complete.",
         onClose
       }
-    )
+    ) : justFinished ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-4 py-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-5xl", "aria-hidden": "true", children: "\u2705" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-black text-slate-900 dark:text-slate-100", children: [
+        (_b = parts.find((p2) => p2.id === justFinished)) == null ? void 0 : _b.tabLabel,
+        ": done!"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: [
+        doneIds.length,
+        " of ",
+        parts.length,
+        " parts finished. Finish every part to complete the listening task."
+      ] }),
+      nextPart && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          onClick: () => selectPart(nextPart.id),
+          className: "py-3 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black text-sm shadow cursor-pointer",
+          children: [
+            "Next: ",
+            nextPart.tabLabel,
+            " \u2794"
+          ]
+        }
+      )
+    ] }) : active.kind === "table" ? /* @__PURE__ */ jsxRuntimeExports.jsx(ListeningTablePartView, { isOpen, part: active, onFinished: () => handlePartFinished(active.id) }, `${active.id}-${runKey}`) : /* @__PURE__ */ jsxRuntimeExports.jsx(ListeningDialoguePart, { isOpen, task: active, onFinished: () => handlePartFinished(active.id) }, `${active.id}-${runKey}`)
   ] }) });
 };
 function shuffleArray(array) {
@@ -72785,7 +74724,7 @@ var EduReadingDrillModal = ({
     const target = currentItemRef.current.jp_text;
     const targetClean = normalizeJapanese(target);
     const spokenClean = normalizeJapanese(spoken);
-    if (isStrictMatch$1(spokenClean, targetClean, JP_SIMILARITY_THRESHOLD$1)) {
+    if (isStrictMatch$1(spokenClean, targetClean, JP_SIMILARITY_THRESHOLD$1) || sameJapaneseNumber(spoken, target)) {
       setSpeechVerified(true);
       speechVerifiedRef.current = true;
       setSpeechStatusMessage(`\u{1F3A4} Voice Verified! ("${spoken}"). Now type the English meaning below.`);
@@ -73258,8 +75197,8 @@ function slotCue(v2) {
   }
   return v2.en ?? v2.text;
 }
-function fillWith(template, combo, pick) {
-  return template.replace(/\{(\w+)\}/g, (m2, key) => combo[key] ? pick(key) : m2);
+function fillWith(template, combo, pick2) {
+  return template.replace(/\{(\w+)\}/g, (m2, key) => combo[key] ? pick2(key) : m2);
 }
 function expandTemplate(template, combo) {
   const out = /* @__PURE__ */ new Set();
@@ -74794,7 +76733,7 @@ async function prepareFile(file) {
     URL.revokeObjectURL(objectUrl);
   }
 }
-function formatDate(iso) {
+function formatDate$1(iso) {
   return new Date(iso).toLocaleDateString(void 0, { year: "numeric", month: "long", day: "numeric" });
 }
 function TranscriptionText({ text }) {
@@ -75130,7 +77069,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
         ] }),
         (status == null ? void 0 : status.retention.deleteAfter) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-xl p-3", children: [
           "\u{1F512} Your image will be kept privately so your teacher can check it, and will be deleted on ",
-          formatDate(status.retention.deleteAfter),
+          formatDate$1(status.retention.deleteAfter),
           "."
         ] }),
         message && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -75351,7 +77290,7 @@ var EduWritingTaskModal = ({ isOpen, onClose, onCompleted, lessonId }) => {
   ] });
 };
 var OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
-function shuffle(array) {
+function shuffle$3(array) {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -75417,7 +77356,7 @@ var EduCultureTaskModal = ({
     setShowTranscript(false);
     setUsingSpeechFallback(false);
     setQuestionIndex(0);
-    setOptionOrders(questions.map((q2) => shuffle(q2.options.map((_2, i) => i))));
+    setOptionOrders(questions.map((q2) => shuffle$3(q2.options.map((_2, i) => i))));
     setWrongPicks([]);
     setSolved(false);
     setFirstTryCorrect(0);
@@ -75856,7 +77795,7 @@ var EduCultureTaskModal = ({
           },
           i
         )) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Take a moment to think, or ask someone in your family!" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Take a moment to think, or ask someone near you!" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "button",
           {
@@ -76268,6 +78207,346 @@ var CULTURE_TASKS = {
         hintCard: 4
       }
     ]
+  },
+  // Unit 1 Lesson 1 で使用（原稿：jp_basics.txt）
+  "japan-basics": {
+    title: "Japan Basics",
+    summary: "Japan's flag, where Japan is, how many people live there \u2013 and Japanese words and brands you already know.",
+    lessons: [{ slug: "greetings-1", label: "Greetings 1: Greeting and saying goodbye" }],
+    cards: [
+      {
+        title: "The flag of Japan",
+        imageUrl: "/images/picture-story/japan-basics-1.webp",
+        imageAlt: "The Japanese flag: a red circle in the centre of a white background",
+        audioUrl: audio("jp_basics_01.mp3"),
+        narration: [
+          "The Japanese flag has a red circle in the center on a white background.",
+          "The red symbolizes the sun, while the white represents purity and sacredness."
+        ]
+      },
+      {
+        title: "Where is Japan?",
+        imageUrl: "/images/picture-story/japan-basics-2.webp",
+        imageAlt: "Japan in East Asia, stretching from Hokkaido in the north to Okinawa in the south, with a Shinkansen bullet train",
+        audioUrl: audio("jp_basics_02.mp3"),
+        narration: [
+          "Japan is located in East Asia, in the Northern Hemisphere.",
+          "It stretches approximately 2,200 kilometers from Hokkaido in the north to Okinawa in the south.",
+          "Every part of the country except Okinawa is accessible by train, including the Shinkansen (bullet train).",
+          "Because it is a relatively small country, there is only one time zone nationwide."
+        ]
+      },
+      {
+        title: "People and money",
+        imageUrl: "/images/picture-story/japan-basics-3.webp",
+        imageAlt: "People in Japan and Japanese yen",
+        audioUrl: audio("jp_basics_03.mp3"),
+        narration: [
+          "Japan has the 12th largest population in the world, with about 120 million people.",
+          "Its currency is the yen.",
+          "Generally speaking, Japanese people tend to have black hair and are not very tall."
+        ]
+      },
+      {
+        title: "Japanese words and brands",
+        imageUrl: "/images/picture-story/japan-basics-4.webp",
+        imageAlt: "Sushi, karaoke and matcha, with well-known Japanese brands such as cars, electronics and clothes",
+        audioUrl: audio("jp_basics_04.mp3"),
+        narration: [
+          "Many English words originate from Japanese, such as sushi, karaoke, and matcha.",
+          "You can also find many well-known Japanese brands in everyday life,",
+          "including Toyota, Mitsubishi, Honda, Mazda, Kawasaki, Panasonic, Sony, and Uniqlo."
+        ]
+      }
+    ],
+    thinkAbout: {
+      lines: [
+        "How does your country or state compare to Japan in terms of land size and population?",
+        "What is the weather like in August where you live, and how are the seasons different from Japan's?"
+      ],
+      audioUrl: audio("jp_basics_05.mp3")
+    },
+    questions: [
+      {
+        question: "What does the red circle on the Japanese flag symbolize?",
+        options: ["The moon", "The sun", "A flower", "Fire"],
+        answerIndex: 1,
+        explanation: "The red circle symbolizes the sun. The white represents purity and sacredness.",
+        hintCard: 1
+      },
+      {
+        question: "Which part of Japan can you NOT reach by train from the rest of the country?",
+        options: ["Hokkaido", "Tokyo", "Okinawa", "Kyoto"],
+        answerIndex: 2,
+        explanation: "Every part of Japan except Okinawa can be reached by train, including the Shinkansen.",
+        hintCard: 2
+      },
+      {
+        question: "How many time zones does Japan have?",
+        options: ["One", "Two", "Three", "Four"],
+        answerIndex: 0,
+        explanation: "Japan is a relatively small country, so there is only one time zone.",
+        hintCard: 2
+      },
+      {
+        question: "About how many people live in Japan?",
+        options: ["12 million", "50 million", "120 million", "1.2 billion"],
+        answerIndex: 2,
+        explanation: "About 120 million people live in Japan \u2013 the 12th largest population in the world.",
+        hintCard: 3
+      },
+      {
+        question: "What is the currency of Japan?",
+        options: ["The yuan", "The won", "The dollar", "The yen"],
+        answerIndex: 3,
+        explanation: "Japan's currency is the yen (\u5186).",
+        hintCard: 3
+      },
+      {
+        question: "Which English word comes from Japanese?",
+        options: ["Karaoke", "Pizza", "Chocolate", "Robot"],
+        answerIndex: 0,
+        explanation: "Karaoke, sushi and matcha are English words that come from Japanese.",
+        hintCard: 4
+      }
+    ]
+  },
+  // Unit 6 Lesson 1 で使用（原稿：jp_food.txt）
+  "japan-food": {
+    title: "Food in Japan",
+    summary: "Sashimi, breakfast, udon, natto and wagyu \u2013 what people in Japan eat, and where their food comes from.",
+    lessons: [{ slug: "food-1", label: "Food 1: Asking about breakfast and meals" }],
+    cards: [
+      {
+        title: "Fish, rice and bread",
+        imageUrl: "/images/picture-story/japan-food-1.webp",
+        imageAlt: "Sashimi with soy sauce and wasabi, a breakfast of rice and miso soup, and bread and milk",
+        audioUrl: audio("jp_food_01.mp3"),
+        narration: [
+          "Japanese people love eating fish, and sashimi is eaten raw by pairing fresh fish with soy sauce and wasabi.",
+          "For breakfast, while some Japanese people eat rice and miso soup, quite a few people also have bread and milk.",
+          "There are many delicious bakeries across Japan.",
+          "Of course, teishoku (set meal) restaurants serving rice and miso soup are also popular",
+          "and become very busy with customers during breakfast and lunch."
+        ]
+      },
+      {
+        title: "Food from around the world",
+        imageUrl: "/images/picture-story/japan-food-2.webp",
+        imageAlt: "A bowl of udon noodles and salmon sushi",
+        audioUrl: audio("jp_food_02.mp3"),
+        narration: [
+          "Although udon is a noodle dish that originally came from China and developed in Japan,",
+          "it is not uncommon for it to be made using wheat imported from countries like Australia.",
+          "While it is well known that Norwegian salmon is used for sushi,",
+          "Japan has also started farming its own salmon to serve on the dinner table."
+        ]
+      },
+      {
+        title: "Soybeans: natto, tofu and more",
+        imageUrl: "/images/picture-story/japan-food-3.webp",
+        imageAlt: "Natto (fermented soybeans) with soy sauce, miso, tofu and edamame",
+        audioUrl: audio("jp_food_03.mp3"),
+        narration: [
+          "When it comes to unique Japanese foods, natto stands out,",
+          "and these fermented soybeans are very good for your health.",
+          "Soybeans are the main ingredient for soy sauce, miso, tofu, and edamame,",
+          "making them a familiar and essential source of protein for Japanese people."
+        ]
+      },
+      {
+        title: "Wagyu beef",
+        imageUrl: "/images/picture-story/japan-food-4.webp",
+        imageAlt: "Wagyu beef",
+        audioUrl: audio("jp_food_04.mp3"),
+        narration: [
+          "Wagyu beef, which has become famous all over the world, is produced in various regions of Japan.",
+          "Because it is so tender and delicious,",
+          "it has become a popular item among tourists and others who are willing to pay a high price for it."
+        ]
+      }
+    ],
+    thinkAbout: {
+      lines: [
+        "How does Japan balance traditional local ingredients with imported foods in its modern diet?",
+        "Which Japanese food mentioned in the text would you like to try, and why?"
+      ],
+      audioUrl: audio("jp_food_05.mp3")
+    },
+    questions: [
+      {
+        question: "How is sashimi eaten?",
+        options: [
+          "Raw fish with soy sauce and wasabi",
+          "Fried fish with rice",
+          "Fish soup with noodles",
+          "Grilled fish with bread"
+        ],
+        answerIndex: 0,
+        explanation: "Sashimi is fresh raw fish, eaten with soy sauce and wasabi.",
+        hintCard: 1
+      },
+      {
+        question: "Besides rice and miso soup, what do quite a few people in Japan have for breakfast?",
+        options: ["Pizza", "Bread and milk", "Curry", "Only fruit"],
+        answerIndex: 1,
+        explanation: "Quite a few people in Japan have bread and milk for breakfast, and there are many delicious bakeries.",
+        hintCard: 1
+      },
+      {
+        question: "The wheat used to make udon sometimes comes from which country?",
+        options: ["Norway", "Australia", "Brazil", "Egypt"],
+        answerIndex: 1,
+        explanation: "Udon is often made with wheat imported from countries like Australia.",
+        hintCard: 2
+      },
+      {
+        question: "What is natto?",
+        options: ["Fermented soybeans", "Raw fish", "A rice cake", "Seaweed"],
+        answerIndex: 0,
+        explanation: "Natto is fermented soybeans, and it is very good for your health.",
+        hintCard: 3
+      },
+      {
+        question: "Which of these is NOT made from soybeans?",
+        options: ["Soy sauce", "Miso", "Tofu", "Wasabi"],
+        answerIndex: 3,
+        explanation: "Soy sauce, miso, tofu and edamame all come from soybeans. Wasabi does not.",
+        hintCard: 3
+      },
+      {
+        question: "Why are many tourists happy to pay a high price for wagyu beef?",
+        options: [
+          "It is very tender and delicious",
+          "It comes from Norway",
+          "It is eaten raw",
+          "It is only sold at night"
+        ],
+        answerIndex: 0,
+        explanation: "Wagyu is famous all over the world because it is so tender and delicious.",
+        hintCard: 4
+      }
+    ]
+  },
+  // まだどのレッスンページにもつないでいない（文化ページ /culture だけ。原稿：jp_konbini.txt）
+  "japan-konbini": {
+    title: "Konbini \u2013 Japan's Convenience Stores",
+    summary: "More than 50,000 stores, open early until late: what you can buy and do at a konbini, and how they help in a disaster.",
+    cards: [
+      {
+        title: "Konbini everywhere",
+        imageUrl: "/images/picture-story/japan-konbini-1.webp",
+        imageAlt: "Convenience stores in Japan: one on the ground floor of a city building and one with a parking lot in the countryside",
+        audioUrl: audio("jp_konbini_01.mp3"),
+        narration: [
+          "There are more than 50,000 convenience stores (konbini) in Japan.",
+          "If you tried to visit one store every day, it would take you over 150 years!",
+          "In cities, konbini are often located on the ground floor of office buildings or apartment complexes,",
+          "while in rural areas, they usually have parking lots to make it easy for drivers to stop by."
+        ]
+      },
+      {
+        title: "The Big Three",
+        imageUrl: "/images/picture-story/japan-konbini-2.webp",
+        imageAlt: "Three convenience stores with red, blue and green signs, open late at night",
+        audioUrl: audio("jp_konbini_02.mp3"),
+        narration: [
+          'The "Big Three" convenience store chains are 7-Eleven, Lawson, and FamilyMart,',
+          "which are easily recognizable by their signature colors: red, blue, and green, respectively.",
+          "Most of these stores are open from early in the morning until late at night",
+          "\u2013 with many operating 24 hours a day."
+        ]
+      },
+      {
+        title: "Much more than a shop",
+        imageUrl: "/images/picture-story/japan-konbini-3.webp",
+        imageAlt: "Inside a konbini: food, drinks and daily goods, an ATM, and a counter for sending packages and paying bills",
+        audioUrl: audio("jp_konbini_03.mp3"),
+        narration: [
+          "At a konbini, you can buy a huge variety of high-quality food, drinks, and daily necessities.",
+          "Beyond shopping, you can also send packages, withdraw cash from ATMs, pay utility bills, and even buy concert tickets.",
+          "Because they offer so many services in one place,",
+          'it makes total sense that the word konbini comes from the English word "convenience."'
+        ]
+      },
+      {
+        title: "Helping in a disaster",
+        imageUrl: "/images/picture-story/japan-konbini-4.webp",
+        imageAlt: "A konbini giving food and water to people in the local community during a natural disaster",
+        audioUrl: audio("jp_konbini_04.mp3"),
+        narration: [
+          "During major natural disasters, convenience stores also act as vital safety hubs for the local community.",
+          "In emergencies, they often step in to provide food and water supplies,",
+          "as well as support for people who are stranded and unable to return home."
+        ]
+      }
+    ],
+    thinkAbout: {
+      lines: [
+        "How do Japanese konbini compare to convenience stores or corner shops in your own country",
+        "in terms of the food, services, and community roles they offer?"
+      ],
+      audioUrl: audio("jp_konbini_05.mp3")
+    },
+    questions: [
+      {
+        question: "About how many konbini are there in Japan?",
+        options: ["About 500", "About 5,000", "More than 50,000", "More than 500,000"],
+        answerIndex: 2,
+        explanation: "There are more than 50,000 konbini in Japan \u2013 visiting one a day would take over 150 years!",
+        hintCard: 1
+      },
+      {
+        question: "What do konbini in the countryside usually have?",
+        options: ["A parking lot", "A swimming pool", "A train station", "A cinema"],
+        answerIndex: 0,
+        explanation: "In rural areas, konbini usually have parking lots so drivers can stop by easily.",
+        hintCard: 1
+      },
+      {
+        question: 'Which three chains are the "Big Three"?',
+        options: [
+          "7-Eleven, Lawson and FamilyMart",
+          "Toyota, Honda and Mazda",
+          "Sony, Panasonic and Uniqlo",
+          "Coles, Woolworths and Aldi"
+        ],
+        answerIndex: 0,
+        explanation: "The Big Three are 7-Eleven, Lawson and FamilyMart.",
+        hintCard: 2
+      },
+      {
+        question: "Which of these can you NOT do at a konbini?",
+        options: ["Send a package", "Withdraw cash from an ATM", "Buy concert tickets", "See a doctor"],
+        answerIndex: 3,
+        explanation: "At a konbini you can send packages, use an ATM, pay bills and buy concert tickets \u2013 but not see a doctor.",
+        hintCard: 3
+      },
+      {
+        question: "Where does the word konbini come from?",
+        options: [
+          'The English word "convenience"',
+          "The name of a Japanese city",
+          "The name of the first store",
+          "An old Chinese word"
+        ],
+        answerIndex: 0,
+        explanation: 'Konbini comes from the English word "convenience" \u2013 a konbini offers many services in one place.',
+        hintCard: 3
+      },
+      {
+        question: "How do konbini help during major natural disasters?",
+        options: [
+          "They provide food and water, and support people who cannot get home",
+          "They all close for a month",
+          "They only sell umbrellas",
+          "They become schools"
+        ],
+        answerIndex: 0,
+        explanation: "In emergencies, konbini act as safety hubs: they provide food and water and support people who are stranded.",
+        hintCard: 4
+      }
+    ]
   }
 };
 var LESSON_PAGE_EXTRAS = {
@@ -76277,7 +78556,7 @@ var LESSON_PAGE_EXTRAS = {
   },
   "countries-1": {
     speakingTitle: "Speaking Task: Where Are You From?",
-    heroImage: { src: "/images/lessons/country-1.webp", alt: "Kaminari-mon gate in Asakusa, Tokyo" }
+    heroImage: { src: "/images/lessons/countries-1.webp", alt: "Kaminari-mon gate in Asakusa, Tokyo" }
   }
 };
 var COMPLETED_TASK_NAMES = {
@@ -76438,7 +78717,19 @@ function EduLessonPage({ lessonSlug: LESSON_SLUG2, data: data2 }) {
       errorMessage: loaderData.loadError || "",
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 relative", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonHeader, { lesson, topic, textbookRefs, heroImage: extras.heroImage ?? null }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            EduLessonHeader,
+            {
+              lesson,
+              topic,
+              textbookRefs,
+              heroImage: extras.heroImage ?? {
+                // 書いていないレッスンも、public/images/lessons/<slug>.webp があれば出す（無ければ EduLessonHeader が隠す）
+                src: `/images/lessons/${LESSON_SLUG2}.webp`,
+                alt: `Illustration for this lesson: ${(lesson == null ? void 0 : lesson.title_en) || LESSON_SLUG2}`
+              }
+            }
+          ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonGoals, { lesson }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "md:col-span-2 space-y-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonDetailsCard, { lesson, textbookRefs, vocabulary, cultureTask }) }),
@@ -76486,7 +78777,7 @@ function EduLessonPage({ lessonSlug: LESSON_SLUG2, data: data2 }) {
         listeningTask && /* @__PURE__ */ jsxRuntimeExports.jsx(
           EduListeningTaskModal,
           {
-            task: listeningTask,
+            parts: listeningTask,
             isOpen: isListeningTaskOpen,
             onClose: () => setIsListeningTaskOpen(false),
             onCompleted: () => setListeningTaskCompleted(true)
@@ -76613,7 +78904,7 @@ async function fetchLessonPageData(slug) {
   return data2;
 }
 var LESSON_SLUG = "family-1";
-async function loader$m({ request }) {
+async function loader$s({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -76627,18 +78918,18 @@ async function loader$m({ request }) {
     ...await fetchLessonPageData(LESSON_SLUG)
   });
 }
-var meta$l = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsFamily1Page() {
   const data2 = useLoaderData();
   return /* @__PURE__ */ jsxRuntimeExports.jsx(EduLessonPage, { lessonSlug: LESSON_SLUG, data: data2 });
 }
-var route38 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsFamily1Page,
-  loader: loader$m,
-  meta: meta$l
+  loader: loader$s,
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
 async function fetchReferenceContentData(supabase2) {
@@ -76700,7 +78991,7 @@ function useReferenceContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$l({ request }) {
+async function loader$r({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -76839,14 +79130,14 @@ function ReferenceIndex() {
     }
   );
 }
-var meta$k = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
-  loader: loader$l,
-  meta: meta$k
+  loader: loader$r,
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 async function action$3({ request, context }) {
   const { supabase: supabase2, headers } = createServerSupabaseClient(request, context);
@@ -76857,16 +79148,16 @@ async function action$3({ request, context }) {
   appendClearAuthCookies(request, headers);
   return dist$1.json({ success: true }, { headers });
 }
-async function loader$k() {
+async function loader$q() {
   return dist$1.json({ error: "Method Not Allowed" }, { status: 405 });
 }
-var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$3,
-  loader: loader$k
+  loader: loader$q
 }, Symbol.toStringTag, { value: "Module" }));
 var NO_STORE = { "Cache-Control": "no-store" };
-async function loader$j() {
+async function loader$p() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE });
 }
 async function action$2({ request, context }) {
@@ -76887,12 +79178,12 @@ async function action$2({ request, context }) {
   }
   return dist$1.json({ status: "allowed", ticket: await createGameTicket(context, userId) }, { headers: NO_STORE });
 }
-var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$2,
-  loader: loader$j
+  loader: loader$p
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$i({ request }) {
+async function loader$o({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -76905,7 +79196,7 @@ async function loader$i({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$j = ({ data: data2 }) => {
+var meta$s = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabIndexPage() {
@@ -77042,15 +79333,441 @@ function VocabIndexPage() {
     }) })
   ] }) }) });
 }
-var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabIndexPage,
-  loader: loader$i,
-  meta: meta$j
+  loader: loader$o,
+  meta: meta$s
+}, Symbol.toStringTag, { value: "Module" }));
+var WORLD_PLACES = [
+  {
+    id: "burger-shop",
+    title: "Yamato Burger",
+    titleJa: "\u30E4\u30DE\u30C8\u30D0\u30FC\u30AC\u30FC",
+    emoji: "\u{1F354}",
+    description: "Order a meal from the clerk at a Japanese burger shop.",
+    infoTitle: "\u{1F4CB} \u30E1\u30CB\u30E5\u30FC Menu",
+    floor: "repeating-conic-gradient(#fde68a 0% 25%, #fef3c7 0% 50%) 0 0 / 48px 48px",
+    walls: [{ x1: 18, y1: 18, x2: 82, y2: 30, color: "#b45309", label: "\u30AB\u30A6\u30F3\u30BF\u30FC" }],
+    things: [
+      { icon: "\u{1F4CB}", x: 50, y: 6, size: 1.6, label: "\u30E1\u30CB\u30E5\u30FC" },
+      { icon: "\u{1F35F}", x: 26, y: 10, size: 1.8 },
+      { icon: "\u{1F964}", x: 74, y: 10, size: 1.8 },
+      { icon: "\u{1F354}", x: 62, y: 10, size: 1.8 },
+      { icon: "\u{1FA91}", x: 15, y: 62, size: 2 },
+      { icon: "\u{1F37D}\uFE0F", x: 22, y: 62, size: 1.6 },
+      { icon: "\u{1FA91}", x: 29, y: 62, size: 2 },
+      { icon: "\u{1FA91}", x: 71, y: 62, size: 2 },
+      { icon: "\u{1F37D}\uFE0F", x: 78, y: 62, size: 1.6 },
+      { icon: "\u{1FA91}", x: 85, y: 62, size: 2 },
+      { icon: "\u{1FAB4}", x: 6, y: 40, size: 2.2 },
+      { icon: "\u{1FAB4}", x: 94, y: 40, size: 2.2 },
+      { icon: "\u{1F6AA}", x: 50, y: 94, size: 2.4, label: "\u3044\u308A\u3050\u3061" }
+    ],
+    npc: { id: "clerk", icon: "\u{1F9D1}\u200D\u{1F373}", name: "Clerk", nameJa: "\u3066\u3093\u3044\u3093", x: 50, y: 14, talkX: 50, talkY: 38 },
+    start: { x: 50, y: 84 },
+    minutes: 3,
+    menu: [
+      {
+        section: "\u30D0\u30FC\u30AC\u30FC Burgers",
+        items: [
+          { ja: "\u30CF\u30F3\u30D0\u30FC\u30AC\u30FC", en: "Hamburger", price: "300\u3048\u3093" },
+          { ja: "\u30C1\u30FC\u30BA\u30D0\u30FC\u30AC\u30FC", en: "Cheeseburger", price: "350\u3048\u3093" },
+          { ja: "\u30C1\u30AD\u30F3\u30D0\u30FC\u30AC\u30FC", en: "Chicken burger", price: "400\u3048\u3093" }
+        ]
+      },
+      {
+        section: "\u30B5\u30A4\u30C9 Sides",
+        items: [{ ja: "\u30DD\u30C6\u30C8", en: "Fries (S / M / L)", price: "200 / 250 / 300\u3048\u3093" }]
+      },
+      {
+        section: "\u306E\u307F\u3082\u306E Drinks",
+        items: [
+          { ja: "\u30AA\u30EC\u30F3\u30B8\u30B8\u30E5\u30FC\u30B9\u30FB\u30B3\u30FC\u30E9\u30FB\u304A\u3061\u3083", en: "Orange juice, cola, green tea (S / M / L)", price: "150 / 200 / 250\u3048\u3093" }
+        ]
+      },
+      {
+        section: "\u30BB\u30C3\u30C8 Meal set",
+        items: [{ ja: "\u30BB\u30C3\u30C8", en: "Burger + fries (M) + drink (M)", price: "\u30D0\u30FC\u30AC\u30FC \uFF0B 300\u3048\u3093" }]
+      }
+    ],
+    phrases: [
+      { ja: "\u3007\u3007\u3092 \u304F\u3060\u3055\u3044\u3002", en: "I\u2019d like \u2026, please." },
+      { ja: "\u3007\u3007\u3092 \u3072\u3068\u3064 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "One \u2026, please." },
+      { ja: "\u30BB\u30C3\u30C8\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "As a meal set, please." },
+      { ja: "M\u30B5\u30A4\u30BA\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "Medium size, please." },
+      { ja: "\u3053\u3053\u3067 \u305F\u3079\u307E\u3059\u3002\uFF0F \u3082\u3061\u304B\u3048\u308A\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "To eat here. / To take away, please." },
+      { ja: "\u3044\u304F\u3089\u3067\u3059\u304B\u3002", en: "How much is it?" },
+      { ja: "\u3007\u3007\u3048\u3093\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "Here is \u2026 yen." },
+      { ja: "\u3082\u3046 \u3044\u3061\u3069 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "Once more, please." }
+    ],
+    goals: ["Order a burger", "Choose a set, a size and a drink", "Say if you will eat here or take away", "Pay and say thank you"]
+  },
+  {
+    id: "bus-stop",
+    title: "Bus stop",
+    titleJa: "\u30D0\u30B9\u3066\u3044",
+    emoji: "\u{1F68F}",
+    description: "Ask a person waiting at the bus stop which bus to take, when it comes and how much it costs.",
+    infoTitle: "\u{1F68C} \u3058\u3053\u304F\u3072\u3087\u3046 Timetable",
+    floor: "linear-gradient(#bbf7d0 0 14%, #e2e8f0 14% 64%, #94a3b8 64% 66%, #475569 66% 100%)",
+    walls: [{ x1: 0, y1: 68, x2: 100, y2: 100, color: "#475569", label: "\u3069\u3046\u308D" }],
+    things: [
+      { icon: "\u{1F3E0}", x: 12, y: 6, size: 2 },
+      { icon: "\u{1F3EA}", x: 80, y: 6, size: 2 },
+      { icon: "\u{1F333}", x: 5, y: 30, size: 2.4 },
+      { icon: "\u{1F333}", x: 95, y: 30, size: 2.4 },
+      { icon: "\u{1F68F}", x: 34, y: 24, size: 2.4, label: "\u30D0\u30B9\u3066\u3044" },
+      { icon: "\u{1F4CB}", x: 24, y: 24, size: 1.6, label: "\u3058\u3053\u304F\u3072\u3087\u3046" },
+      { icon: "\u{1FA91}", x: 62, y: 24, size: 2 },
+      { icon: "\u{1F68C}", x: 78, y: 82, size: 2.6 }
+    ],
+    npc: { id: "waiting", icon: "\u{1F475}", name: "Person waiting", nameJa: "\u307E\u3063\u3066\u3044\u308B\u4EBA", x: 50, y: 24, talkX: 50, talkY: 42 },
+    start: { x: 15, y: 56 },
+    minutes: 3,
+    menu: [
+      {
+        section: "\u30D0\u30B9 Buses",
+        items: [
+          { ja: "1\u3070\u3093 \u3048\u304D \u3044\u304D", en: "No. 1 to the station (15 min)", price: "10:05 / 10:35" },
+          { ja: "2\u3070\u3093 \u3068\u3057\u3087\u304B\u3093 \u3044\u304D", en: "No. 2 to the library (10 min)", price: "10:15 / 10:45" },
+          { ja: "3\u3070\u3093 \u3053\u3046\u3048\u3093 \u3044\u304D", en: "No. 3 to the park (20 min)", price: "10:20 / 10:50" }
+        ]
+      },
+      {
+        section: "\u306D\u3060\u3093 Fare",
+        items: [
+          { ja: "\u304A\u3068\u306A", en: "Adult", price: "200\u3048\u3093" },
+          { ja: "\u3053\u3069\u3082", en: "Child", price: "100\u3048\u3093" }
+        ]
+      },
+      { section: "\u3044\u307E Now", items: [{ ja: "\u3044\u307E\u306E \u3058\u304B\u3093", en: "The time now", price: "10:00" }] }
+    ],
+    phrases: [
+      { ja: "\u3059\u307F\u307E\u305B\u3093\u3002", en: "Excuse me." },
+      { ja: "\u3007\u3007\u306B \u3044\u304D\u305F\u3044\u3067\u3059\u3002", en: "I want to go to \u2026" },
+      { ja: "\u3007\u3007\u3044\u304D\u306E \u30D0\u30B9\u306F \u306A\u3093\u3070\u3093\u3067\u3059\u304B\u3002", en: "Which number is the bus to \u2026?" },
+      { ja: "\u3064\u304E\u306E \u30D0\u30B9\u306F \u306A\u3093\u3058\u3067\u3059\u304B\u3002", en: "What time is the next bus?" },
+      { ja: "\u3069\u306E\u3050\u3089\u3044 \u304B\u304B\u308A\u307E\u3059\u304B\u3002", en: "How long does it take?" },
+      { ja: "\u3044\u304F\u3089\u3067\u3059\u304B\u3002", en: "How much is it?" },
+      { ja: "\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\u3002", en: "Thank you." }
+    ],
+    goals: ["Say excuse me / greet the person", "Ask which bus goes where you want to go", "Ask when the next bus comes", "Ask how much it costs", "Say thank you"]
+  },
+  {
+    id: "supermarket",
+    title: "Yamato Mart",
+    titleJa: "\u30B9\u30FC\u30D1\u30FC",
+    emoji: "\u{1F6D2}",
+    description: "Find things on the shelves, then buy them from the clerk at the checkout.",
+    infoTitle: "\u{1F6D2} \u3046\u308A\u3070 Price list",
+    floor: "repeating-linear-gradient(90deg, #f8fafc 0 46px, #e2e8f0 46px 48px)",
+    walls: [
+      { x1: 8, y1: 12, x2: 30, y2: 18, color: "#16a34a", label: "1 \u3084\u3055\u3044\u30FB\u304F\u3060\u3082\u306E" },
+      { x1: 39, y1: 12, x2: 61, y2: 18, color: "#2563eb", label: "2 \u306E\u307F\u3082\u306E" },
+      { x1: 70, y1: 12, x2: 92, y2: 18, color: "#d97706", label: "3 \u30D1\u30F3\u30FB\u304A\u304B\u3057" },
+      { x1: 58, y1: 64, x2: 88, y2: 70, color: "#64748b", label: "\u30EC\u30B8" }
+    ],
+    things: [
+      { icon: "\u{1F34E}", x: 13, y: 7, size: 1.6 },
+      { icon: "\u{1F34C}", x: 19, y: 7, size: 1.6 },
+      { icon: "\u{1F345}", x: 25, y: 7, size: 1.6 },
+      { icon: "\u{1F95B}", x: 44, y: 7, size: 1.6 },
+      { icon: "\u{1F375}", x: 50, y: 7, size: 1.6 },
+      { icon: "\u{1F9C3}", x: 56, y: 7, size: 1.6 },
+      { icon: "\u{1F35E}", x: 75, y: 7, size: 1.6 },
+      { icon: "\u{1F359}", x: 81, y: 7, size: 1.6 },
+      { icon: "\u{1F36B}", x: 87, y: 7, size: 1.6 },
+      { icon: "\u{1F6D2}", x: 24, y: 52, size: 2.2 },
+      { icon: "\u{1F9FA}", x: 36, y: 80, size: 2 },
+      { icon: "\u{1F6AA}", x: 14, y: 94, size: 2.4, label: "\u3044\u308A\u3050\u3061" }
+    ],
+    npc: { id: "clerk", icon: "\u{1F9D1}\u200D\u{1F4BC}", name: "Clerk", nameJa: "\u3066\u3093\u3044\u3093", x: 73, y: 80, talkX: 73, talkY: 56 },
+    start: { x: 14, y: 84 },
+    minutes: 3,
+    menu: [
+      {
+        section: "1 \u3084\u3055\u3044\u30FB\u304F\u3060\u3082\u306E Fruit & veg",
+        items: [
+          { ja: "\u308A\u3093\u3054", en: "Apple", price: "100\u3048\u3093" },
+          { ja: "\u30D0\u30CA\u30CA", en: "Bananas", price: "150\u3048\u3093" },
+          { ja: "\u30C8\u30DE\u30C8", en: "Tomato", price: "80\u3048\u3093" }
+        ]
+      },
+      {
+        section: "2 \u306E\u307F\u3082\u306E Drinks",
+        items: [
+          { ja: "\u304E\u3085\u3046\u306B\u3085\u3046", en: "Milk", price: "180\u3048\u3093" },
+          { ja: "\u304A\u3061\u3083", en: "Green tea", price: "130\u3048\u3093" },
+          { ja: "\u30B8\u30E5\u30FC\u30B9", en: "Juice", price: "150\u3048\u3093" }
+        ]
+      },
+      {
+        section: "3 \u30D1\u30F3\u30FB\u304A\u304B\u3057 Bread & snacks",
+        items: [
+          { ja: "\u30D1\u30F3", en: "Bread", price: "200\u3048\u3093" },
+          { ja: "\u304A\u306B\u304E\u308A", en: "Rice ball", price: "120\u3048\u3093" },
+          { ja: "\u30C1\u30E7\u30B3\u30EC\u30FC\u30C8", en: "Chocolate", price: "100\u3048\u3093" }
+        ]
+      },
+      { section: "\u30EC\u30B8 Checkout", items: [{ ja: "\u3075\u304F\u308D", en: "Plastic bag", price: "5\u3048\u3093" }] }
+    ],
+    phrases: [
+      { ja: "\u3007\u3007\u306F \u3069\u3053\u3067\u3059\u304B\u3002", en: "Where is \u2026?" },
+      { ja: "\u3053\u308C\u306F \u3044\u304F\u3089\u3067\u3059\u304B\u3002", en: "How much is this?" },
+      { ja: "\u3007\u3007\u3092 \u3075\u305F\u3064 \u304F\u3060\u3055\u3044\u3002", en: "Two \u2026, please." },
+      { ja: "\u3075\u304F\u308D\u306F \u3044\u308A\u307E\u305B\u3093\u3002", en: "I don't need a bag." },
+      { ja: "\u3075\u304F\u308D\u3092 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "A bag, please." },
+      { ja: "\u305C\u3093\u3076\u3067 \u3044\u304F\u3089\u3067\u3059\u304B\u3002", en: "How much is it altogether?" },
+      { ja: "\u3007\u3007\u3048\u3093\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "Here is \u2026 yen." }
+    ],
+    goals: ["Ask where something is", "Buy two or more things and say how many", "Answer if you need a bag", "Pay and say thank you"]
+  },
+  {
+    id: "station",
+    title: "Yamato Station",
+    titleJa: "\u3048\u304D",
+    emoji: "\u{1F689}",
+    description: "Ask the station staff about trains and buy a ticket.",
+    infoTitle: "\u{1F686} \u3046\u3093\u3061\u3093\u30FB\u3058\u3053\u304F\u3072\u3087\u3046 Fares & trains",
+    floor: "repeating-conic-gradient(#e5e7eb 0% 25%, #f3f4f6 0% 50%) 0 0 / 40px 40px",
+    walls: [{ x1: 30, y1: 16, x2: 70, y2: 24, color: "#0f766e", label: "\u304D\u3063\u3077\u3046\u308A\u3070" }],
+    things: [
+      { icon: "\u{1F552}", x: 18, y: 6, size: 1.8 },
+      { icon: "\u{1F4CB}", x: 14, y: 26, size: 1.8, label: "\u3058\u3053\u304F\u3072\u3087\u3046" },
+      { icon: "\u{1F3AB}", x: 84, y: 26, size: 1.8, label: "\u304D\u3063\u3077" },
+      { icon: "\u{1F686}", x: 88, y: 6, size: 2.2 },
+      { icon: "\u{1FA91}", x: 12, y: 62, size: 2 },
+      { icon: "\u{1FA91}", x: 20, y: 62, size: 2 },
+      { icon: "\u{1F6AA}", x: 90, y: 62, size: 2.2, label: "\u304B\u3044\u3055\u3064" },
+      { icon: "\u{1F6AA}", x: 50, y: 94, size: 2.4, label: "\u3044\u308A\u3050\u3061" }
+    ],
+    npc: { id: "staff", icon: "\u{1F9D1}\u200D\u2708\uFE0F", name: "Station staff", nameJa: "\u3048\u304D\u3044\u3093", x: 50, y: 10, talkX: 50, talkY: 36 },
+    start: { x: 50, y: 84 },
+    minutes: 3,
+    menu: [
+      {
+        section: "\u3044\u304D\u3055\u304D Destinations (one-way)",
+        items: [
+          { ja: "\u3068\u3046\u304D\u3087\u3046", en: "Tokyo \xB7 platform 1", price: "400\u3048\u3093" },
+          { ja: "\u3088\u3053\u306F\u307E", en: "Yokohama \xB7 platform 2", price: "300\u3048\u3093" },
+          { ja: "\u3057\u3093\u3058\u3085\u304F", en: "Shinjuku \xB7 platform 3", price: "250\u3048\u3093" }
+        ]
+      },
+      {
+        section: "\u3064\u304E\u306E \u3067\u3093\u3057\u3083 Next trains",
+        items: [
+          { ja: "\u3068\u3046\u304D\u3087\u3046 \u3044\u304D", en: "To Tokyo", price: "11:10" },
+          { ja: "\u3088\u3053\u306F\u307E \u3044\u304D", en: "To Yokohama", price: "11:15" },
+          { ja: "\u3057\u3093\u3058\u3085\u304F \u3044\u304D", en: "To Shinjuku", price: "11:20" }
+        ]
+      },
+      {
+        section: "\u304D\u3063\u3077 Tickets",
+        items: [
+          { ja: "\u304A\u3046\u3075\u304F", en: "Return", price: "x2" },
+          { ja: "\u3053\u3069\u3082", en: "Child", price: "\xBD" },
+          { ja: "\u3044\u307E\u306E \u3058\u304B\u3093", en: "The time now", price: "11:00" }
+        ]
+      }
+    ],
+    phrases: [
+      { ja: "\u3007\u3007\u307E\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "To \u2026, please." },
+      { ja: "\u3007\u3007\u3044\u304D\u306F \u306A\u3093\u3070\u3093\u305B\u3093\u3067\u3059\u304B\u3002", en: "Which platform is the train to \u2026?" },
+      { ja: "\u3064\u304E\u306E \u3067\u3093\u3057\u3083\u306F \u306A\u3093\u3058\u3067\u3059\u304B\u3002", en: "What time is the next train?" },
+      { ja: "\u304B\u305F\u307F\u3061\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "One-way, please." },
+      { ja: "\u304A\u3046\u3075\u304F\u3067 \u304A\u306D\u304C\u3044\u3057\u307E\u3059\u3002", en: "Return, please." },
+      { ja: "\u3044\u304F\u3089\u3067\u3059\u304B\u3002", en: "How much is it?" },
+      { ja: "\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\u3002", en: "Thank you." }
+    ],
+    goals: ["Say where you want to go", "Ask which platform the train leaves from", "Ask the time of the next train", "Buy a one-way or return ticket and pay", "Say thank you"]
+  },
+  {
+    id: "department-store",
+    title: "Yamato Department Store",
+    titleJa: "\u30C7\u30D1\u30FC\u30C8",
+    emoji: "\u{1F3EC}",
+    description: "Ask the receptionist at the information desk which floor to go to.",
+    infoTitle: "\u{1F3EC} \u30D5\u30ED\u30A2\u3042\u3093\u306A\u3044 Floor guide",
+    floor: "repeating-linear-gradient(45deg, #fdf2f8 0 20px, #fce7f3 20px 40px)",
+    walls: [{ x1: 36, y1: 20, x2: 64, y2: 27, color: "#be185d", label: "\u30A4\u30F3\u30D5\u30A9\u30E1\u30FC\u30B7\u30E7\u30F3" }],
+    things: [
+      { icon: "\u{1F6BB}", x: 8, y: 16, size: 2, label: "\u30C8\u30A4\u30EC" },
+      { icon: "\u{1F6D7}", x: 92, y: 16, size: 2.2, label: "\u30A8\u30EC\u30D9\u30FC\u30BF\u30FC" },
+      { icon: "\u{1F45F}", x: 16, y: 58, size: 2 },
+      { icon: "\u{1F45C}", x: 26, y: 70, size: 2 },
+      { icon: "\u{1F45E}", x: 80, y: 58, size: 2 },
+      { icon: "\u{1F392}", x: 72, y: 70, size: 2 },
+      { icon: "\u{1FAB4}", x: 6, y: 86, size: 2.2 },
+      { icon: "\u{1FAB4}", x: 94, y: 86, size: 2.2 },
+      { icon: "\u{1F6AA}", x: 50, y: 94, size: 2.4, label: "\u3044\u308A\u3050\u3061" }
+    ],
+    npc: { id: "reception", icon: "\u{1F481}", name: "Receptionist", nameJa: "\u3046\u3051\u3064\u3051", x: 50, y: 13, talkX: 50, talkY: 40 },
+    start: { x: 50, y: 84 },
+    minutes: 3,
+    menu: [
+      {
+        section: "\u30D5\u30ED\u30A2 Floors",
+        items: [
+          { ja: "\u30EC\u30B9\u30C8\u30E9\u30F3", en: "Restaurants", price: "6\u304B\u3044" },
+          { ja: "\u3067\u3093\u304D\u305B\u3044\u3072\u3093", en: "Electronics", price: "5\u304B\u3044" },
+          { ja: "\u304A\u3082\u3061\u3083\u30FB\u307B\u3093", en: "Toys & books", price: "4\u304B\u3044" },
+          { ja: "\u304A\u3068\u3053\u306E \u3072\u3068\u306E \u3075\u304F", en: "Men's clothes", price: "3\u304B\u3044" },
+          { ja: "\u304A\u3093\u306A\u306E \u3072\u3068\u306E \u3075\u304F", en: "Women's clothes", price: "2\u304B\u3044" },
+          { ja: "\u304F\u3064\u30FB\u304B\u3070\u3093", en: "Shoes & bags (you are here)", price: "1\u304B\u3044" },
+          { ja: "\u305F\u3079\u3082\u306E", en: "Food", price: "\u3061\u304B1\u304B\u3044" }
+        ]
+      },
+      { section: "\u3058\u304B\u3093 Opening hours", items: [{ ja: "\u3042\u3044\u3066\u3044\u308B \u3058\u304B\u3093", en: "Open", price: "10:00\u301C20:00" }] }
+    ],
+    phrases: [
+      { ja: "\u3059\u307F\u307E\u305B\u3093\u3001\u3007\u3007\u306F \u306A\u3093\u304C\u3044\u3067\u3059\u304B\u3002", en: "Excuse me, which floor is \u2026?" },
+      { ja: "\u3007\u3007\u306F \u3069\u3053\u3067 \u304B\u3048\u307E\u3059\u304B\u3002", en: "Where can I buy \u2026?" },
+      { ja: "\u30A8\u30EC\u30D9\u30FC\u30BF\u30FC\u306F \u3069\u3053\u3067\u3059\u304B\u3002", en: "Where is the lift?" },
+      { ja: "\u30C8\u30A4\u30EC\u306F \u3069\u3053\u3067\u3059\u304B\u3002", en: "Where are the toilets?" },
+      { ja: "\u306A\u3093\u3058\u307E\u3067\u3067\u3059\u304B\u3002", en: "Until what time are you open?" },
+      { ja: "\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\u3002", en: "Thank you." }
+    ],
+    goals: ["Ask on which floor you can buy something", "Ask where the lift or the toilets are", "Ask what time the store closes", "Say thank you"]
+  }
+];
+var WORLD_PLACES_COMING_SOON = [
+  { emoji: "\u{1F3EA}", title: "Convenience store", titleJa: "\u30B3\u30F3\u30D3\u30CB" },
+  { emoji: "\u{1F3EB}", title: "School", titleJa: "\u304C\u3063\u3053\u3046" },
+  { emoji: "\u2615", title: "Caf\xE9", titleJa: "\u30AB\u30D5\u30A7" }
+];
+var findWorldPlace = (id2) => WORLD_PLACES.find((p2) => p2.id === id2) ?? null;
+var TITLE$1 = "Speaking Tasks";
+var DESCRIPTION$1 = "All speaking tasks in one place: conversations with AI characters, lesson speaking tasks and VCE oral exam practice.";
+var meta$r = () => [
+  { title: `${TITLE$1} | AI Yamato Portal` },
+  { name: "description", content: DESCRIPTION$1 },
+  { property: "og:title", content: `${TITLE$1} | AI Yamato Portal` },
+  { property: "og:description", content: DESCRIPTION$1 }
+];
+async function loader$n(_2) {
+  const lessons = [];
+  try {
+    const { data: data2 } = await supabase.from("edu_topics").select("*, edu_lessons (*)").order("sort_order", { ascending: true });
+    for (const topic of data2 || []) {
+      if (topic.is_coming_soon)
+        continue;
+      const list2 = [...topic.edu_lessons || []].sort((a, b) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0));
+      list2.forEach((lesson, i) => {
+        const slug = lesson.slug ? newSlugFor(lesson.slug) || lesson.slug : null;
+        if (!slug)
+          return;
+        lessons.push({
+          key: String(lesson.id ?? slug),
+          unit: topic.title_en || topic.slug,
+          title: `Lesson ${i + 1}: ${lesson.title_en || lesson.title || ""}`.trim(),
+          to: `/lessons/${slug}`
+        });
+      });
+    }
+  } catch {
+  }
+  return dist$1.json({ lessons });
+}
+var VCE_ORAL = [
+  { title: "Oral Drill", description: "Answer real EOY oral exam questions one by one.", to: "/vce/speaking/eoy-oral-drill" },
+  { title: "Oral Elaborate", description: "Practise giving longer, more detailed answers.", to: "/vce/speaking/eoy-oral-elaborate" },
+  { title: "Oral Mock Exam", description: "A full mock oral exam with an examiner and a report.", to: "/vce/speaking/eoy-oral-mock" },
+  { title: "Oral Superb", description: "Free conversation with AI Yamato in real time.", to: "/vce/speaking/eoy-oral-superb" }
+];
+var card$2 = "block bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-orange-400 transition";
+function SpeakingTasksPage() {
+  const { lessons } = useLoaderData();
+  const units = [];
+  for (const l2 of lessons) {
+    const last = units[units.length - 1];
+    if (last && last[0] === l2.unit)
+      last[1].push(l2);
+    else
+      units.push([l2.unit, [l2]]);
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: TITLE$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-orange-500 to-rose-500 text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full", children: "\u{1F3A4} Speaking" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-black", children: TITLE$1 }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "max-w-2xl text-white/90", children: DESCRIPTION$1 })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("nav", { "aria-label": "Speaking task types", className: "flex flex-wrap gap-2 text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "#conversations", className: "px-4 py-1.5 rounded-full border border-orange-200 bg-orange-50 text-orange-700 font-semibold", children: "Conversations with AI" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "#lessons", className: "px-4 py-1.5 rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold", children: "Lesson speaking tasks" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "#vce", className: "px-4 py-1.5 rounded-full border border-red-200 bg-red-50 text-red-700 font-semibold", children: "VCE oral exam" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "conversations", className: "space-y-3 scroll-mt-20", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "Conversations with AI characters" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+        "Walk up to a character and talk in Japanese with your voice. ",
+        CREDIT_COSTS.worldTalk3,
+        " credits for up to 3 minutes. No camera."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-3", children: [
+        WORLD_PLACES.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: `/speaking/${p2.id}`, className: card$2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", children: p2.emoji }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-lg font-black text-slate-900 dark:text-white", children: [
+            p2.title,
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-sm text-slate-500", children: p2.titleJa })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: p2.description })
+        ] }, p2.id)),
+        WORLD_PLACES_COMING_SOON.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-5 opacity-60", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", children: p2.emoji }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-lg font-black text-slate-700 dark:text-slate-200", children: [
+            p2.title,
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-sm text-slate-500", children: p2.titleJa })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-slate-500", children: "Coming soon" })
+        ] }, p2.title))
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "lessons", className: "space-y-3 scroll-mt-20", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "Lesson speaking tasks" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "Every textbook lesson has a speaking task. Open a lesson and find \u201CSpeaking\u201D in its six tasks." }),
+      units.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500", children: [
+        "See all lessons on the",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/lessons", className: "text-indigo-600 font-bold underline", children: "Lessons page" }),
+        "."
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-3", children: units.map(([unit, list2]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-slate-900 dark:text-white mb-2", children: unit }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1.5", children: list2.map((l2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Link,
+          {
+            to: l2.to,
+            className: "block text-sm px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-slate-700 dark:text-slate-200",
+            children: [
+              "\u{1F3A4} ",
+              l2.title
+            ]
+          },
+          l2.key
+        )) })
+      ] }, unit)) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "vce", className: "space-y-3 scroll-mt-20", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "VCE oral exam practice" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "For Year 11\u201312 students preparing for the VCE Japanese oral exam." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-4", children: VCE_ORAL.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: v2.to, className: card$2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-slate-900 dark:text-white", children: v2.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300 mt-1", children: v2.description })
+      ] }, v2.to)) })
+    ] })
+  ] }) }) });
+}
+var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: SpeakingTasksPage,
+  loader: loader$n,
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
 var PAGE_TITLE = "Japanese Culture";
 var PAGE_DESCRIPTION = "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed \u2013 watch the story, then try a short quiz.";
-var meta$i = () => [
+var meta$q = () => [
   { title: `${PAGE_TITLE} | AI Yamato Portal` },
   { name: "description", content: PAGE_DESCRIPTION },
   { property: "og:title", content: `${PAGE_TITLE} | AI Yamato Portal` },
@@ -77147,23 +79864,27 @@ function CultureHubPage() {
     if (targets.length === 0)
       return;
     try {
-      const now = (/* @__PURE__ */ new Date()).toISOString();
-      const { error } = await supabase.from("edu_student_progress").upsert(
-        targets.map((l2) => ({
-          user_id: userId,
-          lesson_id: lessonIds[l2.slug],
-          task_key: "culture",
-          is_completed: true,
-          updated_at: now
-        })),
-        { onConflict: "user_id,lesson_id,task_key" }
-      );
-      if (error)
-        throw error;
-      setSavedNotice((prev) => ({
-        ...prev,
-        [taskId]: `Counted as the culture task in ${targets.map((l2) => l2.label.split(":")[0]).join(", ")}.`
-      }));
+      const res = await fetch("/api/lesson-progress", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: targets.map((l2) => ({ lessonId: lessonIds[l2.slug], taskKeys: ["culture"] })) })
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok)
+        throw new Error((result == null ? void 0 : result.error) || `HTTP ${res.status}`);
+      const savedIds = new Set(((result == null ? void 0 : result.saved) ?? []).map((s2) => String(s2.lessonId)));
+      const counted = targets.filter((l2) => savedIds.has(lessonIds[l2.slug]));
+      const refused = Array.isArray(result == null ? void 0 : result.locked) ? result.locked : [];
+      const parts = [];
+      if (counted.length)
+        parts.push(`Counted as the culture task in ${counted.map((l2) => l2.label.split(":")[0]).join(", ")}.`);
+      if (refused.length) {
+        const until = refused[0].until ? new Date(refused[0].until).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" }) : null;
+        parts.push(`This is homework, so it can't be counted during school hours.${until ? ` Please do it again after ${until}.` : ""}`);
+      }
+      if (parts.length)
+        setSavedNotice((prev) => ({ ...prev, [taskId]: parts.join(" ") }));
     } catch (err) {
       console.error("[Culture] Failed to save lesson progress:", err);
     }
@@ -77269,13 +79990,13 @@ function CultureHubPage() {
     )
   ] });
 }
-var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CultureHubPage,
-  meta: meta$i
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$h = ({ request }) => loadGamePage(request);
-var meta$h = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$m = ({ request }) => loadGamePage(request);
+var meta$p = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function HanafudaRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hanafuda Koi-Koi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -77288,13 +80009,13 @@ function HanafudaRoute() {
     }
   ) });
 }
-var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HanafudaRoute,
-  loader: loader$h,
-  meta: meta$h
+  loader: loader$m,
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$g({ request }) {
+async function loader$l({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -77331,7 +80052,7 @@ async function loader$g({ request }) {
     errorMessage: fetchError
   });
 }
-var meta$g = ({ data: data2 }) => {
+var meta$o = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsHubIndex() {
@@ -77358,13 +80079,13 @@ function LessonsHubIndex() {
           Link,
           {
             to: "/culture",
-            className: "mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-md hover:shadow-lg transition",
+            className: "mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-orange-400 dark:border-orange-500/70 shadow-sm hover:shadow-md transition",
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black", children: "\u{1F38E} Japanese Culture" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-50", children: "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed." })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg sm:text-xl font-black text-slate-900 dark:text-slate-50", children: "\u{1F38E} Japanese Culture" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed." })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "shrink-0 font-black text-sm bg-white/20 px-4 py-2 rounded-xl", children: "Explore culture \u2192" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "shrink-0 font-black text-sm text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl transition", children: "Explore culture \u2192" })
             ]
           }
         ),
@@ -77456,13 +80177,1538 @@ function LessonsHubIndex() {
     }
   );
 }
-var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsHubIndex,
-  loader: loader$g,
-  meta: meta$g
+  loader: loader$l,
+  meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$f({ request }) {
+var SPEED = 0.6;
+var TALK_DISTANCE = 12;
+var AVATARS = ["\u{1F9D1}\u200D\u{1F393}", "\u{1F469}\u200D\u{1F393}", "\u{1F468}\u200D\u{1F393}", "\u{1F431}", "\u{1F436}", "\u{1F98A}"];
+function blocked(place, p2) {
+  if (p2.x < 3 || p2.x > 97 || p2.y < 4 || p2.y > 96)
+    return true;
+  return place.walls.some((w2) => p2.x > w2.x1 - 2 && p2.x < w2.x2 + 2 && p2.y > w2.y1 - 2 && p2.y < w2.y2 + 3);
+}
+function WorldScene({
+  place,
+  nickname,
+  disabled,
+  onTalk,
+  stateRef,
+  onMove,
+  onAvatarChange,
+  others,
+  bubbles,
+  myPid,
+  onPickOther
+}) {
+  const [pos, setPos] = reactExports.useState(() => (stateRef == null ? void 0 : stateRef.current) ? { x: stateRef.current.x, y: stateRef.current.y } : place.start);
+  const [avatarIndex, setAvatarIndex] = reactExports.useState(() => {
+    var _a;
+    return ((_a = stateRef == null ? void 0 : stateRef.current) == null ? void 0 : _a.avatar) ?? 0;
+  });
+  const avatar = AVATARS[avatarIndex] ?? AVATARS[0];
+  const onMoveRef = reactExports.useRef(onMove);
+  onMoveRef.current = onMove;
+  reactExports.useEffect(() => {
+    if (stateRef)
+      stateRef.current = { x: pos.x, y: pos.y, avatar: avatarIndex };
+  }, [pos, avatarIndex, stateRef]);
+  reactExports.useEffect(() => {
+    var _a;
+    (_a = onMoveRef.current) == null ? void 0 : _a.call(onMoveRef, pos);
+  }, [pos]);
+  const keys = reactExports.useRef(/* @__PURE__ */ new Set());
+  const target = reactExports.useRef(null);
+  const posRef = reactExports.useRef(pos);
+  posRef.current = pos;
+  const sceneRef = reactExports.useRef(null);
+  const near = Boolean(onTalk) && Math.hypot(pos.x - place.npc.talkX, pos.y - place.npc.talkY) < TALK_DISTANCE;
+  reactExports.useEffect(() => {
+    let raf = 0;
+    const step = () => {
+      raf = requestAnimationFrame(step);
+      if (disabled)
+        return;
+      let dx = 0;
+      let dy = 0;
+      const k2 = keys.current;
+      if (k2.has("arrowleft") || k2.has("a"))
+        dx -= 1;
+      if (k2.has("arrowright") || k2.has("d"))
+        dx += 1;
+      if (k2.has("arrowup") || k2.has("w"))
+        dy -= 1;
+      if (k2.has("arrowdown") || k2.has("s"))
+        dy += 1;
+      if (dx || dy) {
+        target.current = null;
+      } else if (target.current) {
+        dx = target.current.x - posRef.current.x;
+        dy = target.current.y - posRef.current.y;
+        if (Math.hypot(dx, dy) < SPEED) {
+          target.current = null;
+          return;
+        }
+      } else {
+        return;
+      }
+      const len = Math.hypot(dx, dy) || 1;
+      const p2 = posRef.current;
+      const next = { x: p2.x + dx / len * SPEED, y: p2.y + dy / len * SPEED };
+      if (!blocked(place, next))
+        setPos(next);
+      else if (!blocked(place, { x: next.x, y: p2.y }))
+        setPos({ x: next.x, y: p2.y });
+      else if (!blocked(place, { x: p2.x, y: next.y }))
+        setPos({ x: p2.x, y: next.y });
+      else
+        target.current = null;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [disabled, place]);
+  reactExports.useEffect(() => {
+    const down = (e) => {
+      var _a;
+      const tag = (_a = e.target) == null ? void 0 : _a.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA")
+        return;
+      const k2 = e.key.toLowerCase();
+      if (["arrowleft", "arrowright", "arrowup", "arrowdown", "a", "d", "w", "s"].includes(k2)) {
+        keys.current.add(k2);
+        e.preventDefault();
+      }
+      if ((k2 === "enter" || k2 === "e") && !disabled && onTalk) {
+        const p2 = posRef.current;
+        if (Math.hypot(p2.x - place.npc.talkX, p2.y - place.npc.talkY) < TALK_DISTANCE)
+          onTalk();
+      }
+    };
+    const up = (e) => keys.current.delete(e.key.toLowerCase());
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, [disabled, onTalk, place]);
+  const walkTo = reactExports.useCallback(
+    (e) => {
+      if (disabled || !sceneRef.current)
+        return;
+      const r2 = sceneRef.current.getBoundingClientRect();
+      target.current = { x: (e.clientX - r2.left) / r2.width * 100, y: (e.clientY - r2.top) / r2.height * 100 };
+    },
+    [disabled]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        ref: sceneRef,
+        onPointerDown: walkTo,
+        className: "relative w-full aspect-[16/10] rounded-3xl overflow-hidden border-4 border-amber-700/40 shadow-xl select-none touch-none cursor-pointer",
+        style: { background: place.floor },
+        role: "application",
+        "aria-label": `${place.title}. Use the arrow keys or tap the floor to walk. Go to the ${place.npc.name} to talk.`,
+        children: [
+          place.walls.map((w2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute rounded-lg shadow-md flex items-center justify-center text-white/90 text-xs font-bold",
+              style: { left: `${w2.x1}%`, top: `${w2.y1}%`, width: `${w2.x2 - w2.x1}%`, height: `${w2.y2 - w2.y1}%`, background: w2.color },
+              children: w2.label
+            },
+            i
+          )),
+          place.things.map((t2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none",
+              style: { left: `${t2.x}%`, top: `${t2.y}%` },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: `${t2.size ?? 1.8}rem`, lineHeight: 1 }, children: t2.icon }),
+                t2.label && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] font-bold text-amber-900 bg-white/70 rounded px-1 mt-0.5", children: t2.label })
+              ]
+            },
+            i
+          )),
+          onTalk && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: `absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed pointer-events-none transition ${near ? "border-emerald-500 bg-emerald-300/30" : "border-amber-600/40"}`,
+              style: { left: `${place.npc.talkX}%`, top: `${place.npc.talkY}%`, width: "9%", aspectRatio: "1" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none",
+              style: { left: `${place.npc.x}%`, top: `${place.npc.y}%` },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl sm:text-5xl leading-none drop-shadow", children: place.npc.icon }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] sm:text-xs font-bold bg-white/90 text-slate-800 rounded-full px-2 mt-0.5 shadow", children: place.npc.nameJa })
+              ]
+            }
+          ),
+          (others ?? []).map((o) => {
+            const b = bubbles == null ? void 0 : bubbles[o.pid];
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onPointerDown: (e) => e.stopPropagation(),
+                onClick: () => onPickOther == null ? void 0 : onPickOther(o),
+                className: "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer transition-[left,top] duration-200 ease-linear",
+                style: { left: `${o.x}%`, top: `${o.y}%` },
+                "aria-label": `${o.name}. Options`,
+                title: `${o.name} \u2014 block or report`,
+                children: [
+                  b && /* @__PURE__ */ jsxRuntimeExports.jsx(Bubble, { bubble: b }),
+                  o.talking && !b && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "mb-1 text-[10px] font-bold bg-white/90 text-slate-600 rounded-full px-2 py-0.5 shadow", children: [
+                    "\u{1F4AC} talking to the ",
+                    place.npc.name.toLowerCase()
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-3xl sm:text-4xl leading-none drop-shadow opacity-90", children: AVATARS[o.avatar] ?? AVATARS[0] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-[10px] sm:text-xs font-bold bg-white/90 text-slate-700 rounded-full px-2 mt-0.5 shadow max-w-[8rem] truncate", children: o.name })
+                ]
+              },
+              o.pid
+            );
+          }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none",
+              style: { left: `${pos.x}%`, top: `${pos.y}%` },
+              children: [
+                myPid && (bubbles == null ? void 0 : bubbles[myPid]) && /* @__PURE__ */ jsxRuntimeExports.jsx(Bubble, { bubble: bubbles[myPid] }),
+                near && !disabled && !(myPid && (bubbles == null ? void 0 : bubbles[myPid])) && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mb-1 text-[10px] sm:text-xs font-bold bg-emerald-600 text-white rounded-full px-2 py-0.5 shadow animate-bounce", children: "Talk! (E)" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl sm:text-5xl leading-none drop-shadow", children: avatar }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] sm:text-xs font-bold bg-indigo-600 text-white rounded-full px-2 mt-0.5 shadow max-w-[8rem] truncate", children: nickname || "You" })
+              ]
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-1", "aria-label": "Choose your avatar", children: AVATARS.map((a, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => {
+            if (i === avatarIndex)
+              return;
+            setAvatarIndex(i);
+            onAvatarChange == null ? void 0 : onAvatarChange(i);
+          },
+          className: `text-2xl w-10 h-10 rounded-xl cursor-pointer ${avatarIndex === i ? "bg-indigo-100 ring-2 ring-indigo-400" : "hover:bg-slate-100"}`,
+          "aria-label": `Avatar ${a}`,
+          children: a
+        },
+        a
+      )) }),
+      onTalk && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onTalk,
+          disabled: !near || disabled,
+          className: "px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold disabled:opacity-40 cursor-pointer",
+          children: near ? `\u{1F3A4} Talk to the ${place.npc.name.toLowerCase()}` : `Walk to the ${place.npc.name.toLowerCase()} to talk`
+        }
+      )
+    ] })
+  ] });
+}
+function Bubble({ bubble }) {
+  return bubble.stamp ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mb-1 text-3xl leading-none animate-bounce", children: bubble.text }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "mb-1 text-xs sm:text-sm font-bold bg-white text-slate-800 border border-slate-300 rounded-2xl px-2.5 py-1 shadow max-w-[11rem] text-center", children: bubble.text });
+}
+var hasEnglishWord = (text) => /[A-Za-z]{2,}/.test(text);
+var MAX_SAY_LENGTH = 120;
+var MIN_RECORD_MS = 500;
+var MAX_RECORD_MS = 2e4;
+var PACE_LABEL = { steady: "Steady", normal: "Normal", accelerated: "Accelerated" };
+function WorldTalk({
+  place,
+  onClose
+}) {
+  const [status, setStatus] = reactExports.useState("connecting");
+  const [error, setError] = reactExports.useState(null);
+  const [lines, setLines] = reactExports.useState([]);
+  const [endsAt, setEndsAt] = reactExports.useState(0);
+  const [now, setNow] = reactExports.useState(Date.now());
+  const [npcSpeaking, setNpcSpeaking] = reactExports.useState(false);
+  const [npcBusy, setNpcBusy] = reactExports.useState(true);
+  const [mic, setMic] = reactExports.useState("idle");
+  const [heard, setHeard] = reactExports.useState("");
+  const [micNote, setMicNote] = reactExports.useState(null);
+  const [revealed, setRevealed] = reactExports.useState(/* @__PURE__ */ new Set());
+  const [showAll, setShowAll] = reactExports.useState(false);
+  const [feedback, setFeedback] = reactExports.useState({ state: "idle" });
+  const linesRef = reactExports.useRef([]);
+  linesRef.current = lines;
+  const pcRef = reactExports.useRef(null);
+  const dcRef = reactExports.useRef(null);
+  const audioRef = reactExports.useRef(null);
+  const sessionIdRef = reactExports.useRef(null);
+  const finishedRef = reactExports.useRef(false);
+  const englishRef = reactExports.useRef(0);
+  const speakingRef = reactExports.useRef(false);
+  const logEndRef = reactExports.useRef(null);
+  const recorderRef = reactExports.useRef(null);
+  const recStreamRef = reactExports.useRef(null);
+  const recStartedRef = reactExports.useRef(0);
+  const recTimerRef = reactExports.useRef(null);
+  const sttHint = place.menu.flatMap((m2) => m2.items.map((i) => i.ja)).join("\u3001");
+  const stopRecorderStream = () => {
+    var _a;
+    if (recTimerRef.current)
+      clearTimeout(recTimerRef.current);
+    recTimerRef.current = null;
+    (_a = recStreamRef.current) == null ? void 0 : _a.getTracks().forEach((t2) => t2.stop());
+    recStreamRef.current = null;
+  };
+  const cleanup = () => {
+    var _a;
+    try {
+      const recorder = recorderRef.current;
+      if (recorder && recorder.state === "recording") {
+        recorder.onstop = null;
+        recorder.stop();
+      }
+    } catch {
+    }
+    recorderRef.current = null;
+    stopRecorderStream();
+    try {
+      (_a = pcRef.current) == null ? void 0 : _a.close();
+    } catch {
+    }
+    pcRef.current = null;
+    dcRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.srcObject = null;
+      audioRef.current.remove();
+      audioRef.current = null;
+    }
+  };
+  const tellServerEnded = () => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId)
+      return;
+    yamatoFetch(`${YAMATO_API_BASE}/api/world/end`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, englishLeaks: englishRef.current }),
+      keepalive: true
+    }).catch(() => {
+    });
+  };
+  const finish = () => {
+    if (finishedRef.current)
+      return;
+    finishedRef.current = true;
+    cleanup();
+    tellServerEnded();
+    setNpcSpeaking(false);
+    setMic("idle");
+    setStatus("ended");
+  };
+  const onEvent = (msg) => {
+    switch (msg.type) {
+      case "response.created":
+        setNpcBusy(true);
+        break;
+      case "response.output_audio_transcript.done": {
+        const text = String(msg.transcript || "").trim();
+        if (!text)
+          break;
+        if (hasEnglishWord(text))
+          englishRef.current += 1;
+        setLines((prev) => [...prev, { id: String(msg.item_id), speaker: "npc", text }]);
+        break;
+      }
+      case "output_audio_buffer.started":
+        speakingRef.current = true;
+        setNpcSpeaking(true);
+        break;
+      case "output_audio_buffer.stopped":
+      case "output_audio_buffer.cleared":
+        speakingRef.current = false;
+        setNpcSpeaking(false);
+        setNpcBusy(false);
+        break;
+      case "response.done":
+        if (!speakingRef.current)
+          setNpcBusy(false);
+        break;
+    }
+  };
+  reactExports.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const pc2 = new RTCPeerConnection();
+        pcRef.current = pc2;
+        const audio2 = document.createElement("audio");
+        audio2.autoplay = true;
+        document.body.appendChild(audio2);
+        audioRef.current = audio2;
+        pc2.ontrack = (e) => {
+          audio2.srcObject = e.streams[0];
+          audio2.play().catch(() => {
+          });
+        };
+        pc2.addTransceiver("audio", { direction: "recvonly" });
+        const dc2 = pc2.createDataChannel("oai-events");
+        dcRef.current = dc2;
+        dc2.onmessage = (e) => {
+          try {
+            onEvent(JSON.parse(e.data));
+          } catch {
+          }
+        };
+        dc2.onopen = () => {
+          setStatus("live");
+          setNpcBusy(true);
+          dc2.send(JSON.stringify({ type: "response.create" }));
+        };
+        const offer = await pc2.createOffer();
+        await pc2.setLocalDescription(offer);
+        const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ place: place.id, sdp: offer.sdp })
+        });
+        const data2 = await res.json().catch(() => ({}));
+        if (cancelled)
+          return;
+        if (!res.ok || !data2.answerSdp) {
+          cleanup();
+          finishedRef.current = true;
+          setError({
+            text: data2.reply || data2.message || "We could not start the conversation. Please try again.",
+            plans: res.status === 402
+          });
+          setStatus("error");
+          return;
+        }
+        sessionIdRef.current = data2.sessionId;
+        setEndsAt(Date.now() + (data2.minutes ?? place.minutes) * 60 * 1e3);
+        await pc2.setRemoteDescription({ type: "answer", sdp: data2.answerSdp });
+      } catch {
+        if (cancelled)
+          return;
+        cleanup();
+        finishedRef.current = true;
+        setError({ text: "We could not connect. Please check your internet and try again.", plans: false });
+        setStatus("error");
+      }
+    })();
+    const timer = setInterval(() => setNow(Date.now()), 1e3);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      if (!finishedRef.current) {
+        finishedRef.current = true;
+        cleanup();
+        tellServerEnded();
+      }
+    };
+  }, []);
+  const loadFeedback = async () => {
+    const sessionId = sessionIdRef.current;
+    const transcript = linesRef.current.map((l2) => ({ speaker: l2.speaker === "you" ? "student" : "clerk", text: l2.text }));
+    if (!sessionId || !transcript.some((t2) => t2.speaker === "student")) {
+      setFeedback({ state: "none", message: "You didn't say anything, so there is no feedback this time." });
+      return;
+    }
+    setFeedback({ state: "loading" });
+    try {
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, transcript })
+      });
+      const data2 = await res.json().catch(() => ({}));
+      if (!res.ok || !data2.feedback) {
+        const final = data2.error === "NO_ANSWERS" || data2.error === "SESSION_ENDED";
+        setFeedback({ state: final ? "none" : "error", message: data2.message || "Sorry, we could not create your feedback." });
+        return;
+      }
+      setFeedback({ state: "done", text: data2.feedback, pace: data2.pace });
+    } catch {
+      setFeedback({ state: "error", message: "Sorry, we could not create your feedback. Please check your internet." });
+    }
+  };
+  reactExports.useEffect(() => {
+    if (status === "ended" && feedback.state === "idle")
+      loadFeedback();
+  }, [status]);
+  const transcribe = async (blob) => {
+    setMic("transcribing");
+    try {
+      const form = new FormData();
+      form.append("audio", blob, "recording.webm");
+      form.append("prompt", sttHint);
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/stt`, { method: "POST", body: form });
+      if (!res.ok)
+        throw new Error(`HTTP ${res.status}`);
+      const data2 = await res.json().catch(() => ({}));
+      const text = String(data2.userText || data2.text || "").trim().slice(0, MAX_SAY_LENGTH);
+      if (finishedRef.current)
+        return;
+      if (!text || isLikelyHallucination(text, sttHint)) {
+        setMic("idle");
+        setMicNote("We couldn't hear you clearly. Please record again, a little closer to the microphone.");
+        return;
+      }
+      setHeard(text);
+      setMic("confirm");
+    } catch {
+      if (finishedRef.current)
+        return;
+      setMic("idle");
+      setMicNote("Sorry, we could not turn your recording into text. Please try again.");
+    }
+  };
+  const startRecording = async () => {
+    if (status !== "live" || npcBusy || mic === "recording" || mic === "transcribing")
+      return;
+    setMicNote(null);
+    setHeard("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+      if (finishedRef.current)
+        return stream.getTracks().forEach((t2) => t2.stop());
+      recStreamRef.current = stream;
+      let mimeType = "audio/webm";
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus"))
+        mimeType = "audio/webm;codecs=opus";
+      else if (MediaRecorder.isTypeSupported("audio/mp4"))
+        mimeType = "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0)
+          chunks.push(e.data);
+      };
+      recorder.onstop = () => {
+        stopRecorderStream();
+        recorderRef.current = null;
+        if (Date.now() - recStartedRef.current < MIN_RECORD_MS) {
+          setMic("idle");
+          setMicNote("That was too short. Press Record, speak, then press Stop.");
+          return;
+        }
+        transcribe(new Blob(chunks, { type: mimeType }));
+      };
+      recorderRef.current = recorder;
+      recStartedRef.current = Date.now();
+      recorder.start();
+      setMic("recording");
+      recTimerRef.current = setTimeout(() => stopRecording(), MAX_RECORD_MS);
+    } catch (err) {
+      stopRecorderStream();
+      setMic("idle");
+      setMicNote(
+        (err == null ? void 0 : err.name) === "NotAllowedError" ? "Microphone access is blocked. Please allow the microphone in your browser settings." : "Could not start recording. Please check your microphone."
+      );
+    }
+  };
+  const stopRecording = () => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state === "recording")
+      recorder.stop();
+  };
+  const send = () => {
+    const dc2 = dcRef.current;
+    const text = heard.trim();
+    if (mic !== "confirm" || !text || !dc2 || dc2.readyState !== "open")
+      return;
+    dc2.send(
+      JSON.stringify({
+        type: "conversation.item.create",
+        item: { type: "message", role: "user", content: [{ type: "input_text", text }] }
+      })
+    );
+    dc2.send(JSON.stringify({ type: "response.create" }));
+    setLines((prev) => [...prev, { id: `you-${Date.now()}`, speaker: "you", text }]);
+    setNpcBusy(true);
+    setHeard("");
+    setMic("idle");
+  };
+  reactExports.useEffect(() => {
+    if (status !== "live")
+      return;
+    const onKey = (e) => {
+      var _a;
+      const tag = (_a = e.target) == null ? void 0 : _a.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.repeat)
+        return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (mic === "recording")
+          stopRecording();
+        else if (mic === "idle" || mic === "confirm")
+          startRecording();
+      } else if (e.key === "Enter" && mic === "confirm") {
+        e.preventDefault();
+        send();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [status, mic, npcBusy, heard]);
+  const left = endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1e3)) : place.minutes * 60;
+  reactExports.useEffect(() => {
+    if (status === "live" && endsAt && left === 0)
+      finish();
+  }, [left, status, endsAt]);
+  reactExports.useEffect(() => {
+    var _a;
+    (_a = logEndRef.current) == null ? void 0 : _a.scrollIntoView({ block: "nearest" });
+  }, [lines.length]);
+  const clock2 = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  const yourTurn = status === "live" && !npcBusy;
+  const statusText = status === "connecting" ? "Connecting\u2026" : status === "ended" ? "Conversation ended" : status === "error" ? "Could not start" : npcSpeaking ? "Speaking\u2026" : npcBusy ? "Thinking\u2026" : "Your turn \u2014 press Record and speak in Japanese";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 lg:grid-cols-[3fr_2fr]", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-4xl ${npcSpeaking ? "animate-bounce" : ""}`, children: place.npc.icon }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-slate-900 dark:text-white", children: [
+              place.npc.nameJa,
+              "\uFF08",
+              place.npc.name,
+              "\uFF09"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: statusText })
+          ] })
+        ] }),
+        status === "live" && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl font-black tabular-nums text-amber-600", children: clock2 })
+      ] }),
+      error && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm p-3 space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: error.text }),
+        error.plans && /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/prices", className: "inline-block px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold", children: "See plans" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "\u{1F3A7} Listen first. The ",
+          place.npc.name.toLowerCase(),
+          "'s words are hidden \u2014 tap \u201CShow\u201D if you need to read them."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-center gap-1 cursor-pointer font-bold", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: showAll, onChange: (e) => setShowAll(e.target.checked) }),
+          "Show all"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "h-64 overflow-y-auto space-y-2 rounded-xl bg-slate-50 dark:bg-slate-950 p-3", "aria-live": "polite", children: [
+        !lines.length && status !== "error" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-400", children: "The conversation will appear here." }),
+        lines.map((l2) => {
+          const hidden = l2.speaker === "npc" && !showAll && !revealed.has(l2.id);
+          return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `flex ${l2.speaker === "you" ? "justify-end" : "justify-start"}`, children: hidden ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => setRevealed((prev) => new Set(prev).add(l2.id)),
+              className: "max-w-[85%] rounded-2xl px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 cursor-pointer hover:border-amber-400",
+              children: [
+                "\u{1F50A} The ",
+                place.npc.name.toLowerCase(),
+                " said something \xB7 ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold underline", children: "Show" })
+              ]
+            }
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "p",
+            {
+              lang: "ja",
+              className: `max-w-[85%] rounded-2xl px-3 py-2 text-sm ${l2.speaker === "you" ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700"}`,
+              children: l2.text
+            }
+          ) }, l2.id);
+        }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: logEndRef })
+      ] }),
+      status === "live" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-3 space-y-2", children: [
+        mic === "confirm" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-slate-500", children: "Is this what you said?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { lang: "ja", className: "text-lg font-bold text-slate-900 dark:text-white bg-indigo-50 dark:bg-slate-800 rounded-lg px-3 py-2", children: heard }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: send,
+                className: "px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer",
+                children: "\u2705 Yes, send (Enter)"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: startRecording,
+                className: "px-4 py-2 rounded-xl border-2 border-slate-300 text-slate-700 dark:text-slate-200 font-bold cursor-pointer",
+                children: "\u{1F501} Record again (Space)"
+              }
+            )
+          ] })
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-3", children: [
+          mic === "recording" ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: stopRecording,
+              className: "px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer animate-pulse",
+              children: "\u23F9 Stop (Space)"
+            }
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: startRecording,
+              disabled: !yourTurn || mic === "transcribing",
+              className: "px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+              children: "\u{1F3A4} Record (Space)"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+            mic === "recording" && "\u{1F534} Recording\u2026 press Stop when you finish.",
+            mic === "transcribing" && "Turning your voice into text\u2026",
+            mic === "idle" && (yourTurn ? "Speak, then check the text before you send it." : `Please wait for the ${place.npc.name.toLowerCase()}.`)
+          ] })
+        ] }),
+        micNote && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: micNote })
+      ] }),
+      status === "ended" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border-2 border-amber-200 bg-amber-50/60 dark:bg-slate-950 dark:border-amber-900 p-4 space-y-2", "aria-live": "polite", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-slate-900 dark:text-white", children: "\u{1F4DD} Feedback" }),
+          feedback.pace && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs text-slate-500", children: [
+            "For your learning pace: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: PACE_LABEL[feedback.pace] ?? feedback.pace }),
+            " (you can change it in",
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/my-account", className: "underline", children: "My Account" }),
+            ")"
+          ] })
+        ] }),
+        feedback.state === "loading" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 animate-pulse", children: "AI Yamato is writing your feedback\u2026" }),
+        feedback.state === "done" && feedback.text && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm text-slate-800 dark:text-slate-100", dangerouslySetInnerHTML: { __html: formatFeedback(feedback.text, "#d97706") } }),
+        feedback.state === "none" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: feedback.message }),
+        feedback.state === "error" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: feedback.message }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: loadFeedback,
+              className: "px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 font-bold text-sm cursor-pointer",
+              children: "Try again"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-end gap-2", children: status === "live" || status === "connecting" ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: finish,
+          className: "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer",
+          children: "End conversation"
+        }
+      ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: onClose,
+          className: "px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer",
+          children: "Back to the shop"
+        }
+      ) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-2", children: place.infoTitle }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 text-sm", children: place.menu.map((m2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-amber-700", children: m2.section }),
+          m2.items.map((i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "flex justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "font-bold text-slate-800 dark:text-slate-100", children: i.ja }),
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500", children: i.en })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "shrink-0 text-slate-700 dark:text-slate-300", children: i.price })
+          ] }, i.ja))
+        ] }, m2.section)) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-2", children: "\u{1F4AC} Useful phrases" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-1.5 text-sm", children: place.phrases.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "font-bold text-slate-800 dark:text-slate-100", children: p2.ja }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-xs text-slate-500", children: p2.en })
+        ] }, p2.ja)) })
+      ] })
+    ] })
+  ] });
+}
+var meta$n = ({ params }) => {
+  const place = findWorldPlace(params.task);
+  const title = place ? `${place.title} \u2013 Speaking Task` : "Speaking Task";
+  const description = place ? `${place.description} Talk to an AI character in Japanese \u2013 voice only, no camera.` : "Practise everyday Japanese conversations with AI characters.";
+  return [
+    { title: `${title} | AI Yamato Portal` },
+    { name: "description", content: description },
+    { property: "og:title", content: `${title} | AI Yamato Portal` },
+    { property: "og:description", content: description }
+  ];
+};
+function SpeakingTaskPage() {
+  const { task } = useParams();
+  const place = findWorldPlace(task);
+  const [nickname, setNickname] = reactExports.useState("");
+  const [signedIn, setSignedIn] = reactExports.useState(false);
+  const [talking, setTalking] = reactExports.useState(false);
+  const [confirming, setConfirming] = reactExports.useState(false);
+  const sceneState = reactExports.useRef({ x: (place == null ? void 0 : place.start.x) ?? 50, y: (place == null ? void 0 : place.start.y) ?? 84, avatar: 0 });
+  reactExports.useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSignedIn(Boolean(session));
+      if (!session)
+        return;
+      const { data: data2 } = await supabase.from("profiles").select("nickname").eq("id", session.user.id).maybeSingle();
+      if (data2 == null ? void 0 : data2.nickname)
+        setNickname(String(data2.nickname));
+    })();
+  }, []);
+  if (!place) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: "Speaking Tasks", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto p-8 text-center space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700", children: "This speaking task does not exist." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/speaking", className: "text-indigo-600 font-bold underline", children: "Back to Speaking Tasks" })
+    ] }) });
+  }
+  const askToTalk = () => {
+    if (!signedIn) {
+      requestAuthModal("signin");
+      return;
+    }
+    setConfirming(true);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolPageWrapper, { breadcrumbTitle: place.title, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-amber-50/40 dark:bg-slate-950 py-6 sm:py-10 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-end justify-between gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/speaking", className: "text-xs font-bold text-indigo-600 underline", children: "\u2190 Speaking Tasks" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-2xl sm:text-3xl font-black text-slate-900 dark:text-white", children: [
+            place.emoji,
+            " ",
+            place.title,
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-lg text-slate-500", children: place.titleJa })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: place.description })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-500 text-right", children: [
+          "\u{1F3A4} Voice only \u2014 no camera",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+          place.minutes,
+          " min \xB7 ",
+          CREDIT_COSTS.worldTalk3,
+          " credits per conversation"
+        ] })
+      ] }),
+      !talking ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          WorldScene,
+          {
+            place,
+            nickname,
+            disabled: confirming,
+            onTalk: askToTalk,
+            stateRef: sceneState
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-3 sm:grid-cols-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-1", children: "\u{1F3AF} Your mission" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-0.5 text-slate-600 dark:text-slate-300", children: place.goals.map((g) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: g }, g)) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm text-slate-600 dark:text-slate-300", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-1", children: "\u{1F579}\uFE0F How to play" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+              "Walk with the arrow keys (or W A S D), or tap the floor. Go to the green circle in front of the ",
+              place.npc.name.toLowerCase(),
+              " and press \u201CTalk\u201D (or E). On your turn, press \u201CRecord\u201D (Space), speak in Japanese and press \u201CStop\u201D. Check the text, then send it (Enter) or record again. The information (menu, timetable and so on) and useful phrases will be on screen."
+            ] })
+          ] })
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(WorldTalk, { place, onClose: () => setTalking(false) })
+    ] }) }),
+    confirming && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4", role: "dialog", "aria-modal": "true", onClick: () => setConfirming(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full space-y-4", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-black text-slate-900 dark:text-white", children: [
+        place.npc.icon,
+        " Talk to the ",
+        place.npc.name.toLowerCase(),
+        "?"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "text-sm text-slate-600 dark:text-slate-300 list-disc pl-5 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "The conversation lasts up to ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            place.minutes,
+            " minutes"
+          ] }),
+          " and uses ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            CREDIT_COSTS.worldTalk3,
+            " credits"
+          ] }),
+          "."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Your browser will ask to use the microphone. No camera is used." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Record what you want to say in Japanese, check the text, then send it. What you say is shown on screen but not saved." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "The ",
+          place.npc.name.toLowerCase(),
+          "'s words are hidden at first so you can practise listening. You can show them any time."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "When the conversation ends, you get feedback that matches your learning pace (no extra credits)." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setConfirming(false), className: "px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer", children: "Cancel" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              setConfirming(false);
+              setTalking(true);
+            },
+            className: "px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer",
+            children: "\u{1F3A4} Start talking"
+          }
+        )
+      ] })
+    ] }) })
+  ] });
+}
+var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: SpeakingTaskPage,
+  meta: meta$n
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$k({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$m = () => [
+  { title: "Look-alike Characters Test | JP Tutor AI Yamato" },
+  {
+    name: "description",
+    content: "Hiragana, katakana and kanji that look alike: answer each one as quickly and accurately as you can."
+  },
+  { name: "robots", content: "noindex" }
+];
+var TYPES = ["hiragana", "katakana", "kanji"];
+function shuffle$2(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function shuffleNoRepeat(list2) {
+  const rest = shuffle$2(list2);
+  const out = [];
+  while (rest.length) {
+    const k2 = rest.findIndex((x2) => x2 !== out[out.length - 1]);
+    out.push(rest.splice(k2 === -1 ? 0 : k2, 1)[0]);
+  }
+  return out;
+}
+var secText = (ms, digits = 1) => (ms / 1e3).toFixed(digits);
+function clock$1(ms) {
+  const total = ms / 1e3;
+  const m2 = Math.floor(total / 60);
+  const s2 = total - m2 * 60;
+  return `${m2}:${s2.toFixed(1).padStart(4, "0")}`;
+}
+var hasKana = (t2) => /[぀-ヿ]/.test(t2);
+function LookalikeTest() {
+  const [params, setParams] = useSearchParams();
+  const type = isLookalikeType(params.get("type")) ? params.get("type") : "hiragana";
+  const label = LOOKALIKE_LABELS[type];
+  const { target, good } = LOOKALIKE_TARGETS[type];
+  const sets = LOOKALIKE_SETS[type];
+  const speedClass2 = (ms) => ms <= target * 1e3 ? "text-emerald-600" : ms <= good * 1e3 ? "text-amber-600" : "text-rose-600";
+  const [kanjiAnswers, setKanjiAnswers] = reactExports.useState(/* @__PURE__ */ new Map());
+  const [loadError, setLoadError] = reactExports.useState(null);
+  const [loadingKanji, setLoadingKanji] = reactExports.useState(false);
+  const [phase, setPhase] = reactExports.useState("setup");
+  const [selected, setSelected] = reactExports.useState(() => new Set(sets.map((_2, i) => i)));
+  const [rounds, setRounds] = reactExports.useState(2);
+  const [questions, setQuestions] = reactExports.useState([]);
+  const [index, setIndex] = reactExports.useState(0);
+  const [results, setResults] = reactExports.useState([]);
+  const [typed, setTyped] = reactExports.useState("");
+  const [review, setReview] = reactExports.useState(null);
+  const [now, setNow] = reactExports.useState(0);
+  const [saveState, setSaveState] = reactExports.useState("idle");
+  const startRef = reactExports.useRef(0);
+  const scopeRef = reactExports.useRef("all");
+  const leftPageRef = reactExports.useRef(false);
+  const inputRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    setSelected(new Set(LOOKALIKE_SETS[type].map((_2, i) => i)));
+    setPhase("setup");
+    setResults([]);
+    setReview(null);
+  }, [type]);
+  reactExports.useEffect(() => {
+    if (type !== "kanji" || kanjiAnswers.size > 0)
+      return;
+    setLoadingKanji(true);
+    (async () => {
+      try {
+        const { data: data2, error } = await supabase.from("kl_character").select("character, meaning").eq("char_type", "kanji").in("character", lookalikeChars("kanji"));
+        if (error)
+          throw error;
+        setKanjiAnswers(new Map((data2 || []).map((r2) => [String(r2.character), acceptedAnswers(r2.character, r2.meaning)])));
+      } catch (e) {
+        setLoadError((e == null ? void 0 : e.message) || "Could not load the kanji.");
+      } finally {
+        setLoadingKanji(false);
+      }
+    })();
+  }, [type, kanjiAnswers.size]);
+  const answersFor = reactExports.useCallback(
+    (c) => type === "kanji" ? kanjiAnswers.get(c) ?? [] : KANA_ROMAJI[c] ? [KANA_ROMAJI[c]] : [],
+    [type, kanjiAnswers]
+  );
+  const isCorrect = reactExports.useCallback(
+    (c, input2) => type === "kanji" ? isCorrectMeaning(input2, answersFor(c)) : isCorrectRomaji(c, input2),
+    [type, answersFor]
+  );
+  const neighbours = reactExports.useMemo(() => {
+    const map = /* @__PURE__ */ new Map();
+    for (const set of sets) {
+      for (const c of set.chars) {
+        if (!map.has(c))
+          map.set(c, /* @__PURE__ */ new Set());
+        set.chars.filter((x2) => x2 !== c).forEach((x2) => map.get(c).add(x2));
+      }
+    }
+    return map;
+  }, [sets]);
+  const selectedChars = reactExports.useMemo(
+    () => [...new Set(sets.filter((_2, i) => selected.has(i)).flatMap((set) => set.chars))].filter((c) => answersFor(c).length > 0),
+    [sets, selected, answersFor]
+  );
+  const begin = reactExports.useCallback((chars) => {
+    if (chars.length === 0)
+      return;
+    setQuestions(shuffleNoRepeat(chars).map((c) => ({ c, answers: answersFor(c) })));
+    setIndex(0);
+    setResults([]);
+    setTyped("");
+    setReview(null);
+    setSaveState("idle");
+    setPhase("running");
+  }, [answersFor]);
+  const startFromSetup = () => {
+    scopeRef.current = selected.size === sets.length ? "all" : sets.filter((_2, i) => selected.has(i)).map((set) => set.chars.join("")).join(" ");
+    const list2 = [];
+    for (let r2 = 0; r2 < rounds; r2++)
+      list2.push(...selectedChars);
+    begin(list2);
+  };
+  reactExports.useEffect(() => {
+    var _a;
+    if (phase !== "running" || review)
+      return;
+    startRef.current = performance.now();
+    leftPageRef.current = false;
+    setNow(startRef.current);
+    (_a = inputRef.current) == null ? void 0 : _a.focus();
+  }, [phase, index, review]);
+  reactExports.useEffect(() => {
+    if (phase !== "running" || review)
+      return;
+    const id2 = window.setInterval(() => setNow(performance.now()), 100);
+    return () => window.clearInterval(id2);
+  }, [phase, review]);
+  reactExports.useEffect(() => {
+    if (phase !== "running")
+      return;
+    const onVis = () => {
+      if (document.visibilityState === "hidden")
+        leftPageRef.current = true;
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [phase]);
+  const goNext = reactExports.useCallback(() => {
+    setReview(null);
+    setTyped("");
+    if (index + 1 >= questions.length)
+      setPhase("done");
+    else
+      setIndex((i) => i + 1);
+  }, [index, questions.length]);
+  const submit = (pass) => {
+    if (phase !== "running" || review)
+      return;
+    const q2 = questions[index];
+    if (!q2)
+      return;
+    const value = pass ? "" : typed;
+    if (!pass && !value.trim())
+      return;
+    const ms = performance.now() - startRef.current;
+    const leftPage = leftPageRef.current;
+    const correct = !pass && !leftPage && isCorrect(q2.c, value);
+    let mixedWith = null;
+    if (!correct && !pass && !leftPage) {
+      mixedWith = [...neighbours.get(q2.c) ?? []].find((other) => isCorrect(other, value)) ?? null;
+    }
+    const r2 = { q: q2, typed: value, ms, correct, passed: pass, leftPage, mixedWith };
+    setResults((prev) => [...prev, r2]);
+    if (correct)
+      goNext();
+    else
+      setReview(r2);
+  };
+  reactExports.useEffect(() => {
+    if (!review)
+      return;
+    const onKey = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        goNext();
+      }
+    };
+    const t2 = window.setTimeout(() => window.addEventListener("keydown", onKey), 300);
+    return () => {
+      window.clearTimeout(t2);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [review, goNext]);
+  reactExports.useEffect(() => {
+    if (phase !== "done" || saveState !== "idle")
+      return;
+    if (results.length < 5) {
+      setSaveState("short");
+      return;
+    }
+    setSaveState("saving");
+    fetch("/api/test-attempts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        testKey: LOOKALIKE_TEST_KEYS[type],
+        scope: scopeRef.current,
+        items: results.map((r2) => ({ c: r2.q.c, typed: r2.typed, ms: Math.round(r2.ms), passed: r2.passed, left: r2.leftPage }))
+      })
+    }).then((res) => setSaveState(res.ok ? "saved" : res.status === 401 ? "signin" : "error")).catch(() => setSaveState("error"));
+  }, [phase, results, saveState, type]);
+  const running = phase === "running";
+  const current = questions[index];
+  const loading = type === "kanji" && loadingKanji;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test", className: "text-sm text-indigo-600 hover:underline", children: "\u2190 All tests" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-2 text-2xl sm:text-3xl font-black text-slate-900", children: "Look-alike Characters Test" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-1 text-sm text-slate-600", children: [
+        "Characters that look alike come one at a time. Type the ",
+        label.answer,
+        " and press Enter \u2014 as quickly and accurately as you can. Aim for an average of ",
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+          target,
+          " seconds or less"
+        ] }),
+        "."
+      ] })
+    ] }),
+    !running && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2 mb-4", role: "tablist", "aria-label": "Character type", children: TYPES.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        role: "tab",
+        "aria-selected": t2 === type,
+        onClick: () => setParams({ type: t2 }, { replace: true }),
+        className: `flex-1 rounded-xl border-2 px-3 py-2 font-bold text-sm ${t2 === type ? "border-indigo-500 bg-indigo-50 text-indigo-800" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`,
+        children: [
+          LOOKALIKE_LABELS[t2].title,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-semibold text-slate-400", children: LOOKALIKE_LABELS[t2].jp })
+        ]
+      },
+      t2
+    )) }),
+    loading && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500", children: "Loading kanji\u2026" }),
+    loadError && type === "kanji" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-rose-600", children: loadError }),
+    !loading && phase === "setup" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Link,
+        {
+          to: `/test/lookalike/answers#${type}`,
+          className: "flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-4 py-3 text-sm transition-colors",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-900", children: [
+              "\u{1F4D6} ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Optional:" }),
+              " check the characters and the answers that are accepted before you start."
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-indigo-700 shrink-0", children: "See the list \u2192" })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+          "\u2328\uFE0F ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "A computer with a keyboard is strongly recommended." }),
+          " Typing on a phone is much slower."
+        ] }),
+        type === "kanji" ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: `\u2022 Type the English meaning. Upper/lower case, "to", "the", and colour/color spelling don't matter.` }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+          "\u2022 Type the romaji with Japanese input ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "off" }),
+          ". Only one spelling is correct: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "shi, chi, tsu, fu, ji, wo, n" }),
+          " (not si, ti, tu, hu, zi)."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u2022 The time includes typing. \u2022 Pasting is turned off. \u2022 If you switch to another tab or app during a question, that question is marked wrong." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900", children: "Look-alike sets" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: () => setSelected(new Set(selected.size === sets.length ? [] : sets.map((_2, i) => i))),
+              className: "text-sm text-indigo-600 hover:underline",
+              children: selected.size === sets.length ? "Clear all" : "Select all"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 sm:grid-cols-3 gap-2", children: sets.map((set, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 cursor-pointer", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "input",
+            {
+              type: "checkbox",
+              checked: selected.has(i),
+              onChange: (e) => {
+                const next = new Set(selected);
+                if (e.target.checked)
+                  next.add(i);
+                else
+                  next.delete(i);
+                setSelected(next);
+              }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl tracking-widest text-slate-900", children: set.chars.join(" ") })
+        ] }, i)) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-slate-900", children: "Each character appears" }),
+        [1, 2, 3].map((n2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setRounds(n2),
+            className: `rounded-lg border px-3 py-1 ${rounds === n2 ? "border-indigo-500 bg-indigo-50 font-bold text-indigo-800" : "border-slate-300 hover:bg-slate-50"}`,
+            children: n2 === 1 ? "once" : `${n2} times`
+          },
+          n2
+        ))
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          disabled: selectedChars.length === 0,
+          onClick: startFromSetup,
+          className: "w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-black text-lg rounded-xl py-3",
+          children: [
+            "Start (",
+            selectedChars.length * rounds,
+            " questions)"
+          ]
+        }
+      )
+    ] }),
+    running && current && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-sm text-slate-500", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          index + 1,
+          " / ",
+          questions.length
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Total ",
+          clock$1(results.reduce((n2, r2) => n2 + r2.ms, 0) + (review ? 0 : now - startRef.current))
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-full bg-indigo-500 transition-all", style: { width: `${index / questions.length * 100}%` } }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center my-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-8xl sm:text-9xl font-bold text-slate-900 leading-none select-none", children: current.c }),
+        !review && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `mt-4 text-lg font-mono font-bold ${speedClass2(now - startRef.current)}`, children: [
+          secText(Math.max(0, now - startRef.current)),
+          " s"
+        ] })
+      ] }),
+      !review ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "form",
+          {
+            onSubmit: (e) => {
+              e.preventDefault();
+              submit(false);
+            },
+            className: "flex flex-col sm:flex-row gap-3",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  ref: inputRef,
+                  value: typed,
+                  onChange: (e) => setTyped(e.target.value),
+                  onPaste: (e) => e.preventDefault(),
+                  onDrop: (e) => e.preventDefault(),
+                  onKeyDown: (e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      submit(true);
+                    }
+                  },
+                  autoComplete: "off",
+                  autoCorrect: "off",
+                  autoCapitalize: "off",
+                  spellCheck: false,
+                  placeholder: type === "kanji" ? "English meaning" : "romaji",
+                  "aria-label": type === "kanji" ? "English meaning" : "romaji",
+                  className: "flex-1 border-2 border-slate-300 focus:border-indigo-500 outline-none rounded-xl px-4 py-3 text-lg"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "submit", className: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-6 py-3", children: "Enter" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => submit(true),
+                  className: "border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl px-4 py-3 text-sm",
+                  children: "I don't know (Esc)"
+                }
+              )
+            ]
+          }
+        ),
+        hasKana(typed) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm font-bold text-rose-600", children: "Japanese input is on \u2014 switch it off and type in English letters." })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border-2 border-rose-200 bg-rose-50 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-rose-700", children: review.leftPage ? "\u2717 You left this page during the question, so it does not count." : review.passed ? "Skipped" : `\u2717 "${review.typed}" is not accepted` }),
+        review.mixedWith && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-1 text-slate-800", children: [
+          "That is the answer for ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl font-bold", children: review.mixedWith }),
+          ". Look again:",
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl font-bold", children: review.q.c }),
+          " \u2260 ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-2xl font-bold", children: review.mixedWith })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-slate-700", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
+            review.q.c,
+            " = "
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: review.q.answers.join(" / ") })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: goNext, className: "mt-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg px-5 py-2", children: "Next (Enter)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-xs text-slate-500", children: "The time you spend reading this is not counted." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 text-right", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => {
+            setReview(null);
+            setPhase("done");
+          },
+          className: "text-xs text-slate-400 hover:text-slate-600 underline",
+          children: "Stop and see results"
+        }
+      ) })
+    ] }),
+    phase === "done" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ResultsPanel$1,
+      {
+        results,
+        total: questions.length,
+        target,
+        good,
+        speedClass: speedClass2,
+        onRetrySame: () => begin(questions.map((q2) => q2.c)),
+        onRetryWeak: () => {
+          const weak = new Set(results.filter((r2) => !r2.correct || r2.ms > good * 1e3).map((r2) => r2.q.c));
+          const withNeighbours = /* @__PURE__ */ new Set();
+          weak.forEach((c) => {
+            var _a;
+            withNeighbours.add(c);
+            (_a = neighbours.get(c)) == null ? void 0 : _a.forEach((x2) => withNeighbours.add(x2));
+          });
+          scopeRef.current = "review: mistakes & slow ones";
+          const list2 = [...withNeighbours].filter((c) => answersFor(c).length > 0);
+          begin([...list2, ...list2]);
+        },
+        onSetup: () => setPhase("setup"),
+        saveState
+      }
+    )
+  ] }) }) });
+}
+function ResultsPanel$1(props) {
+  const { results, total, target, good, speedClass: speedClass2, onRetrySame, onRetryWeak, onSetup, saveState } = props;
+  const answered = results.length;
+  const totalMs = results.reduce((n2, r2) => n2 + r2.ms, 0);
+  const avgMs = answered ? totalMs / answered : 0;
+  const correct = results.filter((r2) => r2.correct);
+  const mistakes = results.filter((r2) => !r2.correct);
+  const weakCount = new Set(results.filter((r2) => !r2.correct || r2.ms > good * 1e3).map((r2) => r2.q.c)).size;
+  const byChar = /* @__PURE__ */ new Map();
+  for (const r2 of results) {
+    if (!byChar.has(r2.q.c))
+      byChar.set(r2.q.c, []);
+    byChar.get(r2.q.c).push(r2);
+  }
+  const charStats = [...byChar.entries()].map(([c, list2]) => ({ c, ok: list2.filter((r2) => r2.correct).length, n: list2.length, avg: list2.reduce((n2, r2) => n2 + r2.ms, 0) / list2.length })).sort((a, b) => a.ok / a.n - b.ok / b.n || b.avg - a.avg);
+  const mixups = /* @__PURE__ */ new Map();
+  for (const r2 of mistakes) {
+    if (!r2.mixedWith)
+      continue;
+    const key = `${r2.q.c} \u2192 ${r2.mixedWith}`;
+    mixups.set(key, (mixups.get(key) ?? 0) + 1);
+  }
+  const tier = avgMs <= target * 1e3 ? "Excellent" : avgMs <= good * 1e3 ? "Very good" : "Keep practising";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6", children: [
+      answered < total && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-3", children: [
+        "Stopped after ",
+        answered,
+        " of ",
+        total,
+        " questions."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-3 gap-3 text-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$2, { label: "Total time", value: clock$1(totalMs) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$2, { label: "Average per character", value: `${secText(avgMs, 2)} s`, className: speedClass2(avgMs) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$2, { label: "Correct", value: `${correct.length} / ${answered}` })
+      ] }),
+      answered > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `mt-4 text-center font-bold ${speedClass2(avgMs)}`, children: [
+        tier,
+        " \u2014 average ",
+        secText(avgMs, 2),
+        " s (target: ",
+        target,
+        " s or less)"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-5 flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onRetrySame, className: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg px-4 py-2", children: "Try the same set again" }),
+        weakCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onRetryWeak, className: "bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg px-4 py-2", children: "Practise mistakes & slow ones, with their look-alikes" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onSetup, className: "border border-slate-300 hover:bg-slate-50 rounded-lg px-4 py-2", children: "Choose sets" })
+      ] })
+    ] }),
+    mixups.size > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card$1, { title: "Mixed up", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mb-2", children: "You gave the answer of a look-alike character:" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: [...mixups.entries()].map(([k2, n2]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "rounded-lg border border-rose-300 bg-rose-50 px-3 py-1 text-xl", children: [
+        k2,
+        " ",
+        n2 > 1 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm text-rose-700", children: [
+          "\xD7",
+          n2
+        ] })
+      ] }, k2)) })
+    ] }),
+    mistakes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card$1, { title: `Mistakes (${mistakes.length})`, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-left text-slate-500 border-b", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "Character" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "You typed" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1", children: "Accepted answers" })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: mistakes.map((r2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-100 align-top", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-2 text-2xl", children: r2.q.c }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 pr-2 text-rose-700", children: [
+          r2.leftPage ? "(left the page)" : r2.passed ? "(skipped)" : r2.typed,
+          r2.mixedWith && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
+            " (= ",
+            r2.mixedWith,
+            ")"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5", children: r2.q.answers.join(" / ") })
+      ] }, i)) })
+    ] }) }),
+    charStats.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card$1, { title: "Each character", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: charStats.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: `border rounded-lg px-3 py-1.5 text-center ${s2.ok < s2.n ? "border-rose-300 bg-rose-50" : "border-slate-200"}`,
+        title: `${s2.ok} of ${s2.n} correct`,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-2xl", children: s2.c }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `text-xs font-mono ${speedClass2(s2.avg)}`, children: [
+            secText(s2.avg),
+            " s"
+          ] }),
+          s2.ok < s2.n && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-[10px] text-rose-700", children: [
+            "\u2717",
+            s2.n - s2.ok
+          ] })
+        ]
+      },
+      s2.c
+    )) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500 text-center", children: [
+      saveState === "saving" && "Saving your results\u2026",
+      saveState === "saved" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        "\u2713 Saved. See how you are improving on",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/progress", className: "text-indigo-600 font-bold underline", children: "My Progress" }),
+        "."
+      ] }),
+      saveState === "signin" && "Sign in to save your results and see your progress over time.",
+      saveState === "short" && "Answer at least 5 questions to save a result.",
+      saveState === "error" && "Your results could not be saved this time."
+    ] })
+  ] });
+}
+function Stat$2({ label, value, className = "" }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-slate-50 border border-slate-200 p-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-slate-500", children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `text-xl font-black font-mono ${className}`, children: value })
+  ] });
+}
+function Card$1({ title, children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900 mb-3", children: title }),
+    children
+  ] });
+}
+var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: LookalikeTest,
+  loader: loader$k,
+  meta: meta$m
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$j({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -77475,7 +81721,7 @@ async function loader$f({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$f = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrivacyPolicy() {
@@ -77539,13 +81785,13 @@ function PrivacyPolicy() {
     }
   );
 }
-var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrivacyPolicy,
-  loader: loader$f,
-  meta: meta$f
+  loader: loader$j,
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$e({ request, params }) {
+async function loader$i({ request, params }) {
   const url = new URL(request.url);
   const slug = String(params.slug || "");
   const renamed = newSlugFor(slug);
@@ -77606,7 +81852,7 @@ async function loader$e({ request, params }) {
     loadError
   });
 }
-var meta$e = ({ data: data2 }) => {
+var meta$k = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonSlugPage() {
@@ -77776,17 +82022,19 @@ function LessonTopicHubPage() {
     }
   );
 }
-var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonSlugPage,
-  loader: loader$e,
-  meta: meta$e
+  loader: loader$i,
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
 var generatedRoutes = [
   "/about",
   "/api.auth.logout",
+  "/api.lesson-progress",
   "/api.lesson-settings",
   "/api.teacher-vocab",
+  "/api.test-attempts",
   "/class-quiz.$homeworkId",
   "/contact",
   "/culture._index",
@@ -77811,12 +82059,21 @@ var generatedRoutes = [
   "/lessons.family-1",
   "/my-account",
   "/prices",
+  "/progress",
   "/reference.200kanji",
   "/reference._index",
   "/reference.text-types",
   "/reference.vce-grammar",
   "/reference.vocab",
   "/reference.writing-styles",
+  "/speaking.$task",
+  "/speaking._index",
+  "/test._index",
+  "/test.kanji",
+  "/test.kanji_.answers",
+  "/test.lookalike",
+  "/test.lookalike_.answers",
+  "/test.typing",
   "/vce._index",
   "/vce.speaking._index",
   "/vce.speaking.eoy-oral-drill",
@@ -77828,9 +82085,11 @@ var generatedRoutes = [
   "/vce.writing.eoy-writing",
   "/vce.writing.eoy-writing-custom",
   "/vce.writing.genkoyoshi-editor-vce",
-  "/vce.writing.kanji-grammar-checker"
+  "/vce.writing.kanji-grammar-checker",
+  "/world.$place",
+  "/world._index"
 ];
-async function loader$d({ request }) {
+async function loader$h({ request }) {
   const baseUrl = "https://jptutoraiyamato.com";
   const routes2 = generatedRoutes.includes("") ? generatedRoutes : ["", ...generatedRoutes];
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -77851,9 +82110,9 @@ ${routes2.map(
     }
   });
 }
-var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$d
+  loader: loader$h
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$4 = "CONTENT_GAMES";
 async function fetchGamesContentData(supabase2) {
@@ -77916,7 +82175,7 @@ function useGamesContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$c({ request }) {
+async function loader$g({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -78063,16 +82322,16 @@ function GamesHubIndex() {
     }
   );
 }
-var meta$d = ({ data: data2 }) => {
+var meta$j = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
-  loader: loader$c,
-  meta: meta$d
+  loader: loader$g,
+  meta: meta$j
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$b({ request }) {
+async function loader$f({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -78162,29 +82421,822 @@ function LegalIndex() {
     }
   );
 }
-var meta$c = ({ data: data2 }) => {
+var meta$i = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route57 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
-  loader: loader$b,
-  meta: meta$c
+  loader: loader$f,
+  meta: meta$i
 }, Symbol.toStringTag, { value: "Module" }));
-var meta$b = () => [
+var meta$h = () => [
   { title: "Preparing report..." },
   { name: "robots", content: "noindex, nofollow" }
 ];
 function PrintReport() {
   return null;
 }
-var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route58 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrintReport,
-  meta: meta$b
+  meta: meta$h
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$a = ({ request }) => loadGamePage(request);
-var meta$a = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var PLAZA_RULES_VERSION = 1;
+var PLAZA_CLOSED_MESSAGES = {
+  LOGIN_REQUIRED: "Please log in to use Together mode.",
+  SCHOOL_ACCOUNT: "Together mode is only for personal accounts. Teacher accounts and students in a school class can use the Speaking Tasks instead.",
+  SUSPENDED: "You cannot use Together mode at the moment because of reports from other users.",
+  ROOM_FULL: "This place is full right now. Please try again in a few minutes.",
+  FULL: "This place is full right now. Please try again in a few minutes.",
+  OPENED_ELSEWHERE: "You opened Together mode in another tab or device, so this one was closed.",
+  IDLE: "You were away for a while, so you left Together mode.",
+  AUTH_TIMEOUT: "The connection timed out. Please try again.",
+  CONNECTION_LOST: "The connection was lost. Please try again.",
+  NOT_AGREED: "Please agree to the Together mode rules first.",
+  SERVER_ERROR: "Something went wrong on the server. Please try again later."
+};
+var MOVE_SEND_MS = 200;
+var BUBBLE_MS = 4500;
+function usePlaza({
+  placeId,
+  active,
+  getStart
+}) {
+  const [phase, setPhase] = reactExports.useState("off");
+  const [closedCode, setClosedCode] = reactExports.useState(null);
+  const [me2, setMe] = reactExports.useState(null);
+  const [others, setOthers] = reactExports.useState({});
+  const [bubbles, setBubbles] = reactExports.useState({});
+  const [phrases, setPhrases] = reactExports.useState([]);
+  const [stamps, setStamps] = reactExports.useState([]);
+  const [notice, setNotice] = reactExports.useState(null);
+  const [attempt, setAttempt] = reactExports.useState(0);
+  const wsRef = reactExports.useRef(null);
+  const getStartRef = reactExports.useRef(getStart);
+  getStartRef.current = getStart;
+  const phrasesRef = reactExports.useRef([]);
+  const stampsRef = reactExports.useRef([]);
+  const bubbleId = reactExports.useRef(0);
+  const pendingMove = reactExports.useRef(null);
+  const moveTimer = reactExports.useRef(null);
+  const showBubble = reactExports.useCallback((pid, text, stamp) => {
+    const id2 = ++bubbleId.current;
+    setBubbles((prev) => ({ ...prev, [pid]: { id: id2, text, stamp } }));
+    setTimeout(() => {
+      setBubbles((prev) => {
+        var _a;
+        if (((_a = prev[pid]) == null ? void 0 : _a.id) !== id2)
+          return prev;
+        const next = { ...prev };
+        delete next[pid];
+        return next;
+      });
+    }, BUBBLE_MS);
+  }, []);
+  const onMessage = reactExports.useCallback(
+    (msg) => {
+      switch (msg.t) {
+        case "welcome": {
+          phrasesRef.current = Array.isArray(msg.phrases) ? msg.phrases : [];
+          stampsRef.current = Array.isArray(msg.stamps) ? msg.stamps : [];
+          setPhrases(phrasesRef.current);
+          setStamps(stampsRef.current);
+          setMe(msg.you);
+          const map = {};
+          for (const p2 of msg.players ?? [])
+            map[p2.pid] = p2;
+          setOthers(map);
+          setPhase("live");
+          break;
+        }
+        case "join":
+          setOthers((prev) => ({ ...prev, [msg.p.pid]: msg.p }));
+          break;
+        case "leave":
+          setOthers((prev) => {
+            if (!prev[msg.pid])
+              return prev;
+            const next = { ...prev };
+            delete next[msg.pid];
+            return next;
+          });
+          break;
+        case "moves":
+          setOthers((prev) => {
+            const next = { ...prev };
+            for (const [pid, x2, y2] of msg.m ?? [])
+              if (next[pid])
+                next[pid] = { ...next[pid], x: x2, y: y2 };
+            return next;
+          });
+          break;
+        case "avatar":
+        case "talking":
+          setOthers(
+            (prev) => prev[msg.pid] ? { ...prev, [msg.pid]: { ...prev[msg.pid], ...msg.t === "avatar" ? { avatar: msg.i } : { talking: !!msg.on } } } : prev
+          );
+          if (msg.t === "avatar")
+            setMe((m2) => m2 && m2.pid === msg.pid ? { ...m2, avatar: msg.i } : m2);
+          break;
+        case "say": {
+          const p2 = phrasesRef.current[msg.i];
+          if (p2)
+            showBubble(msg.pid, p2.ja, false);
+          break;
+        }
+        case "stamp": {
+          const s2 = stampsRef.current[msg.i];
+          if (s2)
+            showBubble(msg.pid, s2, true);
+          break;
+        }
+        case "blocked":
+          setNotice("Blocked. You and this person will not see each other in Yamato Town.");
+          break;
+        case "reported":
+          setNotice("Thank you. We will check your report. You and this person will not see each other any more.");
+          break;
+      }
+    },
+    [showBubble]
+  );
+  reactExports.useEffect(() => {
+    if (!active) {
+      setPhase("off");
+      setOthers({});
+      setBubbles({});
+      setMe(null);
+      return;
+    }
+    let stopped = false;
+    let retries = 0;
+    let retryTimer = null;
+    const fail = (code) => {
+      if (stopped)
+        return;
+      setClosedCode(code);
+      setPhase("closed");
+    };
+    const connect = async () => {
+      const joinRes = await yamatoFetch(`${YAMATO_API_BASE}/api/world/plaza/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ place: placeId })
+      }).catch(() => null);
+      const join = await (joinRes == null ? void 0 : joinRes.json().catch(() => ({})));
+      if (stopped)
+        return;
+      if (!joinRes)
+        return fail("CONNECTION_LOST");
+      if ((join == null ? void 0 : join.status) === "NOT_AGREED")
+        return setPhase("needs-agree");
+      if (!joinRes.ok || !(join == null ? void 0 : join.room))
+        return fail((join == null ? void 0 : join.status) || "SERVER_ERROR");
+      const token = await getAccessToken();
+      if (stopped)
+        return;
+      if (!token)
+        return fail("LOGIN_REQUIRED");
+      const ws = new WebSocket(`${YAMATO_API_BASE.replace(/^http/, "ws")}/api/world/plaza/room/${placeId}/${join.room}/ws`);
+      wsRef.current = ws;
+      let serverClosed = false;
+      ws.onopen = () => {
+        retries = 0;
+        const start = getStartRef.current();
+        ws.send(JSON.stringify({ t: "auth", token, avatar: start.avatar, x: start.x, y: start.y }));
+      };
+      ws.onmessage = (event) => {
+        let msg;
+        try {
+          msg = JSON.parse(String(event.data));
+        } catch {
+          return;
+        }
+        if ((msg == null ? void 0 : msg.t) === "closed") {
+          serverClosed = true;
+          fail(String(msg.code || "SERVER_ERROR"));
+          return;
+        }
+        onMessage(msg);
+      };
+      ws.onclose = (event) => {
+        if (wsRef.current === ws)
+          wsRef.current = null;
+        if (stopped || serverClosed || event.code === 4e3)
+          return;
+        retries += 1;
+        setOthers({});
+        if (retries > 5)
+          return fail("CONNECTION_LOST");
+        setPhase("connecting");
+        retryTimer = setTimeout(connect, Math.min(1e3 * retries, 5e3));
+      };
+    };
+    (async () => {
+      setClosedCode(null);
+      setNotice(null);
+      setPhase("checking");
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/plaza/status`).catch(() => null);
+      const data2 = await (res == null ? void 0 : res.json().catch(() => ({})));
+      if (stopped)
+        return;
+      if (!res)
+        return fail("CONNECTION_LOST");
+      if (res.status === 401)
+        return fail("LOGIN_REQUIRED");
+      if ((data2 == null ? void 0 : data2.status) === "NOT_AGREED")
+        return setPhase("needs-agree");
+      if ((data2 == null ? void 0 : data2.status) !== "OK")
+        return fail((data2 == null ? void 0 : data2.status) || "SERVER_ERROR");
+      setPhase("connecting");
+      connect();
+    })();
+    const ping = setInterval(() => {
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify({ t: "ping" }));
+    }, 3e4);
+    return () => {
+      var _a;
+      stopped = true;
+      clearInterval(ping);
+      if (retryTimer)
+        clearTimeout(retryTimer);
+      if (moveTimer.current)
+        clearTimeout(moveTimer.current);
+      moveTimer.current = null;
+      (_a = wsRef.current) == null ? void 0 : _a.close();
+      wsRef.current = null;
+    };
+  }, [active, placeId, attempt, onMessage]);
+  const send = reactExports.useCallback((msg) => {
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN)
+      ws.send(JSON.stringify(msg));
+  }, []);
+  const sendMove = reactExports.useCallback(
+    (p2) => {
+      pendingMove.current = p2;
+      if (moveTimer.current)
+        return;
+      moveTimer.current = setTimeout(() => {
+        moveTimer.current = null;
+        const next = pendingMove.current;
+        pendingMove.current = null;
+        if (next)
+          send({ t: "move", x: next.x, y: next.y });
+      }, MOVE_SEND_MS);
+    },
+    [send]
+  );
+  const agree = reactExports.useCallback(async () => {
+    const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/plaza/agree`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ version: PLAZA_RULES_VERSION })
+    }).catch(() => null);
+    const data2 = await (res == null ? void 0 : res.json().catch(() => ({})));
+    if ((data2 == null ? void 0 : data2.status) === "OK") {
+      setAttempt((n2) => n2 + 1);
+      return null;
+    }
+    if ((data2 == null ? void 0 : data2.status) && PLAZA_CLOSED_MESSAGES[data2.status]) {
+      setClosedCode(data2.status);
+      setPhase("closed");
+      return null;
+    }
+    return (data2 == null ? void 0 : data2.message) || "Something went wrong. Please try again.";
+  }, []);
+  return {
+    phase,
+    closedCode,
+    me: me2,
+    others,
+    bubbles,
+    phrases,
+    stamps,
+    notice,
+    clearNotice: () => setNotice(null),
+    retry: () => setAttempt((n2) => n2 + 1),
+    agree,
+    sendMove,
+    say: (i) => send({ t: "say", i }),
+    stamp: (i) => send({ t: "stamp", i }),
+    setAvatar: (i) => send({ t: "avatar", i }),
+    setTalking: (on) => send({ t: "talking", on }),
+    block: (pid) => send({ t: "block", pid }),
+    report: (pid, reason) => send({ t: "report", pid, reason })
+  };
+}
+function PlazaChatBar({
+  phrases,
+  stamps,
+  onSay,
+  onStamp,
+  othersCount
+}) {
+  const [cooling, setCooling] = reactExports.useState(false);
+  const press = (fn) => {
+    if (cooling)
+      return;
+    fn();
+    setCooling(true);
+    setTimeout(() => setCooling(false), 2500);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 space-y-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-900 dark:text-white", children: "\u{1F4AC} Say something" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: othersCount === 0 ? "Nobody else is here right now." : `${othersCount} other ${othersCount === 1 ? "learner" : "learners"} here` })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: phrases.map((p2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        disabled: cooling,
+        onClick: () => press(() => onSay(i)),
+        title: p2.en,
+        className: "px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-indigo-400 text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed text-left",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "font-bold text-slate-800 dark:text-slate-100", children: p2.ja }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[10px] text-slate-500", children: p2.en })
+        ]
+      },
+      p2.ja
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1", children: stamps.map((s2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        disabled: cooling,
+        onClick: () => press(() => onStamp(i)),
+        className: "text-2xl w-10 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+        "aria-label": `Stamp ${s2}`,
+        children: s2
+      },
+      s2
+    )) })
+  ] });
+}
+function PlazaRulesModal({ onAgree, onCancel }) {
+  const [age, setAge] = reactExports.useState(false);
+  const [kind, setKind] = reactExports.useState(false);
+  const [busy, setBusy] = reactExports.useState(false);
+  const [error, setError] = reactExports.useState(null);
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    const err = await onAgree();
+    setBusy(false);
+    if (err)
+      setError(err);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4", role: "dialog", "aria-modal": "true", onClick: onCancel, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      className: "bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto",
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-lg font-black text-slate-900 dark:text-white", children: "\u{1F465} Together mode rules" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "text-sm text-slate-600 dark:text-slate-300 list-disc pl-5 space-y-1.5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "You can see other learners walking around the shop, and they can see you." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+            "You can only use ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "set Japanese phrases and stamps" }),
+            ". There is no free chat, no voice between users, no private messages and no friend requests."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+            "Your real name and nickname are ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "never shown" }),
+            ". You get a random town name (for example, \u305F\u306C\u304D 27) each time you come in."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Your conversation with the AI clerk is still just between you and the clerk. Others only see \u201Ctalking to the clerk\u201D." }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+            "If someone bothers you, tap their avatar to ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "block" }),
+            " or ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "report" }),
+            " them. Reports are checked by our team, and people who are reported can be removed."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Accounts linked to a school class are not able to use Together mode." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2 text-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex gap-2 items-start cursor-pointer", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: age, onChange: (e) => setAge(e.target.checked), className: "mt-1" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-800 dark:text-slate-100", children: [
+              "I am 18 or older, ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "or" }),
+              " my parent or guardian has said I can use Together mode."
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex gap-2 items-start cursor-pointer", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: kind, onChange: (e) => setKind(e.target.checked), className: "mt-1" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-800 dark:text-slate-100", children: "I will be kind to other learners and follow these rules." })
+          ] })
+        ] }),
+        error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: error }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onCancel, className: "px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer", children: "Not now" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: submit,
+              disabled: !age || !kind || busy,
+              className: "px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+              children: busy ? "Saving\u2026" : "Agree and join"
+            }
+          )
+        ] })
+      ]
+    }
+  ) });
+}
+var REPORT_REASONS = [
+  { id: "spam", label: "Sending too many phrases or stamps" },
+  { id: "following", label: "Following me around" },
+  { id: "unkind", label: "Being unkind" },
+  { id: "other", label: "Something else" }
+];
+function PlazaPlayerMenu({
+  player,
+  onBlock,
+  onReport,
+  onClose
+}) {
+  const [reporting, setReporting] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4", role: "dialog", "aria-modal": "true", onClick: onClose, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl p-5 max-w-sm w-full space-y-3", onClick: (e) => e.stopPropagation(), children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-black text-slate-900 dark:text-white", children: [
+      AVATARS[player.avatar] ?? AVATARS[0],
+      " ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", children: player.name })
+    ] }),
+    !reporting ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "Is this person bothering you?" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: onBlock,
+            className: "px-4 py-2 rounded-xl border-2 border-slate-300 font-bold text-slate-800 dark:text-slate-100 cursor-pointer",
+            children: "\u{1F6AB} Block \u2014 we will not see each other"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setReporting(true),
+            className: "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer",
+            children: "\u{1F6A9} Report to the AI Yamato team"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onClose, className: "px-4 py-2 rounded-xl text-slate-500 font-bold cursor-pointer", children: "Cancel" })
+      ] })
+    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: "What happened? (This person will also be blocked.)" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-2", children: [
+        REPORT_REASONS.map((r2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => onReport(r2.id),
+            className: "px-4 py-2 rounded-xl border border-slate-300 text-left text-sm font-bold text-slate-800 dark:text-slate-100 hover:border-rose-400 cursor-pointer",
+            children: r2.label
+          },
+          r2.id
+        )),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setReporting(false), className: "px-4 py-2 rounded-xl text-slate-500 font-bold cursor-pointer", children: "Back" })
+      ] })
+    ] })
+  ] }) });
+}
+function useSchoolAccountRedirect(target) {
+  const navigate = useNavigate();
+  const [state, setState] = reactExports.useState("checking");
+  reactExports.useEffect(() => {
+    let stopped = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        if (!stopped)
+          setState("ok");
+        return;
+      }
+      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/world/plaza/status`).catch(() => null);
+      const data2 = await (res == null ? void 0 : res.json().catch(() => ({})));
+      if (stopped)
+        return;
+      if ((data2 == null ? void 0 : data2.status) === "SCHOOL_ACCOUNT")
+        navigate(target, { replace: true });
+      else
+        setState("ok");
+    })();
+    return () => {
+      stopped = true;
+    };
+  }, [navigate, target]);
+  return state;
+}
+var meta$g = ({ params }) => {
+  const place = findWorldPlace(params.place);
+  const title = place ? `${place.title} \u2013 Yamato Town` : "Yamato Town";
+  const description = "Meet other Japanese learners, greet them with set Japanese phrases and stamps, and talk to an AI character in Japanese.";
+  return [
+    { title: `${title} | AI Yamato Portal` },
+    { name: "description", content: description },
+    { property: "og:title", content: `${title} | AI Yamato Portal` },
+    { property: "og:description", content: description }
+  ];
+};
+function WorldPlacePage() {
+  var _a, _b;
+  const { place: placeId } = useParams();
+  const navigate = useNavigate();
+  const place = findWorldPlace(placeId);
+  const [signedIn, setSignedIn] = reactExports.useState(null);
+  const [talking, setTalking] = reactExports.useState(false);
+  const [confirming, setConfirming] = reactExports.useState(false);
+  const [picked, setPicked] = reactExports.useState(null);
+  const sceneState = reactExports.useRef({ x: (place == null ? void 0 : place.start.x) ?? 50, y: (place == null ? void 0 : place.start.y) ?? 84, avatar: 0 });
+  const gate = useSchoolAccountRedirect(place ? `/speaking/${place.id}` : "/speaking");
+  const plaza = usePlaza({
+    placeId: (place == null ? void 0 : place.id) ?? "",
+    active: Boolean(place) && signedIn === true && gate === "ok",
+    getStart: () => sceneState.current
+  });
+  reactExports.useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSignedIn(Boolean(session));
+    })();
+  }, []);
+  reactExports.useEffect(() => {
+    if (plaza.phase === "live")
+      plaza.setTalking(talking);
+  }, [talking, plaza.phase]);
+  reactExports.useEffect(() => {
+    if (!plaza.notice)
+      return;
+    const t2 = setTimeout(plaza.clearNotice, 6e3);
+    return () => clearTimeout(t2);
+  }, [plaza.notice]);
+  if (!place) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: "Yamato Town", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto p-8 text-center space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-700", children: "This place does not exist." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/world", className: "text-indigo-600 font-bold underline", children: "Back to Yamato Town" })
+    ] }) });
+  }
+  if (gate === "checking") {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: place.title, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen" }) });
+  }
+  const askToTalk = () => {
+    if (!signedIn) {
+      requestAuthModal("signin");
+      return;
+    }
+    setConfirming(true);
+  };
+  const live = plaza.phase === "live";
+  const others = live ? Object.values(plaza.others) : [];
+  const npcName = place.npc.name.toLowerCase();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(ToolPageWrapper, { breadcrumbTitle: place.title, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-amber-50/40 dark:bg-slate-950 py-6 sm:py-10 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-end justify-between gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/world", className: "text-xs font-bold text-indigo-600 underline", children: "\u2190 Yamato Town" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-2xl sm:text-3xl font-black text-slate-900 dark:text-white", children: [
+            place.emoji,
+            " ",
+            place.title,
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-lg text-slate-500", children: place.titleJa }),
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold text-indigo-600 align-middle", children: "BETA" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+            "Meet other learners here, and talk to the ",
+            npcName,
+            " in Japanese."
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-500 text-right", children: [
+          "\u{1F465} Other learners: set phrases and stamps only",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+          "\u{1F3A4} ",
+          place.npc.icon,
+          " ",
+          place.npc.name,
+          ": ",
+          place.minutes,
+          " min \xB7 ",
+          CREDIT_COSTS.worldTalk3,
+          " credits \xB7 voice only"
+        ] })
+      ] }),
+      signedIn === false && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-sm p-4 flex flex-wrap items-center justify-between gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+          "Sign in to see and greet other learners, or to talk to the ",
+          npcName,
+          "."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => requestAuthModal("signin"), className: "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold cursor-pointer", children: "Sign in" })
+      ] }),
+      !talking && signedIn && (plaza.phase === "checking" || plaza.phase === "connecting") && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Joining\u2026" }),
+      !talking && plaza.phase === "closed" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm p-4 flex flex-wrap items-center justify-between gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: PLAZA_CLOSED_MESSAGES[plaza.closedCode ?? ""] ?? PLAZA_CLOSED_MESSAGES.SERVER_ERROR }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
+          !["SCHOOL_ACCOUNT", "SUSPENDED"].includes(plaza.closedCode ?? "") && /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: plaza.retry, className: "px-3 py-1.5 rounded-lg border border-amber-400 font-bold cursor-pointer", children: "Try again" }),
+          plaza.closedCode === "SCHOOL_ACCOUNT" && /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: `/speaking/${place.id}`, className: "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold", children: "Go to Speaking Tasks" })
+        ] })
+      ] }),
+      plaza.notice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm p-3", children: plaza.notice }),
+      !talking ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          WorldScene,
+          {
+            place,
+            nickname: live ? ((_a = plaza.me) == null ? void 0 : _a.name) ?? "" : "",
+            disabled: confirming || Boolean(picked),
+            onTalk: askToTalk,
+            stateRef: sceneState,
+            onMove: live ? plaza.sendMove : void 0,
+            onAvatarChange: live ? plaza.setAvatar : void 0,
+            others,
+            bubbles: live ? plaza.bubbles : void 0,
+            myPid: live ? (_b = plaza.me) == null ? void 0 : _b.pid : void 0,
+            onPickOther: setPicked
+          }
+        ),
+        live && /* @__PURE__ */ jsxRuntimeExports.jsx(PlazaChatBar, { phrases: plaza.phrases, stamps: plaza.stamps, onSay: plaza.say, onStamp: plaza.stamp, othersCount: others.length }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-3 sm:grid-cols-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-bold text-slate-900 dark:text-white mb-1", children: [
+              "\u{1F3AF} Talking to the ",
+              npcName
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "list-disc pl-5 space-y-0.5 text-slate-600 dark:text-slate-300", children: place.goals.map((g) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: g }, g)) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 text-sm text-slate-600 dark:text-slate-300", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-1", children: "\u{1F579}\uFE0F How it works" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+              "Walk with the arrow keys (or W A S D), or tap the floor. Greet other learners with a set phrase or a stamp. Tap another learner to block or report them. To talk to the ",
+              npcName,
+              ", go to the green circle and press \u201CTalk\u201D (or E)."
+            ] })
+          ] })
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(WorldTalk, { place, onClose: () => setTalking(false) })
+    ] }) }),
+    confirming && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4", role: "dialog", "aria-modal": "true", onClick: () => setConfirming(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full space-y-4", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-lg font-black text-slate-900 dark:text-white", children: [
+        place.npc.icon,
+        " Talk to the ",
+        npcName,
+        "?"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "text-sm text-slate-600 dark:text-slate-300 list-disc pl-5 space-y-1", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "The conversation lasts up to ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            place.minutes,
+            " minutes"
+          ] }),
+          " and uses ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            CREDIT_COSTS.worldTalk3,
+            " credits"
+          ] }),
+          "."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Your browser will ask to use the microphone. No camera is used." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Record what you want to say in Japanese, check the text, then send it. What you say is shown on screen but not saved." }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "The ",
+          npcName,
+          "'s words are hidden at first so you can practise listening. You can show them any time."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "When the conversation ends, you get feedback that matches your learning pace (no extra credits)." }),
+        live && /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          "Other learners cannot hear you or the ",
+          npcName,
+          ". They only see that you are talking."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setConfirming(false), className: "px-4 py-2 rounded-xl border border-slate-300 font-bold cursor-pointer", children: "Cancel" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              setConfirming(false);
+              setTalking(true);
+            },
+            className: "px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer",
+            children: "\u{1F3A4} Start talking"
+          }
+        )
+      ] })
+    ] }) }),
+    plaza.phase === "needs-agree" && /* @__PURE__ */ jsxRuntimeExports.jsx(PlazaRulesModal, { onAgree: plaza.agree, onCancel: () => navigate("/world") }),
+    picked && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      PlazaPlayerMenu,
+      {
+        player: picked,
+        onClose: () => setPicked(null),
+        onBlock: () => {
+          plaza.block(picked.pid);
+          setPicked(null);
+        },
+        onReport: (reason) => {
+          plaza.report(picked.pid, reason);
+          setPicked(null);
+        }
+      }
+    )
+  ] });
+}
+var route59 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: WorldPlacePage,
+  meta: meta$g
+}, Symbol.toStringTag, { value: "Module" }));
+var TITLE = "Yamato Town";
+var DESCRIPTION = "Walk around a little Japanese town, meet other Japanese learners and greet each other with set Japanese phrases and stamps. In every place there is an AI character you can talk to.";
+var meta$f = () => [
+  { title: `${TITLE} | AI Yamato Portal` },
+  { name: "description", content: DESCRIPTION },
+  { property: "og:title", content: `${TITLE} | AI Yamato Portal` },
+  { property: "og:description", content: DESCRIPTION }
+];
+function WorldIndexPage() {
+  const gate = useSchoolAccountRedirect("/speaking");
+  if (gate === "checking")
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: TITLE, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen" }) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: TITLE, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-8", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-3xl p-6 sm:p-10 shadow-xl space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold uppercase tracking-wider bg-white/20 w-fit px-3 py-1 rounded-full", children: "\u{1F465} Meet other learners \xB7 BETA" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-4xl font-black", children: TITLE }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "max-w-2xl text-white/90", children: DESCRIPTION })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-3 sm:grid-cols-2 text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: "\u{1F6E1}\uFE0F Safe by design" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600 dark:text-slate-300", children: "No free chat, no voice between users, and no real names. Personal accounts only. You can block or report anyone." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: "\u{1F3A4} An AI character in every place" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-slate-600 dark:text-slate-300", children: [
+          "Talk to the burger shop clerk, a person at the bus stop, station staff and more, with your voice (",
+          CREDIT_COSTS.worldTalk3,
+          " credits for 3 minutes)."
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-3", children: [
+      WORLD_PLACES.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Link,
+        {
+          to: `/world/${p2.id}`,
+          className: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-amber-400 transition",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", children: p2.emoji }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-lg font-black text-slate-900 dark:text-white", children: [
+              p2.title,
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-sm text-slate-500", children: p2.titleJa })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+              "Meet other learners \xB7 talk to the ",
+              p2.npc.name.toLowerCase(),
+              " ",
+              p2.npc.icon
+            ] })
+          ]
+        },
+        p2.id
+      )),
+      WORLD_PLACES_COMING_SOON.map((p2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-5 opacity-60", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-4xl", children: p2.emoji }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-lg font-black text-slate-700 dark:text-slate-200", children: [
+          p2.title,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "text-sm text-slate-500", children: p2.titleJa })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs font-bold text-slate-500", children: "Coming soon" })
+      ] }, p2.title))
+    ] })
+  ] }) }) });
+}
+var route60 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: WorldIndexPage,
+  meta: meta$f
+}, Symbol.toStringTag, { value: "Module" }));
+var loader$e = ({ request }) => loadGamePage(request);
+var meta$e = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function ShogiRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Shogi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -78197,13 +83249,13 @@ function ShogiRoute() {
     }
   ) });
 }
-var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route61 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ShogiRoute,
-  loader: loader$a,
-  meta: meta$a
+  loader: loader$e,
+  meta: meta$e
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$9({ request }) {
+async function loader$d({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -78277,14 +83329,587 @@ function TermsOfService() {
     }
   );
 }
-var meta$9 = ({ data: data2 }) => {
+var meta$d = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route62 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
-  loader: loader$9,
-  meta: meta$9
+  loader: loader$d,
+  meta: meta$d
+}, Symbol.toStringTag, { value: "Module" }));
+var TYPING_STORE_KEY = "yamato-typing-progress-v1";
+var TYPING_LESSON_COUNT = 22;
+function readTypingProgress() {
+  try {
+    const v2 = JSON.parse(window.localStorage.getItem(TYPING_STORE_KEY) || "{}");
+    return v2 && typeof v2 === "object" ? v2 : {};
+  } catch {
+    return {};
+  }
+}
+async function loader$c({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$c = () => [
+  { title: "Touch Typing | JP Tutor AI Yamato" },
+  { name: "description", content: "Learn to type without looking at the keyboard, step by step, then type Japanese in romaji." }
+];
+var FINGER_OF = {};
+var setF = (keys, f2) => keys.split("").forEach((k2) => FINGER_OF[k2] = f2);
+setF("qaz", "lp");
+setF("wsx", "lr");
+setF("edc", "lm");
+setF("rfvtgb", "li");
+setF("yhnujm", "ri");
+setF("ik,", "rm");
+setF("ol.", "rr");
+setF("p;/'", "rp");
+FINGER_OF[" "] = "th";
+var FINGER_NAME = {
+  lp: "Left little finger",
+  lr: "Left ring finger",
+  lm: "Left middle finger",
+  li: "Left index finger",
+  ri: "Right index finger",
+  rm: "Right middle finger",
+  rr: "Right ring finger",
+  rp: "Right little finger",
+  th: "Thumb"
+};
+var FINGER_COLOR = {
+  lp: { key: "bg-fuchsia-100 border-fuchsia-300", dot: "bg-fuchsia-400" },
+  rp: { key: "bg-fuchsia-100 border-fuchsia-300", dot: "bg-fuchsia-400" },
+  lr: { key: "bg-sky-100 border-sky-300", dot: "bg-sky-400" },
+  rr: { key: "bg-sky-100 border-sky-300", dot: "bg-sky-400" },
+  lm: { key: "bg-emerald-100 border-emerald-300", dot: "bg-emerald-400" },
+  rm: { key: "bg-emerald-100 border-emerald-300", dot: "bg-emerald-400" },
+  li: { key: "bg-amber-100 border-amber-300", dot: "bg-amber-400" },
+  ri: { key: "bg-amber-100 border-amber-300", dot: "bg-amber-400" },
+  th: { key: "bg-slate-100 border-slate-300", dot: "bg-slate-400" }
+};
+var KEY_ROWS = ["qwertyuiop", "asdfghjkl;", "zxcvbnm,./"];
+var pick = (a) => a[Math.floor(Math.random() * a.length)];
+var shuffle$1 = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+function letterDrill(learned, fresh, groups = 12) {
+  const all = learned.split("");
+  const neu = fresh.replace(/ /g, "").split("");
+  const out = [];
+  for (let g = 0; g < groups; g++) {
+    const len = 2 + Math.floor(Math.random() * 3);
+    let w2 = "";
+    for (let i = 0; i < len; i++)
+      w2 += Math.random() < 0.6 ? pick(neu) : pick(all);
+    out.push({ text: w2 });
+  }
+  return out;
+}
+function kanaDrill(pairs, count = 14) {
+  const out = [];
+  let pool = [];
+  while (out.length < count) {
+    if (pool.length === 0)
+      pool = shuffle$1(pairs);
+    const [label, text] = pool.pop();
+    out.push({ label, text });
+  }
+  return out;
+}
+var K = (s2) => s2.split(" ").map((p2) => {
+  const [kana, romaji] = p2.split(":");
+  return [kana, romaji];
+});
+var KANA = {
+  vowels: K("\u3042:a \u3044:i \u3046:u \u3048:e \u304A:o"),
+  k: K("\u304B:ka \u304D:ki \u304F:ku \u3051:ke \u3053:ko"),
+  s: K("\u3055:sa \u3057:shi \u3059:su \u305B:se \u305D:so"),
+  t: K("\u305F:ta \u3061:chi \u3064:tsu \u3066:te \u3068:to"),
+  n: K("\u306A:na \u306B:ni \u306C:nu \u306D:ne \u306E:no"),
+  h: K("\u306F:ha \u3072:hi \u3075:fu \u3078:he \u307B:ho"),
+  m: K("\u307E:ma \u307F:mi \u3080:mu \u3081:me \u3082:mo"),
+  y: K("\u3084:ya \u3086:yu \u3088:yo"),
+  r: K("\u3089:ra \u308A:ri \u308B:ru \u308C:re \u308D:ro"),
+  w: K("\u308F:wa \u3092:wo \u3093:nn")
+};
+var ALL_KANA = Object.values(KANA).flat();
+var JP_WORDS = K(
+  "\u3059\u3057:sushi \u3055\u304F\u3089:sakura \u306D\u3053:neko \u3044\u306C:inu \u3084\u307E:yama \u304B\u308F:kawa \u3046\u307F:umi \u306F\u306A:hana \u305D\u3089:sora \u3072\u3068:hito \u3064\u304F\u3048:tsukue \u3075\u306D:fune \u304A\u304B\u3057:okashi \u3042\u3057\u305F:ashita \u304D\u3082\u306E:kimono \u3068\u3082\u3060\u3061:tomodachi \u305B\u3093\u305B\u3044:sensei \u3042\u308A\u304C\u3068\u3046:arigatou \u304A\u306F\u3088\u3046:ohayou \u3055\u3088\u3046\u306A\u3089:sayounara \u3059\u304D\u3084\u304D:sukiyaki \u305F\u3053\u3084\u304D:takoyaki"
+);
+var EN_WORDS = "the and you that was for are with his they one have this from word but what some can out other were all there when use your how said each she which their time will way about many then them write would like these her long make thing see him two has look more day could come did number sound most people over know water than call first who may down side been now find".split(
+  " "
+);
+var HOME = "asdfjkl;";
+var LESSONS = [
+  { id: "h1", stage: "Home row", title: "F and J", newKeys: "fj", tip: "Find the small bumps on F and J with your index fingers. They are your home.", make: () => letterDrill("fj", "fj") },
+  { id: "h2", stage: "Home row", title: "D and K", newKeys: "dk", tip: "Middle fingers rest on D and K.", make: () => letterDrill("fjdk", "dk") },
+  { id: "h3", stage: "Home row", title: "S and L", newKeys: "sl", tip: "Ring fingers rest on S and L.", make: () => letterDrill("fjdksl", "sl") },
+  { id: "h4", stage: "Home row", title: "A and ;", newKeys: "a;", tip: "Little fingers rest on A and ;.", make: () => letterDrill(HOME, "a;") },
+  { id: "h5", stage: "Home row", title: "G and H", newKeys: "gh", tip: "Reach one key inward with your index fingers, then come back home.", make: () => letterDrill(HOME + "gh", "gh") },
+  { id: "t1", stage: "Top row", title: "R and U", newKeys: "ru", tip: "Index fingers reach up. Keep the other fingers on the home row.", make: () => letterDrill(HOME + "ghru", "ru") },
+  { id: "t2", stage: "Top row", title: "E and I", newKeys: "ei", tip: "Middle fingers reach up.", make: () => letterDrill(HOME + "ghruei", "ei") },
+  { id: "t3", stage: "Top row", title: "W and O", newKeys: "wo", tip: "Ring fingers reach up.", make: () => letterDrill(HOME + "ghrueiwo", "wo") },
+  { id: "t4", stage: "Top row", title: "Q and P", newKeys: "qp", tip: "Little fingers reach up.", make: () => letterDrill(HOME + "ghrueiwoqp", "qp") },
+  { id: "t5", stage: "Top row", title: "T and Y", newKeys: "ty", tip: "Index fingers reach up and inward.", make: () => letterDrill(HOME + "ghrueiwoqpty", "ty") },
+  { id: "b1", stage: "Bottom row", title: "V and M", newKeys: "vm", tip: "Index fingers reach down.", make: () => letterDrill(HOME + "ghrueiwoqptyvm", "vm") },
+  { id: "b2", stage: "Bottom row", title: "C and ,", newKeys: "c,", tip: "Middle fingers reach down.", make: () => letterDrill(HOME + "ghrueiwoqptyvmc", "c,") },
+  { id: "b3", stage: "Bottom row", title: "X and .", newKeys: "x.", tip: "Ring fingers reach down.", make: () => letterDrill(HOME + "ghrueiwoqptyvmcx", "x.") },
+  { id: "b4", stage: "Bottom row", title: "B, N and Z", newKeys: "bnz", tip: "B and N: index fingers reach down and inward. Z: left little finger.", make: () => letterDrill(HOME + "ghrueiwoqptyvmcxbnz", "bnz") },
+  { id: "e1", stage: "English words", title: "Common words", newKeys: "", tip: "Use every finger. Keep your eyes on the screen, not on your hands.", make: () => shuffle$1(EN_WORDS).slice(0, 14).map((text) => ({ text })) },
+  { id: "r1", stage: "Japanese in romaji", title: "\u3042\u3044\u3046\u3048\u304A", newKeys: "aiueo", tip: "Every Japanese sound ends in one of these five vowels.", make: () => kanaDrill(KANA.vowels) },
+  { id: "r2", stage: "Japanese in romaji", title: "\u304B\u30FB\u3055 rows", newKeys: "ks", tip: "\u3057 is shi (not si).", make: () => kanaDrill([...KANA.k, ...KANA.s]) },
+  { id: "r3", stage: "Japanese in romaji", title: "\u305F\u30FB\u306A rows", newKeys: "tn", tip: "\u3061 is chi and \u3064 is tsu.", make: () => kanaDrill([...KANA.t, ...KANA.n]) },
+  { id: "r4", stage: "Japanese in romaji", title: "\u306F\u30FB\u307E rows", newKeys: "hm", tip: "\u3075 is fu (not hu).", make: () => kanaDrill([...KANA.h, ...KANA.m]) },
+  { id: "r5", stage: "Japanese in romaji", title: "\u3084\u30FB\u3089\u30FB\u308F rows and \u3093", newKeys: "yrwn", tip: "\u3092 is wo. \u3093 is written n, but when you type Japanese on a computer you press n twice (nn).", make: () => kanaDrill([...KANA.y, ...KANA.r, ...KANA.w]) },
+  { id: "r6", stage: "Japanese in romaji", title: "All basic kana", newKeys: "", tip: "Mix of everything so far.", make: () => kanaDrill(ALL_KANA, 20) },
+  { id: "r7", stage: "Japanese in romaji", title: "Japanese words", newKeys: "", tip: "Long vowels are typed as you write them in kana: \u3042\u308A\u304C\u3068\u3046 = arigatou.", make: () => shuffle$1(JP_WORDS).slice(0, 10).map(([label, text]) => ({ label, text })) }
+];
+var PASS_ACCURACY = 95;
+var STORE_KEY = TYPING_STORE_KEY;
+function loadProgress() {
+  try {
+    return JSON.parse(window.localStorage.getItem(STORE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+function saveProgress(p2) {
+  try {
+    window.localStorage.setItem(STORE_KEY, JSON.stringify(p2));
+  } catch {
+  }
+}
+function TypingPage() {
+  const [progress, setProgress] = reactExports.useState({});
+  const [lessonIdx, setLessonIdx] = reactExports.useState(null);
+  reactExports.useEffect(() => setProgress(loadProgress()), []);
+  const record = reactExports.useCallback((id2, accuracy, kpm) => {
+    setProgress((prev) => {
+      const old = prev[id2];
+      const passed = accuracy >= PASS_ACCURACY;
+      const next = {
+        ...prev,
+        [id2]: {
+          accuracy: Math.max((old == null ? void 0 : old.accuracy) ?? 0, accuracy),
+          kpm: passed ? Math.max((old == null ? void 0 : old.kpm) ?? 0, kpm) : (old == null ? void 0 : old.kpm) ?? 0,
+          passed: Boolean((old == null ? void 0 : old.passed) || passed)
+        }
+      };
+      saveProgress(next);
+      return next;
+    });
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test", className: "text-sm text-indigo-600 hover:underline", children: "\u2190 All tests" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-2 text-2xl sm:text-3xl font-black text-slate-900", children: "Touch Typing" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-slate-600", children: "Learn to type without looking at the keyboard. It helps in every subject, not only Japanese." }),
+    lessonIdx === null ? /* @__PURE__ */ jsxRuntimeExports.jsx(LessonList, { progress, onOpen: setLessonIdx }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+      LessonRunner,
+      {
+        lesson: LESSONS[lessonIdx],
+        hasNext: lessonIdx + 1 < LESSONS.length,
+        onDone: (acc, kpm) => record(LESSONS[lessonIdx].id, acc, kpm),
+        onNext: () => setLessonIdx(lessonIdx + 1),
+        onBack: () => setLessonIdx(null)
+      },
+      LESSONS[lessonIdx].id + ":" + lessonIdx
+    )
+  ] }) }) });
+}
+function HomePositionGuide() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900", children: "Before you start: the home position" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { className: "list-decimal pl-5 text-sm text-slate-700 space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+        "Put your left fingers on ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "A S D F" }),
+        " and your right fingers on ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "J K L ;" }),
+        "."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+        "Feel the small bumps on ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "F" }),
+        " and ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "J" }),
+        ". Your index fingers always come back to them."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Rest your thumbs on the space bar." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Each finger presses only the keys of its own colour, then returns home." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: "Look at the screen, not your hands. Accuracy first, speed later." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Keyboard, { highlight: null, emphasise: HOME }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(FingerLegend, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2", children: "\u2328\uFE0F This page needs a physical keyboard. Turn Japanese input off (type in English mode)." })
+  ] });
+}
+function LessonList({ progress, onOpen }) {
+  const stages = reactExports.useMemo(() => {
+    const m2 = /* @__PURE__ */ new Map();
+    LESSONS.forEach((l2, i) => {
+      if (!m2.has(l2.stage))
+        m2.set(l2.stage, []);
+      m2.get(l2.stage).push(i);
+    });
+    return [...m2.entries()];
+  }, []);
+  const firstOpen = LESSONS.findIndex((l2) => {
+    var _a;
+    return !((_a = progress[l2.id]) == null ? void 0 : _a.passed);
+  });
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(HomePositionGuide, {}),
+    stages.map(([stage, idxs]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-5", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900 mb-3", children: stage }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid sm:grid-cols-2 gap-2", children: idxs.map((i) => {
+        const l2 = LESSONS[i];
+        const p2 = progress[l2.id];
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => onOpen(i),
+            className: `text-left border rounded-xl px-4 py-3 hover:bg-indigo-50 transition-colors ${i === firstOpen ? "border-indigo-400 ring-2 ring-indigo-100" : "border-slate-200"}`,
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "font-semibold", children: [
+                i + 1,
+                ". ",
+                l2.title
+              ] }),
+              (p2 == null ? void 0 : p2.passed) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-emerald-700", children: [
+                "\u2713 ",
+                p2.kpm,
+                " keys/min"
+              ] }) : i === firstOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold text-indigo-600", children: "Next" }) : null
+            ] })
+          },
+          l2.id
+        );
+      }) })
+    ] }, stage)),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400 text-center", children: "Your progress is kept in this browser only." })
+  ] });
+}
+function LessonRunner(props) {
+  const { lesson, hasNext, onDone, onNext, onBack } = props;
+  const [tokens, setTokens] = reactExports.useState(() => lesson.make());
+  const stream = reactExports.useMemo(() => tokens.map((t2) => t2.text).join(" "), [tokens]);
+  const [pos, setPos] = reactExports.useState(0);
+  const [errors, setErrors] = reactExports.useState(0);
+  const [wrongFlash, setWrongFlash] = reactExports.useState(false);
+  const [imeWarning, setImeWarning] = reactExports.useState(false);
+  const [finished, setFinished] = reactExports.useState(null);
+  const startRef = reactExports.useRef(null);
+  const errorAt = reactExports.useRef(/* @__PURE__ */ new Set());
+  const restart = () => {
+    setTokens(lesson.make());
+    setPos(0);
+    setErrors(0);
+    setFinished(null);
+    startRef.current = null;
+    errorAt.current = /* @__PURE__ */ new Set();
+  };
+  reactExports.useEffect(() => {
+    if (finished)
+      return;
+    const onKey = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey)
+        return;
+      if (e.isComposing || e.key === "Process") {
+        setImeWarning(true);
+        return;
+      }
+      if (e.key.length !== 1)
+        return;
+      e.preventDefault();
+      setImeWarning(false);
+      const expected = stream[pos];
+      if (startRef.current === null)
+        startRef.current = performance.now();
+      if (e.key.toLowerCase() === expected) {
+        const next = pos + 1;
+        setPos(next);
+        if (next >= stream.length) {
+          const minutes = Math.max((performance.now() - startRef.current) / 6e4, 1 / 60);
+          const accuracy = Math.round(stream.length / (stream.length + errors) * 100);
+          const kpm = Math.round(stream.length / minutes);
+          setFinished({ accuracy, kpm });
+          onDone(accuracy, kpm);
+        }
+      } else {
+        setErrors((n2) => n2 + 1);
+        errorAt.current.add(pos);
+        setWrongFlash(true);
+        window.setTimeout(() => setWrongFlash(false), 150);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [stream, pos, errors, finished, onDone]);
+  const nextChar = finished ? null : stream[pos] ?? null;
+  const finger = nextChar ? FINGER_OF[nextChar] : null;
+  let offset = 0;
+  const tokenStarts = tokens.map((t2) => {
+    const s2 = offset;
+    offset += t2.text.length + 1;
+    return s2;
+  });
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onBack, className: "text-sm text-slate-500 hover:text-slate-700 underline", children: "\u2190 Lessons" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-400", children: lesson.stage })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900", children: lesson.title }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mt-1", children: lesson.tip }),
+      !finished ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: `mt-5 flex flex-wrap gap-x-4 gap-y-3 font-mono text-2xl sm:text-3xl p-4 rounded-xl border-2 transition-colors ${wrongFlash ? "border-rose-400 bg-rose-50" : "border-slate-200 bg-slate-50"}`,
+            children: tokens.map((t2, ti2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-start", children: [
+              t2.label && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-sans text-slate-500 mb-0.5", children: t2.label }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                t2.text.split("").map((ch2, ci2) => {
+                  const at = tokenStarts[ti2] + ci2;
+                  const cls = at < pos ? errorAt.current.has(at) ? "text-rose-500" : "text-emerald-600" : at === pos ? "bg-indigo-600 text-white rounded" : "text-slate-400";
+                  return /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `px-0.5 ${cls}`, children: ch2 }, ci2);
+                }),
+                tokenStarts[ti2] + t2.text.length === pos && ti2 < tokens.length - 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "px-0.5 bg-indigo-600 text-white rounded", children: "\u2423" })
+              ] })
+            ] }, ti2))
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 flex flex-wrap items-center justify-between gap-2 text-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-600", children: nextChar && finger ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+            "Next: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { className: "font-mono", children: nextChar === " " ? "space" : nextChar }),
+            " \u2014",
+            " ",
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `inline-block w-3 h-3 rounded-full ${FINGER_COLOR[finger].dot}` }),
+              FINGER_NAME[finger]
+            ] })
+          ] }) : null }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-500", children: [
+            pos,
+            " / ",
+            stream.length,
+            " \xB7 mistakes ",
+            errors
+          ] })
+        ] }),
+        imeWarning && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm font-bold text-rose-600", children: "Japanese input is on. Switch to English input (e.g. press \u82F1\u6570 or Caps Lock on a Mac, \u534A\u89D2/\u5168\u89D2 on Windows)." }),
+        pos === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-xs text-slate-400", children: "Start typing \u2014 the timer starts with your first key." })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-5 text-center space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-2xl font-black ${finished.accuracy >= PASS_ACCURACY ? "text-emerald-600" : "text-amber-600"}`, children: finished.accuracy >= PASS_ACCURACY ? "\u2713 Passed!" : "Almost \u2014 try again" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-slate-700", children: [
+          "Accuracy ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            finished.accuracy,
+            "%"
+          ] }),
+          " (pass: ",
+          PASS_ACCURACY,
+          "%) \xB7 Speed ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: finished.kpm }),
+          " keys per minute"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: restart, className: "border border-slate-300 hover:bg-slate-50 rounded-lg px-4 py-2", children: "Again" }),
+          hasNext && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onNext,
+              className: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg px-5 py-2",
+              children: "Next lesson \u2192"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Keyboard, { highlight: nextChar, emphasise: lesson.newKeys }) })
+    ] })
+  ] });
+}
+function Keyboard({ highlight, emphasise }) {
+  const indent = ["ml-0", "ml-4 sm:ml-6", "ml-8 sm:ml-12"];
+  const keyEl = (k2) => {
+    const f2 = FINGER_OF[k2];
+    const isNext = highlight === k2;
+    const isNew = emphasise.includes(k2);
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: `relative w-7 h-8 sm:w-10 sm:h-10 border rounded-md flex items-center justify-center font-mono text-sm sm:text-base uppercase select-none ${FINGER_COLOR[f2].key} ${isNext ? "ring-4 ring-indigo-500 scale-110 font-black" : ""} ${isNew && !isNext ? "font-bold ring-1 ring-slate-500" : ""}`,
+        children: [
+          k2,
+          (k2 === "f" || k2 === "j") && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute bottom-1 w-2 h-0.5 bg-slate-500 rounded" })
+        ]
+      },
+      k2
+    );
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-1 overflow-x-auto", children: [
+    KEY_ROWS.map((row, r2) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `flex gap-1 ${indent[r2]}`, children: row.split("").map(keyEl) }, r2)),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: `mt-1 h-8 sm:h-10 w-48 sm:w-72 border rounded-md flex items-center justify-center text-xs text-slate-500 ${FINGER_COLOR.th.key} ${highlight === " " ? "ring-4 ring-indigo-500 font-bold" : ""}`,
+        children: "space"
+      }
+    )
+  ] });
+}
+function FingerLegend() {
+  const items = [
+    ["Little fingers", FINGER_COLOR.lp.dot],
+    ["Ring fingers", FINGER_COLOR.lr.dot],
+    ["Middle fingers", FINGER_COLOR.lm.dot],
+    ["Index fingers", FINGER_COLOR.li.dot],
+    ["Thumbs", FINGER_COLOR.th.dot]
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-3 text-xs text-slate-600", children: items.map(([name, dot]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `inline-block w-3 h-3 rounded-full ${dot}` }),
+    name
+  ] }, name)) });
+}
+var route63 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: TypingPage,
+  loader: loader$c,
+  meta: meta$c
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$b({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$b = () => [
+  { title: "Tests | JP Tutor AI Yamato" },
+  {
+    name: "description",
+    content: "Language tests for kana, kanji, vocabulary and sentences: how accurately and how instantly can you answer? Plus a touch typing course."
+  }
+];
+var SECTIONS = [
+  {
+    id: "characters",
+    title: "Characters",
+    jp: "\u6587\u5B57",
+    intro: "See a character and answer as fast as you can.",
+    color: "border-rose-200 bg-rose-50 text-rose-700",
+    items: [
+      { title: "Hiragana", jp: "\u3072\u3089\u304C\u306A", description: "See a hiragana, type its romaji. Column by column, then all." },
+      { title: "Katakana", jp: "\u30AB\u30BF\u30AB\u30CA", description: "See a katakana, type its romaji. Column by column, then all." },
+      {
+        title: "VCE Kanji 200",
+        jp: "\u6F22\u5B57",
+        description: "See a kanji, type its English meaning. Total time and average seconds per kanji. You can check the accepted answers first.",
+        to: "/test/kanji"
+      },
+      {
+        title: "Look-alike Characters",
+        jp: "\u3057\u3064\u30FB\u30B7\u30C4\u30FB\u6301\u5F85",
+        description: "Hiragana, katakana and kanji that are easy to mix up (\u3057\u30FB\u3064, \u30B7\u30FB\u30C4, \u6301\u30FB\u5F85\u30FB\u5BFA). Answer each one quickly and accurately.",
+        to: "/test/lookalike"
+      }
+    ]
+  },
+  {
+    id: "vocabulary",
+    title: "Vocabulary",
+    jp: "\u8A9E\u5F59",
+    intro: "Words by topic, written in hiragana, katakana and kanji.",
+    color: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    items: [{ title: "Vocabulary by topic", jp: "\u3053\u3068\u3070", description: "See a word, type its English meaning." }]
+  },
+  {
+    id: "sentences",
+    title: "Sentences",
+    jp: "\u6587",
+    intro: "Understand Japanese sentences quickly.",
+    color: "border-sky-200 bg-sky-50 text-sky-700",
+    items: [
+      { title: "Listening", jp: "\u304D\u304F", description: "Short to longer sentences. Answer in English." },
+      { title: "Reading", jp: "\u3088\u3080", description: "Short sentences. Answer in English." }
+    ]
+  }
+];
+function TestHub() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-black text-slate-900", children: "Tests" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-slate-600", children: "How accurately \u2014 and how instantly \u2014 can you understand Japanese? Quick, confident answers show real language ability. Students can practise on their own, and teachers can use these tests as formative or summative assessment in class." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/progress", className: "font-bold text-indigo-600 underline", children: "\u{1F4C8} See your results over time in My Progress" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm text-amber-800", children: "\u2328\uFE0F A computer with a keyboard is strongly recommended. Typing on a phone is much slower." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Link,
+      {
+        to: "/test/typing",
+        className: "block rounded-2xl border-2 border-indigo-300 bg-white hover:bg-indigo-50 shadow-sm p-6 transition-colors",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl", "aria-hidden": true, children: "\u2328\uFE0F" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900", children: "Touch Typing" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mt-1", children: "New to typing? Start here. Learn where each finger goes, step by step, then type Japanese in romaji. The time in every test includes typing, so this will lift all your scores \u2014 and it helps in every subject." }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block mt-3 text-sm font-bold text-indigo-600", children: "Start learning \u2192" })
+          ] })
+        ] })
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { "aria-label": "Test types", className: "flex flex-wrap gap-2", children: SECTIONS.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: `#${s2.id}`, className: `text-sm font-semibold px-4 py-1.5 rounded-full border ${s2.color}`, children: [
+      s2.title,
+      " ",
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-normal", children: s2.jp })
+    ] }, s2.id)) }),
+    SECTIONS.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: s2.id, className: "scroll-mt-20 bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "text-xl font-black text-slate-900", children: [
+        s2.title,
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400 font-bold", children: s2.jp })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mt-1", children: s2.intro }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3", children: s2.items.map(
+        (item) => item.to ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Link,
+          {
+            to: item.to,
+            className: "block border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50 transition-colors",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ItemBody, { item }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block mt-2 text-sm font-bold text-indigo-600", children: "Start \u2192" })
+            ]
+          },
+          item.title
+        ) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border border-dashed border-slate-200 rounded-xl p-4 bg-slate-50", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ItemBody, { item }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block mt-2 text-xs font-bold text-slate-400 uppercase tracking-wide", children: "Coming soon" })
+        ] }, item.title)
+      ) })
+    ] }, s2.id))
+  ] }) }) });
+}
+function ItemBody({ item }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "font-bold text-slate-900", children: [
+      item.title,
+      " ",
+      item.jp && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-400 font-semibold", children: item.jp })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 mt-1", children: item.description })
+  ] });
+}
+var route64 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: TestHub,
+  loader: loader$b,
+  meta: meta$b
 }, Symbol.toStringTag, { value: "Module" }));
 var BGM_TRACKS = [
   // 曲名はひとまずファイル名のまま（あとで英語の曲名に変える）
@@ -79028,9 +84653,9 @@ function useCountdown(endsAt, serverOffset) {
   }, [endsAt, serverOffset]);
   return left;
 }
-function formatClock(sec) {
-  const m2 = Math.floor(sec / 60);
-  const s2 = sec % 60;
+function formatClock(sec2) {
+  const m2 = Math.floor(sec2 / 60);
+  const s2 = sec2 % 60;
   return `${m2}:${String(s2).padStart(2, "0")}`;
 }
 var QUESTION_SET_LABELS = {
@@ -80285,21 +85910,6 @@ function CharacterPicker({
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Questions and wrong choices come only from the characters you choose. Your choice is remembered on this device." })
   ] });
 }
-function readImageSize(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
-      URL.revokeObjectURL(url);
-    };
-    img.onerror = () => {
-      reject(new Error("Could not read the image."));
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  });
-}
 function JigsawSetup({
   selected,
   onSelect,
@@ -80308,13 +85918,6 @@ function JigsawSetup({
 }) {
   const [images, setImages] = reactExports.useState(null);
   const [loadError, setLoadError] = reactExports.useState(null);
-  const [showUpload, setShowUpload] = reactExports.useState(false);
-  const [file, setFile] = reactExports.useState(null);
-  const [title, setTitle] = reactExports.useState("");
-  const [credit, setCredit] = reactExports.useState("");
-  const [rights, setRights] = reactExports.useState(false);
-  const [uploading, setUploading] = reactExports.useState(false);
-  const [uploadError, setUploadError] = reactExports.useState(null);
   const [deletingId, setDeletingId] = reactExports.useState(null);
   const [deleteError, setDeleteError] = reactExports.useState(null);
   reactExports.useEffect(() => {
@@ -80330,37 +85933,6 @@ function JigsawSetup({
       }
     })();
   }, []);
-  const upload = async () => {
-    if (!file || !title.trim() || !rights)
-      return;
-    setUploading(true);
-    setUploadError(null);
-    try {
-      const { width, height } = await readImageSize(file);
-      const form = new FormData();
-      form.append("file", file);
-      form.append("title", title.trim());
-      form.append("credit", credit.trim());
-      form.append("rights", "yes");
-      form.append("width", String(width));
-      form.append("height", String(height));
-      const res = await yamatoFetch(`${YAMATO_API_BASE}/api/live-game/jigsaw/images`, { method: "POST", body: form });
-      const data2 = await res.json().catch(() => ({}));
-      if (!res.ok || !data2.image)
-        throw new Error(data2.message || data2.error || `HTTP ${res.status}`);
-      setImages((prev) => [data2.image, ...prev ?? []]);
-      onSelect(data2.image);
-      setShowUpload(false);
-      setFile(null);
-      setTitle("");
-      setCredit("");
-      setRights(false);
-    } catch (err) {
-      setUploadError((err == null ? void 0 : err.message) || "Could not upload the picture.");
-    } finally {
-      setUploading(false);
-    }
-  };
   const remove2 = async (img) => {
     if (!window.confirm(`Delete "${img.title}"? This cannot be undone.`))
       return;
@@ -80401,7 +85973,7 @@ function JigsawSetup({
               children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: img.url, alt: img.title, className: "w-full aspect-video object-cover", loading: "lazy" }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block px-2 py-1 text-xs font-bold text-slate-700 truncate", children: img.title }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block px-2 pb-1 text-[10px] text-slate-400", children: img.mine ? "Your picture" : "AI Yamato library" })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block px-2 pb-1 text-[10px] text-slate-400", children: img.mine ? "Your old upload (please delete)" : "AI Yamato library" })
               ]
             }
           ),
@@ -80418,53 +85990,9 @@ function JigsawSetup({
             }
           )
         ] }, img.id)),
-        !images.length && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 col-span-full", children: "No pictures yet. Upload one below." })
+        !images.length && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 col-span-full", children: "No pictures are available right now." })
       ] }),
-      deleteError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600 mt-2", children: deleteError }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => setShowUpload((v2) => !v2), className: "mt-3 text-sm font-bold text-indigo-600 underline cursor-pointer", children: showUpload ? "Cancel upload" : "+ Upload your own picture" }),
-      showUpload && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-3 space-y-2 rounded-xl border border-slate-200 p-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "file", accept: "image/jpeg,image/png,image/webp", onChange: (e) => {
-          var _a;
-          return setFile(((_a = e.target.files) == null ? void 0 : _a[0]) ?? null);
-        }, className: "text-sm" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            value: title,
-            onChange: (e) => setTitle(e.target.value),
-            maxLength: 100,
-            placeholder: "Title (e.g. Mt Fuji in spring)",
-            className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-sm text-slate-900"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            value: credit,
-            onChange: (e) => setCredit(e.target.value),
-            maxLength: 200,
-            placeholder: "Credit / source (optional, shown when the puzzle is finished)",
-            className: "w-full px-3 py-2 border border-slate-300 rounded-xl text-sm text-slate-900"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-start gap-2 text-xs text-slate-600", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: rights, onChange: (e) => setRights(e.target.checked), className: "mt-0.5" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "I have the right to use this picture in class (for example, I took it myself or it is free to use), and it does not show students\u2019 faces or personal information." })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-400", children: "Many free stock photo sites do not allow their photos to be made into jigsaw puzzles. Please check the site\u2019s licence, or use your own photos." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-400", children: "JPEG, PNG or WebP, up to 5 MB. Only you can use pictures you upload, and you can delete them at any time." }),
-        uploadError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: uploadError }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            type: "button",
-            disabled: !file || !title.trim() || !rights || uploading,
-            onClick: upload,
-            className: "px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl disabled:opacity-40 cursor-pointer",
-            children: uploading ? "Uploading\u2026" : "Upload"
-          }
-        )
-      ] })
+      deleteError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600 mt-2", children: deleteError })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-200 mb-2", children: "Pieces" }),
@@ -80473,10 +86001,10 @@ function JigsawSetup({
     ] })
   ] });
 }
-async function loader$8({ request }) {
+async function loader$a({ request }) {
   return dist$1.json({ portalContent: null, currentPath: new URL(request.url).pathname });
 }
-var meta$8 = () => [
+var meta$a = () => [
   { title: "Class Live Game | JP Tutor AI Yamato" },
   { name: "description", content: "A live Japanese game for the whole class, run by your teacher." },
   { name: "robots", content: "noindex, nofollow" }
@@ -80768,11 +86296,11 @@ function Field({ label, children }) {
     children
   ] });
 }
-var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route65 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ClassGamePage,
-  loader: loader$8,
-  meta: meta$8
+  loader: loader$a,
+  meta: meta$a
 }, Symbol.toStringTag, { value: "Module" }));
 var util;
 (function(util2) {
@@ -84925,6 +90453,133 @@ You can only change your time zone once every 30 days.`
     ] })
   ] });
 }
+async function fetchMyPlan() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session)
+    return null;
+  const { data: data2, error } = await supabase.rpc("get_my_plan");
+  if (error) {
+    console.error("get_my_plan failed:", error.message);
+    return null;
+  }
+  return data2;
+}
+async function startPlanCheckout(plan) {
+  try {
+    const res = await yamatoFetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan })
+    });
+    const data2 = await res.json().catch(() => ({}));
+    if (data2.url) {
+      window.location.href = data2.url;
+      return null;
+    }
+    return data2.error || "Could not start checkout. Please try again.";
+  } catch {
+    return "Could not start checkout. Please try again.";
+  }
+}
+async function openBillingPortal() {
+  try {
+    const res = await yamatoFetch("/api/create-portal-session", { method: "POST" });
+    const data2 = await res.json().catch(() => ({}));
+    if (data2.url) {
+      window.location.href = data2.url;
+      return null;
+    }
+    return data2.error || "Could not open the plan management page. Please try again.";
+  } catch {
+    return "Could not open the plan management page. Please try again.";
+  }
+}
+var formatDate = (iso) => iso ? new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" }) : "";
+var PLAN_LABEL = { basic: "Basic", plus: "Plus" };
+var passLabel = (months) => months && months.length ? months.map((m2) => `${m2}-Month Pass`).join(" + ") : "Pass";
+function PlanSection({ userId }) {
+  const [plan, setPlan] = reactExports.useState(null);
+  const [loaded, setLoaded] = reactExports.useState(false);
+  const [busy, setBusy] = reactExports.useState(false);
+  const [error, setError] = reactExports.useState(null);
+  const [justPaid, setJustPaid] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (!userId)
+      return;
+    let cancelled = false;
+    const params = new URLSearchParams(window.location.search);
+    const paid = params.get("checkout") === "success";
+    setJustPaid(paid);
+    const load = async () => {
+      const p2 = await fetchMyPlan();
+      if (!cancelled) {
+        setPlan(p2);
+        setLoaded(true);
+      }
+      return p2;
+    };
+    load().then((p2) => {
+      if (paid && !(p2 == null ? void 0 : p2.paid_access) && !(p2 == null ? void 0 : p2.trial_done))
+        setTimeout(load, 4e3);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+  if (!userId || !loaded)
+    return null;
+  const manage = async () => {
+    setBusy(true);
+    setError(await openBillingPortal());
+    setBusy(false);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-bold text-slate-900 dark:text-white", children: "Your plan" }),
+    justPaid && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2", children: "Thank you! Your payment was received. It can take a few seconds for your plan and credits to appear." }),
+    (plan == null ? void 0 : plan.plan) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1 text-sm text-slate-700 dark:text-slate-300", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-base font-bold text-slate-900 dark:text-white", children: [
+        PLAN_LABEL[plan.plan],
+        " \xB7 ",
+        plan.interval === "year" ? "yearly" : "monthly"
+      ] }),
+      plan.status === "past_due" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-rose-600 font-bold", children: "Your last payment didn\u2019t go through. Please update your card." }),
+      plan.cancel_at_period_end ? /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        "Cancelled \u2014 your plan stays active until ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: formatDate(plan.period_end) }),
+        " and will not renew."
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        "Renews automatically on ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: formatDate(plan.period_end) }),
+        ". You can cancel any time before then."
+      ] })
+    ] }) : (plan == null ? void 0 : plan.season_ends_at) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-1 text-sm text-slate-700 dark:text-slate-300", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-bold text-slate-900 dark:text-white", children: passLabel(plan.season_months) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        "Active until ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: formatDate(plan.season_ends_at) }),
+        ". It does not renew automatically."
+      ] })
+    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2 text-sm text-slate-700 dark:text-slate-300", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-base font-bold text-slate-900 dark:text-white", children: "Free plan" }),
+      !(plan == null ? void 0 : plan.ai_unlocked) && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "To use the AI features, start with the AI Trial (A$1 for 100 credits) or choose a plan." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/prices", className: "inline-block text-indigo-600 font-bold underline", children: "See plans" })
+    ] }),
+    (plan == null ? void 0 : plan.has_customer) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pt-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: manage,
+          disabled: busy,
+          className: "px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 cursor-pointer",
+          children: busy ? "Opening\u2026" : "Manage plan, card and receipts"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 mt-1", children: "You can cancel, change your card and download receipts on the secure Stripe page." })
+    ] }),
+    error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-rose-600", children: error })
+  ] });
+}
 function RegistrationDetails({
   email,
   plan,
@@ -84967,40 +90622,50 @@ function CreditTransactionsSection({
       /* @__PURE__ */ jsxRuntimeExports.jsx(RotateCcwClock, { className: "w-5 h-5 text-blue-600" }),
       " Credit Transactions History"
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500", children: "A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features." }),
-    isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg animate-pulse", children: "Loading transactions history..." }) : transactions.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg", children: "No credit transactions recorded yet." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-left border-collapse text-xs sm:text-sm", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-gray-200 bg-gray-50 text-gray-600", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Date / Time" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Feature / Type" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Description" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Amount" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Balance" })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { className: "divide-y divide-gray-100", children: transactions.map((tx) => {
-        const isPositive = tx.amount > 0;
-        const formattedDate = new Date(tx.created_at).toLocaleString("en-AU", {
-          dateStyle: "medium",
-          timeStyle: "short"
-        });
-        return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "hover:bg-gray-50/50", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-gray-600 whitespace-nowrap", children: formattedDate }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 font-medium text-gray-900 whitespace-nowrap", children: tx.feature_used || "general" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-gray-600 max-w-xs truncate", title: tx.description || "", children: tx.description || "-" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-right whitespace-nowrap", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "span",
-            {
-              className: `inline-flex items-center gap-0.5 px-2 py-1 rounded-full font-bold ${isPositive ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`,
-              children: [
-                isPositive ? /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowUpRight, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowDownRight, { className: "w-3.5 h-3.5" }),
-                isPositive ? `+${tx.amount}` : tx.amount,
-                " pts"
-              ]
-            }
-          ) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-right whitespace-nowrap font-semibold text-gray-900 tabular-nums", children: typeof tx.balance_after === "number" ? `${tx.balance_after} pts` : "-" })
-        ] }, tx.id);
-      }) })
-    ] }) })
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-gray-500", children: [
+      "A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features.",
+      transactions.length > 10 && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        " Newest first \u2013 scroll down to see older ones (",
+        transactions.length,
+        " in total)."
+      ] })
+    ] }),
+    isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg animate-pulse", children: "Loading transactions history..." }) : transactions.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center py-8 text-sm text-gray-500 italic bg-gray-50 rounded-lg", children: "No credit transactions recorded yet." }) : (
+      // 💡 最新の 10 件ほどが見える高さにして、それより前はスクロールで見る（見出しの行は上に固定）
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-auto max-h-[33rem] border border-gray-100 rounded-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-left border-collapse text-xs sm:text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { className: "sticky top-0 z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-gray-200 bg-gray-50 text-gray-600", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Date / Time" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Feature / Type" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold", children: "Description" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Amount" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-2.5 px-3 font-semibold text-right", children: "Balance" })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { className: "divide-y divide-gray-100", children: transactions.map((tx) => {
+          const isPositive = tx.amount > 0;
+          const formattedDate = new Date(tx.created_at).toLocaleString("en-AU", {
+            dateStyle: "medium",
+            timeStyle: "short"
+          });
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "hover:bg-gray-50/50", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-gray-600 whitespace-nowrap", children: formattedDate }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 font-medium text-gray-900 whitespace-nowrap", children: tx.feature_used || "general" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-gray-600 max-w-xs truncate", title: tx.description || "", children: tx.description || "-" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-right whitespace-nowrap", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "span",
+              {
+                className: `inline-flex items-center gap-0.5 px-2 py-1 rounded-full font-bold ${isPositive ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`,
+                children: [
+                  isPositive ? /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowUpRight, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowDownRight, { className: "w-3.5 h-3.5" }),
+                  isPositive ? `+${tx.amount}` : tx.amount,
+                  " pts"
+                ]
+              }
+            ) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-3 px-3 text-right whitespace-nowrap font-semibold text-gray-900 tabular-nums", children: typeof tx.balance_after === "number" ? `${tx.balance_after} pts` : "-" })
+          ] }, tx.id);
+        }) })
+      ] }) })
+    )
   ] });
 }
 function DeleteAccountModal({ className = "" }) {
@@ -85066,12 +90731,27 @@ function DeleteAccountModal({ className = "" }) {
     ] }) })
   ] });
 }
+function studentStatusText(hw) {
+  switch (hw.status) {
+    case "ontime":
+      return "Done on time";
+    case "late":
+      return "Done late";
+    case "catchup":
+      return hw.catchupUntil ? `Overdue \u2013 please finish by ${formatDue(hw.catchupUntil)}` : "Overdue";
+    case "missed":
+      return "Closed \u2013 not finished";
+    default:
+      return null;
+  }
+}
 var taskLabel = (key) => {
   var _a;
   return ((_a = LESSON_TASKS.find((t2) => t2.key === key)) == null ? void 0 : _a.label) ?? key;
 };
 function formatDue(iso) {
-  return new Date(iso).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}, ${d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
 }
 function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }) {
   const fetcher = useFetcher();
@@ -85244,7 +90924,8 @@ function AssignmentList({ title, icon, items }) {
       const doneCount = isQuiz ? hw.quiz && hw.quiz.attempts > 0 ? 1 : 0 : hw.tasks.filter((t2) => t2.done).length;
       const totalCount = isQuiz ? 1 : hw.tasks.length;
       const allDone = doneCount === totalCount;
-      const overdue = !allDone && new Date(hw.dueAt).getTime() < Date.now();
+      const statusText = studentStatusText(hw);
+      const closed = hw.status === "missed";
       return /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: hw.lessonUrl, className: "text-sm font-semibold text-blue-700 hover:underline", children: hw.title }),
@@ -85252,8 +90933,14 @@ function AssignmentList({ title, icon, items }) {
             isQuiz && /* @__PURE__ */ jsxRuntimeExports.jsx(Languages, { className: "w-3 h-3 inline -mt-0.5 mr-0.5" }),
             isQuiz ? `Vocabulary quiz: ${hw.lessonTitle}` : hw.lessonTitle,
             " \xB7 Due ",
-            formatDue(hw.dueAt),
-            overdue && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "ml-1 font-semibold text-red-600", children: "(overdue)" })
+            formatDue(hw.dueAt)
+          ] }),
+          statusText && hw.status && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[hw.status]}`, suppressHydrationWarning: true, children: statusText }),
+          hw.lockedUntil && !allDone && !closed && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[11px] font-semibold text-amber-700 mt-1", suppressHydrationWarning: true, children: [
+            "\u{1F512} Homework can't be done during school hours. Available after",
+            " ",
+            new Date(hw.lockedUntil).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" }),
+            "."
           ] }),
           isQuiz ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-gray-600 mt-1.5", children: hw.quiz && hw.quiz.attempts > 0 && hw.quiz.best !== null && hw.quiz.total !== null ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
             "Best score: ",
@@ -85267,7 +90954,7 @@ function AssignmentList({ title, icon, items }) {
             " time",
             hw.quiz.attempts === 1 ? "" : "s",
             " \xB7 You can try again"
-          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: hw.lessonUrl, className: "text-blue-700 font-semibold hover:underline", children: "Start the quiz \u2192" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5 mt-1.5", children: hw.tasks.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          ] }) : closed ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-gray-500", children: "This quiz is closed." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: hw.lessonUrl, className: "text-blue-700 font-semibold hover:underline", children: "Start the quiz \u2192" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5 mt-1.5", children: hw.tasks.map((t2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "span",
             {
               className: `inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${t2.done ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-600"}`,
@@ -85284,7 +90971,7 @@ function AssignmentList({ title, icon, items }) {
     }) })
   ] });
 }
-async function loader$7({ request, context }) {
+async function loader$9({ request, context }) {
   var _a;
   const url = new URL(request.url);
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
@@ -85306,7 +90993,7 @@ async function loader$7({ request, context }) {
   if (user) {
     const { data: profile } = await serverSupabase.from("profiles").select("credits, nickname, learning_pace, state, school_name, school_ref_id, is_teacher, teacher_status").eq("id", user.id).maybeSingle();
     if (profile) {
-      initialCredits = profile.credits ?? 10;
+      initialCredits = profile.credits ?? 0;
       initialNickname = profile.nickname ?? "";
       initialPace = profile.learning_pace ?? "normal";
       initialState = profile.state ?? null;
@@ -85499,17 +91186,26 @@ async function loadStudentHomework(admin, classId, userId) {
     return [];
   const lessonIds = [...new Set(rows.map((r2) => r2.lessonId).filter((id2) => Boolean(id2)))];
   const quizIds = [...new Set(rows.map((r2) => r2.quizId).filter((id2) => Boolean(id2)))];
+  const lockedUntil = await getClassLockUntil(admin, classId, userId);
+  const lockOf = (r2) => r2.kind === "homework" && !r2.allowDuringSchool ? lockedUntil : null;
+  const readProgress = (columns) => admin.from("edu_student_progress").select(columns).eq("user_id", userId).in("lesson_id", lessonIds);
+  const loadProgress2 = async () => {
+    if (!lessonIds.length)
+      return { data: [] };
+    const withCompletedAt = await readProgress("lesson_id, task_key, is_completed, updated_at, completed_at");
+    return withCompletedAt.error ? readProgress("lesson_id, task_key, is_completed, updated_at") : withCompletedAt;
+  };
   const [{ data: lessons }, { data: progress }, { data: quizzes }, quizStats] = await Promise.all([
     lessonIds.length ? admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds) : { data: [] },
-    lessonIds.length ? admin.from("edu_student_progress").select("lesson_id, task_key, is_completed").eq("user_id", userId).in("lesson_id", lessonIds) : { data: [] },
+    loadProgress2(),
     quizIds.length ? admin.from("edu_teacher_quizzes").select("id, title").in("id", quizIds) : { data: [] },
     loadQuizStats(admin, rows.filter((r2) => r2.itemType === "vocab_quiz").map((r2) => r2.id), [userId])
   ]);
   const lessonMap = new Map((lessons ?? []).map((l2) => [String(l2.id), l2]));
   const quizMap = new Map((quizzes ?? []).map((q2) => [String(q2.id), String(q2.title)]));
   const statMap = new Map(quizStats.map((st) => [st.homeworkId, st]));
-  const done = new Set(
-    (progress ?? []).filter((p2) => p2.is_completed).map((p2) => `${p2.lesson_id}:${p2.task_key}`)
+  const completedAt = new Map(
+    (progress ?? []).filter((p2) => p2.is_completed).map((p2) => [`${p2.lesson_id}:${p2.task_key}`, String(p2.completed_at ?? p2.updated_at ?? "1970-01-01T00:00:00Z")])
   );
   return rows.map((r2) => {
     if (r2.itemType === "vocab_quiz") {
@@ -85519,24 +91215,33 @@ async function loadStudentHomework(admin, classId, userId) {
         title: r2.title,
         kind: r2.kind,
         dueAt: r2.dueAt,
+        catchupUntil: r2.catchupUntil,
+        status: homeworkStatus(r2, (st == null ? void 0 : st.firstAt) ?? null),
         itemType: "vocab_quiz",
         lessonTitle: quizMap.get(r2.quizId ?? "") ?? "Vocabulary quiz",
         lessonUrl: `/class-quiz/${r2.id}`,
         tasks: [],
-        quiz: st ? { best: st.best, total: st.total, attempts: st.attempts } : { best: null, total: null, attempts: 0 }
+        quiz: st ? { best: st.best, total: st.total, attempts: st.attempts } : { best: null, total: null, attempts: 0 },
+        lockedUntil: lockOf(r2)
       };
     }
     const lesson = lessonMap.get(String(r2.lessonId));
+    const times = r2.taskKeys.map((key) => completedAt.get(`${r2.lessonId}:${key}`) ?? null);
+    const finishedAt = times.some((t2) => !t2) ? null : times.reduce((a, b) => a > b ? a : b, times[0]);
     return {
       id: r2.id,
       title: r2.title,
       kind: r2.kind,
       dueAt: r2.dueAt,
+      catchupUntil: r2.catchupUntil,
+      status: homeworkStatus(r2, finishedAt),
       itemType: "lesson",
       lessonTitle: (lesson == null ? void 0 : lesson.title_en) ?? "Lesson",
       lessonUrl: (lesson == null ? void 0 : lesson.slug) ? `/lessons/${lesson.slug}` : "/lessons",
-      tasks: r2.taskKeys.map((key) => ({ key, done: done.has(`${r2.lessonId}:${key}`) })),
-      quiz: null
+      // 宿題として数えるのは、閉じるまでに終えたタスクだけ
+      tasks: r2.taskKeys.map((key) => ({ key, done: countsAsDone(r2, completedAt.get(`${r2.lessonId}:${key}`) ?? null) })),
+      quiz: null,
+      lockedUntil: lockOf(r2)
     };
   });
 }
@@ -85640,11 +91345,37 @@ function AccountSettingsRoute() {
       }
     }
   }, [rootData]);
+  const showStudentClass = !initialData.isTeacher && initialData.teacherStatus !== "pending" && Boolean(user == null ? void 0 : user.id);
+  const inClass = Boolean(initialData.studentClass);
+  const studentClassSection = /* @__PURE__ */ jsxRuntimeExports.jsx(
+    StudentClassSection,
+    {
+      studentClass: initialData.studentClass,
+      homework: initialData.homework,
+      verifiedSchoolEmails: initialData.verifiedSchoolEmails,
+      joinRequest: initialData.joinRequest
+    }
+  );
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-bold text-gray-900", children: "Account Settings" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mt-1", children: "Manage your AI tutor preferences, registration details, subscription plan, and credit history." })
     ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      Link,
+      {
+        to: "/progress",
+        className: "flex items-center justify-between gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-4 transition-colors",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block font-black text-indigo-900", children: "\u{1F4C8} My Progress" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-sm text-indigo-800/80", children: "Lessons, culture tasks, language tests and typing \u2014 all in one place." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-indigo-700", children: "Open \u2192" })
+        ]
+      }
+    ),
+    showStudentClass && inClass && studentClassSection,
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       TutorPreferencesSection,
       {
@@ -85657,21 +91388,14 @@ function AccountSettingsRoute() {
         onSaved: () => revalidator.revalidate()
       }
     ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(PlanSection, { userId: user == null ? void 0 : user.id }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(TimezoneSection, { userId: user == null ? void 0 : user.id }),
     initialData.teacherStatus === "pending" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm text-indigo-900", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-semibold", children: "Your teacher account is being reviewed." }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-indigo-800 mt-1", children: "We check every teacher account before classes can be created. Adding your state and school below helps us confirm it. You can keep using AI Yamato as usual in the meantime." }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/teacher-dashboard", className: "inline-block mt-2 text-xs font-semibold text-indigo-700 hover:underline", children: "Open your Teacher Dashboard to verify your school Google account \u2192" })
     ] }),
-    !initialData.isTeacher && initialData.teacherStatus !== "pending" && (user == null ? void 0 : user.id) && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      StudentClassSection,
-      {
-        studentClass: initialData.studentClass,
-        homework: initialData.homework,
-        verifiedSchoolEmails: initialData.verifiedSchoolEmails,
-        joinRequest: initialData.joinRequest
-      }
-    ),
+    showStudentClass && !inClass && studentClassSection,
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       RegistrationDetails,
       {
@@ -85685,23 +91409,602 @@ function AccountSettingsRoute() {
       CreditTransactionsSection,
       {
         transactions,
-        isLoading: isLoadingTransactions
+        isLoading: isLoadingTransactions,
+        className: "lg:-mx-8 xl:-mx-24"
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(DeleteAccountModal, {})
   ] }) });
 }
-var meta$7 = ({ data: data2 }) => {
+var meta$9 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route66 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
-  loader: loader$7,
-  meta: meta$7
+  loader: loader$9,
+  meta: meta$9
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$6({ request }) {
+async function loader$8({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$8 = () => [
+  { title: "VCE Kanji Test | JP Tutor AI Yamato" },
+  { name: "description", content: "See each VCE kanji and type its English meaning as fast as you can." },
+  { name: "robots", content: "noindex" }
+];
+var GROUP_ORDER = KANJI_GROUP_ORDER;
+var TARGET_SEC = 3;
+var GOOD_SEC = 4;
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function sec$1(ms, digits = 1) {
+  return (ms / 1e3).toFixed(digits);
+}
+function clock(ms) {
+  const total = ms / 1e3;
+  const m2 = Math.floor(total / 60);
+  const s2 = total - m2 * 60;
+  return `${m2}:${s2.toFixed(1).padStart(4, "0")}`;
+}
+function speedClass(ms) {
+  if (ms <= TARGET_SEC * 1e3)
+    return "text-emerald-600";
+  if (ms <= GOOD_SEC * 1e3)
+    return "text-amber-600";
+  return "text-rose-600";
+}
+function tierLabel(ms) {
+  if (ms <= TARGET_SEC * 1e3)
+    return "Excellent";
+  if (ms <= GOOD_SEC * 1e3)
+    return "Very good";
+  return "Keep practising";
+}
+function KanjiSpeedTest() {
+  const [rows, setRows] = reactExports.useState([]);
+  const [loadError, setLoadError] = reactExports.useState(null);
+  const [loading, setLoading] = reactExports.useState(true);
+  const [phase, setPhase] = reactExports.useState("setup");
+  const [selected, setSelected] = reactExports.useState(/* @__PURE__ */ new Set());
+  const [randomOrder, setRandomOrder] = reactExports.useState(true);
+  const [questions, setQuestions] = reactExports.useState([]);
+  const [index, setIndex] = reactExports.useState(0);
+  const [results, setResults] = reactExports.useState([]);
+  const [typed, setTyped] = reactExports.useState("");
+  const [review, setReview] = reactExports.useState(null);
+  const [now, setNow] = reactExports.useState(0);
+  const startRef = reactExports.useRef(0);
+  const scopeRef = reactExports.useRef("all");
+  const [saveState, setSaveState] = reactExports.useState("idle");
+  const leftPageRef = reactExports.useRef(false);
+  const inputRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    (async () => {
+      try {
+        const { data: data2, error } = await supabase.from("kl_character").select("character, meaning, category, sort_order").eq("char_type", "kanji").order("sort_order", { ascending: true });
+        if (error)
+          throw error;
+        const list2 = data2 || [];
+        setRows(list2);
+        setSelected(new Set(list2.map((r2) => r2.category || "Miscellaneous")));
+      } catch (e) {
+        setLoadError((e == null ? void 0 : e.message) || "Could not load the kanji list.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+  const groups = reactExports.useMemo(() => {
+    const map = /* @__PURE__ */ new Map();
+    for (const r2 of rows) {
+      const g = r2.category || "Miscellaneous";
+      if (!map.has(g))
+        map.set(g, []);
+      map.get(g).push(r2);
+    }
+    const rank = (g) => {
+      const i = GROUP_ORDER.indexOf(g);
+      return i === -1 ? GROUP_ORDER.length : i;
+    };
+    return [...map.entries()].sort((a, b) => rank(a[0]) - rank(b[0]));
+  }, [rows]);
+  const selectedCount = reactExports.useMemo(
+    () => groups.filter(([g]) => selected.has(g)).reduce((n2, [, list2]) => n2 + list2.length, 0),
+    [groups, selected]
+  );
+  const begin = reactExports.useCallback((qs) => {
+    if (qs.length === 0)
+      return;
+    setQuestions(qs);
+    setIndex(0);
+    setResults([]);
+    setTyped("");
+    setReview(null);
+    setSaveState("idle");
+    setPhase("running");
+  }, []);
+  const startFromSetup = () => {
+    const qs = [];
+    for (const [g, list2] of groups) {
+      if (!selected.has(g))
+        continue;
+      for (const r2 of list2) {
+        qs.push({ kanji: r2.character, group: g, answers: acceptedAnswers(r2.character, r2.meaning) });
+      }
+    }
+    scopeRef.current = groups.every(([g]) => selected.has(g)) ? "all" : groups.filter(([g]) => selected.has(g)).map(([g]) => g).join(", ");
+    begin(randomOrder ? shuffle(qs) : qs);
+  };
+  reactExports.useEffect(() => {
+    var _a;
+    if (phase !== "running" || review)
+      return;
+    startRef.current = performance.now();
+    leftPageRef.current = false;
+    setNow(startRef.current);
+    (_a = inputRef.current) == null ? void 0 : _a.focus();
+  }, [phase, index, review]);
+  reactExports.useEffect(() => {
+    if (phase !== "running" || review)
+      return;
+    const id2 = window.setInterval(() => setNow(performance.now()), 100);
+    return () => window.clearInterval(id2);
+  }, [phase, review]);
+  reactExports.useEffect(() => {
+    if (phase !== "running")
+      return;
+    const onVis = () => {
+      if (document.visibilityState === "hidden")
+        leftPageRef.current = true;
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [phase]);
+  const goNext = reactExports.useCallback(() => {
+    setReview(null);
+    setTyped("");
+    if (index + 1 >= questions.length) {
+      setPhase("done");
+    } else {
+      setIndex((i) => i + 1);
+    }
+  }, [index, questions.length]);
+  const submit = (pass) => {
+    if (phase !== "running" || review)
+      return;
+    const q2 = questions[index];
+    if (!q2)
+      return;
+    const value = pass ? "" : typed;
+    if (!pass && !value.trim())
+      return;
+    const ms = performance.now() - startRef.current;
+    const leftPage = leftPageRef.current;
+    const correct = !pass && !leftPage && isCorrectMeaning(value, q2.answers);
+    const r2 = { q: q2, typed: value, ms, correct, passed: pass, leftPage };
+    setResults((prev) => [...prev, r2]);
+    if (correct) {
+      goNext();
+    } else {
+      setReview(r2);
+    }
+  };
+  const stopEarly = () => {
+    setReview(null);
+    setPhase("done");
+  };
+  reactExports.useEffect(() => {
+    if (!review)
+      return;
+    const onKey = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        goNext();
+      }
+    };
+    const t2 = window.setTimeout(() => window.addEventListener("keydown", onKey), 300);
+    return () => {
+      window.clearTimeout(t2);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [review, goNext]);
+  reactExports.useEffect(() => {
+    if (phase !== "done" || saveState !== "idle")
+      return;
+    if (results.length < 5) {
+      setSaveState("short");
+      return;
+    }
+    setSaveState("saving");
+    fetch("/api/test-attempts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        testKey: "kanji-vce200",
+        scope: scopeRef.current,
+        items: results.map((r2) => ({ c: r2.q.kanji, typed: r2.typed, ms: Math.round(r2.ms), passed: r2.passed, left: r2.leftPage }))
+      })
+    }).then((res) => setSaveState(res.ok ? "saved" : res.status === 401 ? "signin" : "error")).catch(() => setSaveState("error"));
+  }, [phase, results, saveState]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test", className: "text-sm text-indigo-600 hover:underline", children: "\u2190 All tests" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "mt-2 text-2xl sm:text-3xl font-black text-slate-900", children: "VCE Kanji Test" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-1 text-sm text-slate-600", children: [
+        "See a kanji, type its English meaning, press Enter. Aim for an average of",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+          TARGET_SEC,
+          " seconds or less"
+        ] }),
+        " per kanji."
+      ] })
+    ] }),
+    loading && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-500", children: "Loading kanji\u2026" }),
+    loadError && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-rose-600", children: loadError }),
+    !loading && !loadError && phase === "setup" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SetupPanel,
+      {
+        groups,
+        selected,
+        setSelected,
+        selectedCount,
+        randomOrder,
+        setRandomOrder,
+        onStart: startFromSetup
+      }
+    ),
+    phase === "running" && questions[index] && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between text-sm text-slate-500", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          index + 1,
+          " / ",
+          questions.length
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Total ",
+          clock(results.reduce((n2, r2) => n2 + r2.ms, 0) + (review ? 0 : now - startRef.current))
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "h-full bg-indigo-500 transition-all",
+          style: { width: `${index / questions.length * 100}%` }
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center my-8", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-8xl sm:text-9xl font-bold text-slate-900 leading-none select-none", children: questions[index].kanji }),
+        !review && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `mt-4 text-lg font-mono font-bold ${speedClass(now - startRef.current)}`, children: [
+          sec$1(Math.max(0, now - startRef.current)),
+          " s"
+        ] })
+      ] }),
+      !review ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "form",
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            submit(false);
+          },
+          className: "flex flex-col sm:flex-row gap-3",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                ref: inputRef,
+                value: typed,
+                onChange: (e) => setTyped(e.target.value),
+                onPaste: (e) => e.preventDefault(),
+                onDrop: (e) => e.preventDefault(),
+                onKeyDown: (e) => {
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    submit(true);
+                  }
+                },
+                autoComplete: "off",
+                autoCorrect: "off",
+                autoCapitalize: "off",
+                spellCheck: false,
+                placeholder: "English meaning",
+                "aria-label": "English meaning",
+                className: "flex-1 border-2 border-slate-300 focus:border-indigo-500 outline-none rounded-xl px-4 py-3 text-lg"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "submit",
+                className: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-6 py-3",
+                children: "Enter"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => submit(true),
+                className: "border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-xl px-4 py-3 text-sm",
+                children: "I don't know (Esc)"
+              }
+            )
+          ]
+        }
+      ) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border-2 border-rose-200 bg-rose-50 p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-rose-700", children: review.leftPage ? "\u2717 You left this page during the question, so it does not count." : review.passed ? "Skipped" : `\u2717 "${review.typed}" is not accepted` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "mt-2 text-slate-700", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-slate-500", children: "Accepted answers: " }),
+          review.q.answers.join(" / ")
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: goNext,
+            className: "mt-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg px-5 py-2",
+            children: "Next (Enter)"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-xs text-slate-500", children: "The time you spend reading this is not counted." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 text-right", children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: stopEarly, className: "text-xs text-slate-400 hover:text-slate-600 underline", children: "Stop and see results" }) })
+    ] }),
+    phase === "done" && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ResultsPanel,
+      {
+        results,
+        total: questions.length,
+        onRetrySame: () => begin(randomOrder ? shuffle(questions) : questions),
+        onRetryWeak: () => {
+          const weak = results.filter((r2) => !r2.correct || r2.ms > GOOD_SEC * 1e3).map((r2) => r2.q);
+          scopeRef.current = "review: mistakes & slow ones";
+          begin(shuffle(weak));
+        },
+        onSetup: () => setPhase("setup"),
+        saveState
+      }
+    )
+  ] }) }) });
+}
+function SetupPanel(props) {
+  const { groups, selected, setSelected, selectedCount, randomOrder, setRandomOrder, onStart } = props;
+  const allOn = groups.every(([g]) => selected.has(g));
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      Link,
+      {
+        to: "/test/kanji/answers",
+        className: "flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-4 py-3 text-sm transition-colors",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-indigo-900", children: [
+            "\u{1F4D6} ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Optional:" }),
+            " check the 200 kanji and the English answers that are accepted before you start."
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-bold text-indigo-700 shrink-0", children: "See the list \u2192" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        "\u2328\uFE0F ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "A computer with a keyboard is strongly recommended." }),
+        " Typing on a phone is much slower."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: `\u2022 The time includes typing. \u2022 Upper/lower case, "to", "the", and colour/color spelling don't matter.` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "\u2022 Pasting is turned off. \u2022 If you switch to another tab or app during a question, that question is marked wrong." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900", children: "Kanji groups" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setSelected(new Set(allOn ? [] : groups.map(([g]) => g))),
+            className: "text-sm text-indigo-600 hover:underline",
+            children: allOn ? "Clear all" : "Select all"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid sm:grid-cols-2 gap-2", children: groups.map(([g, list2]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "label",
+        {
+          className: "flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 hover:bg-slate-50 cursor-pointer",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "checkbox",
+                checked: selected.has(g),
+                onChange: (e) => {
+                  const next = new Set(selected);
+                  if (e.target.checked)
+                    next.add(g);
+                  else
+                    next.delete(g);
+                  setSelected(next);
+                }
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1 text-sm", children: g }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-400 tracking-wide", children: list2.map((r2) => r2.character).join("") })
+          ]
+        },
+        g
+      )) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "flex items-center gap-2 text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "checkbox", checked: randomOrder, onChange: (e) => setRandomOrder(e.target.checked) }),
+      "Random order"
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        disabled: selectedCount === 0,
+        onClick: onStart,
+        className: "w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-black text-lg rounded-xl py-3",
+        children: [
+          "Start (",
+          selectedCount,
+          " kanji)"
+        ]
+      }
+    )
+  ] });
+}
+function ResultsPanel(props) {
+  const { results, total, onRetrySame, onRetryWeak, onSetup, saveState } = props;
+  const answered = results.length;
+  const totalMs = results.reduce((n2, r2) => n2 + r2.ms, 0);
+  const avgMs = answered ? totalMs / answered : 0;
+  const correct = results.filter((r2) => r2.correct);
+  const correctAvg = correct.length ? correct.reduce((n2, r2) => n2 + r2.ms, 0) / correct.length : 0;
+  const tiers = {
+    excellent: correct.filter((r2) => r2.ms <= TARGET_SEC * 1e3).length,
+    good: correct.filter((r2) => r2.ms > TARGET_SEC * 1e3 && r2.ms <= GOOD_SEC * 1e3).length,
+    slow: correct.filter((r2) => r2.ms > GOOD_SEC * 1e3).length,
+    wrong: answered - correct.length
+  };
+  const mistakes = results.filter((r2) => !r2.correct);
+  const slowest = [...correct].sort((a, b) => b.ms - a.ms).slice(0, 10);
+  const weakCount = results.filter((r2) => !r2.correct || r2.ms > GOOD_SEC * 1e3).length;
+  const byGroup = /* @__PURE__ */ new Map();
+  for (const r2 of results) {
+    if (!byGroup.has(r2.q.group))
+      byGroup.set(r2.q.group, []);
+    byGroup.get(r2.q.group).push(r2);
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-6", children: [
+      answered < total && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-500 mb-3", children: [
+        "Stopped after ",
+        answered,
+        " of ",
+        total,
+        " kanji."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-3 text-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$1, { label: "Total time", value: clock(totalMs) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$1, { label: "Average per kanji", value: `${sec$1(avgMs, 2)} s`, className: speedClass(avgMs) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$1, { label: "Correct", value: `${correct.length} / ${answered}` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Stat$1, { label: "Average (correct only)", value: correct.length ? `${sec$1(correctAvg, 2)} s` : "\u2013" })
+      ] }),
+      answered > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `mt-4 text-center font-bold ${speedClass(avgMs)}`, children: [
+        tierLabel(avgMs),
+        " \u2014 average ",
+        sec$1(avgMs, 2),
+        " s (target: ",
+        TARGET_SEC,
+        " s or less)"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Tier, { color: "bg-emerald-100 text-emerald-800", label: `\u2264 ${TARGET_SEC} s`, n: tiers.excellent }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Tier, { color: "bg-amber-100 text-amber-800", label: `${TARGET_SEC}\u2013${GOOD_SEC} s`, n: tiers.good }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Tier, { color: "bg-orange-100 text-orange-800", label: `over ${GOOD_SEC} s`, n: tiers.slow }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Tier, { color: "bg-rose-100 text-rose-800", label: "wrong / skipped", n: tiers.wrong })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-5 flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onRetrySame, className: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg px-4 py-2", children: "Try the same set again" }),
+        weakCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { type: "button", onClick: onRetryWeak, className: "bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg px-4 py-2", children: [
+          "Practise mistakes & slow ones (",
+          weakCount,
+          ")"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: onSetup, className: "border border-slate-300 hover:bg-slate-50 rounded-lg px-4 py-2", children: "Choose groups" })
+      ] })
+    ] }),
+    mistakes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { title: `Mistakes (${mistakes.length})`, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-left text-slate-500 border-b", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "Kanji" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "You typed" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1", children: "Accepted answers" })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: mistakes.map((r2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-100 align-top", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-2 text-2xl", children: r2.q.kanji }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-2 text-rose-700", children: r2.leftPage ? "(left the page)" : r2.passed ? "(skipped)" : r2.typed }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5", children: r2.q.answers.join(" / ") })
+      ] }, i)) })
+    ] }) }),
+    slowest.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { title: "Slowest correct answers", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: slowest.map((r2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border border-slate-200 rounded-lg px-3 py-1.5 text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-2xl", children: r2.q.kanji }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `text-xs font-mono ${speedClass(r2.ms)}`, children: [
+        sec$1(r2.ms),
+        " s"
+      ] })
+    ] }, i)) }) }),
+    byGroup.size > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { title: "By group", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-left text-slate-500 border-b", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "Group" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1 pr-2", children: "Correct" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1", children: "Average" })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: GROUP_ORDER.concat([...byGroup.keys()].filter((g) => !GROUP_ORDER.includes(g))).filter((g) => byGroup.has(g)).map((g) => {
+        const list2 = byGroup.get(g);
+        const avg = list2.reduce((n2, r2) => n2 + r2.ms, 0) / list2.length;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-100", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-2", children: g }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 pr-2", children: [
+            list2.filter((r2) => r2.correct).length,
+            " / ",
+            list2.length
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: `py-1.5 font-mono ${speedClass(avg)}`, children: [
+            sec$1(avg, 2),
+            " s"
+          ] })
+        ] }, g);
+      }) })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500 text-center", children: [
+      saveState === "saving" && "Saving your results\u2026",
+      saveState === "saved" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        "\u2713 Saved. See how you are improving on",
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/progress", className: "text-indigo-600 font-bold underline", children: "My Progress" }),
+        "."
+      ] }),
+      saveState === "signin" && "Sign in to save your results and see your progress over time.",
+      saveState === "short" && "Answer at least 5 kanji to save a result.",
+      saveState === "error" && "Your results could not be saved this time."
+    ] })
+  ] });
+}
+function Stat$1({ label, value, className = "" }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl bg-slate-50 border border-slate-200 p-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-slate-500", children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `text-xl font-black font-mono ${className}`, children: value })
+  ] });
+}
+function Tier({ color, label, n: n2 }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `rounded-lg px-3 py-2 ${color}`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs", children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-lg font-bold", children: n2 })
+  ] });
+}
+function Card({ title, children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white border border-slate-200 rounded-2xl shadow-sm p-5", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-bold text-slate-900 mb-3", children: title }),
+    children
+  ] });
+}
+var route67 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: KanjiSpeedTest,
+  loader: loader$8,
+  meta: meta$8
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$7({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -85823,17 +92126,17 @@ function VceHubIndex() {
     }
   );
 }
-var meta$6 = ({ data: data2 }) => {
+var meta$7 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route68 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
-  loader: loader$6,
-  meta: meta$6
+  loader: loader$7,
+  meta: meta$7
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$5 = ({ request }) => loadGamePage(request);
-var meta$5 = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$6 = ({ request }) => loadGamePage(request);
+var meta$6 = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function IgoRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "9x9 Go", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -85846,9 +92149,402 @@ function IgoRoute() {
     }
   ) });
 }
-var route57 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route69 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
+  loader: loader$6,
+  meta: meta$6
+}, Symbol.toStringTag, { value: "Module" }));
+var meta$5 = () => [
+  { title: "My Progress | AI Yamato Portal" },
+  { name: "robots", content: "noindex" }
+];
+var TASKS = [
+  { key: "vocabulary", label: "Vocabulary", short: "V" },
+  { key: "listening", label: "Listening", short: "L" },
+  { key: "reading", label: "Reading", short: "R" },
+  { key: "speaking", label: "Speaking", short: "S" },
+  { key: "writing", label: "Writing", short: "W" },
+  { key: "culture", label: "Culture", short: "C" }
+];
+var BREAKTHROUGH_MS = 500;
+var SLOW_MS = 4e3;
+async function loader$5({ request, context }) {
+  const { user, headers } = await getSessionUser(request, context);
+  if (!user)
+    return dist$1.json({ signedIn: false }, { headers });
+  const admin = createAdminSupabaseClient(context);
+  const [topicsRes, progressRes, attemptsRes, quizRes] = await Promise.all([
+    admin.from("edu_topics").select("*, edu_lessons (*)").order("sort_order", { ascending: true }),
+    admin.from("edu_student_progress").select("lesson_id, task_key, is_completed").eq("user_id", user.id).eq("is_completed", true),
+    admin.from("test_attempts").select("test_key, scope, item_count, correct_count, total_ms, avg_ms, details, created_at").eq("user_id", user.id).order("created_at", { ascending: true }).limit(500),
+    admin.from("edu_quiz_attempts").select("homework_id, score, total, created_at").eq("user_id", user.id).limit(1e3)
+  ]);
+  const done = /* @__PURE__ */ new Map();
+  for (const p2 of progressRes.data ?? []) {
+    const id2 = String(p2.lesson_id);
+    if (!done.has(id2))
+      done.set(id2, /* @__PURE__ */ new Set());
+    done.get(id2).add(String(p2.task_key));
+  }
+  const units = [];
+  const lessonIdBySlug = /* @__PURE__ */ new Map();
+  for (const topic of topicsRes.data ?? []) {
+    if (topic.is_coming_soon)
+      continue;
+    const lessons = [...topic.edu_lessons ?? []].sort((a, b) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0));
+    if (lessons.length === 0)
+      continue;
+    units.push({
+      title: topic.title_en || topic.slug,
+      lessons: lessons.map((l2, i) => {
+        const slug = l2.slug ? newSlugFor(l2.slug) || l2.slug : "";
+        if (slug)
+          lessonIdBySlug.set(slug, String(l2.id));
+        return {
+          id: String(l2.id),
+          slug,
+          title: `Lesson ${i + 1}${l2.title_en || l2.title ? `: ${l2.title_en || l2.title}` : ""}`,
+          done: [...done.get(String(l2.id)) ?? []]
+        };
+      })
+    });
+  }
+  const culture = Object.entries(CULTURE_TASKS).map(([id2, t2]) => ({
+    id: id2,
+    title: t2.title,
+    done: (t2.lessons ?? []).some((l2) => {
+      var _a;
+      const lid = lessonIdBySlug.get(newSlugFor(l2.slug) || l2.slug);
+      return Boolean(lid && ((_a = done.get(lid)) == null ? void 0 : _a.has("culture")));
+    })
+  }));
+  const byKey = /* @__PURE__ */ new Map();
+  for (const a of attemptsRes.data ?? []) {
+    if (!byKey.has(a.test_key))
+      byKey.set(a.test_key, []);
+    byKey.get(a.test_key).push(a);
+  }
+  const tests = [...byKey.entries()].map(([key, list2]) => {
+    var _a;
+    const stats = /* @__PURE__ */ new Map();
+    for (const a of list2.slice(-5)) {
+      for (const d of Array.isArray(a.details) ? a.details : []) {
+        const c = String((d == null ? void 0 : d.c) ?? "");
+        if (!c)
+          continue;
+        const s2 = stats.get(c) ?? { misses: 0, slow: 0, seen: 0, ms: 0 };
+        s2.seen += 1;
+        s2.ms += Number(d == null ? void 0 : d.ms) || 0;
+        if (!(d == null ? void 0 : d.ok))
+          s2.misses += 1;
+        else if (Number(d == null ? void 0 : d.ms) > (((_a = TEST_NAMES[key]) == null ? void 0 : _a.slowMs) ?? SLOW_MS))
+          s2.slow += 1;
+        stats.set(c, s2);
+      }
+    }
+    const weak = [...stats.entries()].map(([c, s2]) => ({ c, misses: s2.misses, slow: s2.slow, seen: s2.seen, avgMs: Math.round(s2.ms / s2.seen) })).filter((w2) => w2.misses > 0 || w2.slow > 0).sort((a, b) => b.misses - a.misses || b.slow - a.slow || b.avgMs - a.avgMs).slice(0, 16);
+    return {
+      key,
+      weak,
+      attempts: list2.map((a) => ({
+        at: String(a.created_at),
+        scope: String(a.scope ?? "all"),
+        count: Number(a.item_count),
+        correct: Number(a.correct_count),
+        avgMs: Number(a.avg_ms),
+        totalMs: Number(a.total_ms)
+      }))
+    };
+  });
+  const quizzes = [];
+  const quizAttempts = quizRes.data ?? [];
+  if (quizAttempts.length) {
+    const hwIds = [...new Set(quizAttempts.map((q2) => String(q2.homework_id)))];
+    const { data: hws } = await admin.from("edu_homework").select("id, title").in("id", hwIds);
+    const titles = new Map((hws ?? []).map((h) => [String(h.id), String(h.title)]));
+    for (const id2 of hwIds) {
+      const list2 = quizAttempts.filter((q2) => String(q2.homework_id) === id2);
+      const best = list2.reduce((b, q2) => q2.score / q2.total > b.score / b.total ? q2 : b, list2[0]);
+      quizzes.push({
+        title: titles.get(id2) ?? "Vocabulary quiz",
+        best: Number(best.score),
+        total: Number(best.total),
+        tries: list2.length,
+        last: list2.map((q2) => String(q2.created_at)).sort().pop() ?? ""
+      });
+    }
+  }
+  return dist$1.json({ signedIn: true, units, culture, tests, quizzes }, { headers });
+}
+var card$1 = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm";
+var sec = (ms) => `${(ms / 1e3).toFixed(2)} s`;
+var day = (iso) => iso ? new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short" }) : "";
+var pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+var TEST_NAMES = {
+  "kanji-vce200": { title: "VCE Kanji 200", to: "/test/kanji", unit: "kanji", targetSec: 3, slowMs: SLOW_MS, breakthroughMs: BREAKTHROUGH_MS, fullLabel: "full 200-kanji tests only" },
+  "lookalike-hiragana": { title: "Look-alike Hiragana", to: "/test/lookalike?type=hiragana", unit: "character", targetSec: 2, slowMs: 3e3, breakthroughMs: 300, fullLabel: "tests with all sets only" },
+  "lookalike-katakana": { title: "Look-alike Katakana", to: "/test/lookalike?type=katakana", unit: "character", targetSec: 2, slowMs: 3e3, breakthroughMs: 300, fullLabel: "tests with all sets only" },
+  "lookalike-kanji": { title: "Look-alike Kanji", to: "/test/lookalike?type=kanji", unit: "kanji", targetSec: 3, slowMs: SLOW_MS, breakthroughMs: BREAKTHROUGH_MS, fullLabel: "tests with all sets only" }
+};
+function ProgressPage() {
+  const data2 = useLoaderData();
+  const [typing, setTyping] = reactExports.useState({});
+  reactExports.useEffect(() => setTyping(readTypingProgress()), []);
+  if (!data2.signedIn) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: "My Progress", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto p-8 text-center space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-black text-slate-900", children: "My Progress" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-slate-600", children: "Sign in to see your lessons, culture tasks and test results in one place." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { type: "button", onClick: () => requestAuthModal("signin"), className: "px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold", children: "Sign in" })
+    ] }) });
+  }
+  const { units, culture, tests, quizzes } = data2;
+  const lessonCount = units.reduce((n2, u2) => n2 + u2.lessons.length, 0);
+  const taskTotal = lessonCount * TASKS.length;
+  const taskDone = units.reduce((n2, u2) => n2 + u2.lessons.reduce((m2, l2) => m2 + l2.done.filter((k2) => TASKS.some((t2) => t2.key === k2)).length, 0), 0);
+  const cultureDone = culture.filter((c) => c.done).length;
+  const testRuns = tests.reduce((n2, t2) => n2 + t2.attempts.length, 0);
+  const typingPassed = Object.values(typing).filter((t2) => t2 == null ? void 0 : t2.passed).length;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { breadcrumbTitle: "My Progress", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-10 px-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "max-w-5xl mx-auto space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-black text-slate-900 dark:text-white", children: "My Progress" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300 mt-1", children: "Everything you have done, in one place." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 lg:grid-cols-4 gap-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Summary, { href: "#lessons", label: "Lesson tasks", value: `${taskDone} / ${taskTotal}`, percent: pct(taskDone, taskTotal), color: "bg-orange-500" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Summary, { href: "#culture", label: "Culture tasks", value: `${cultureDone} / ${culture.length}`, percent: pct(cultureDone, culture.length), color: "bg-amber-500" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Summary, { href: "#tests", label: "Language tests taken", value: String(testRuns), color: "bg-indigo-500" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Summary,
+        {
+          href: "#typing",
+          label: "Typing lessons",
+          value: `${typingPassed} / ${TYPING_LESSON_COUNT}`,
+          percent: pct(typingPassed, TYPING_LESSON_COUNT),
+          color: "bg-emerald-500"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "lessons", className: `${card$1} p-5 scroll-mt-20`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-baseline justify-between gap-2 mb-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "Lessons" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: TASKS.map((t2) => `${t2.short} = ${t2.label}`).join(" \xB7 ") })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-4 md:grid-cols-2", children: units.map((u2) => {
+        const uDone = u2.lessons.reduce((n2, l2) => n2 + l2.done.length, 0);
+        const uTotal = u2.lessons.length * TASKS.length;
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border border-slate-200 dark:border-slate-800 rounded-xl p-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black text-slate-900 dark:text-white", children: u2.title }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-500", children: [
+              pct(uDone, uTotal),
+              "%"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Bar, { percent: pct(uDone, uTotal), color: "bg-orange-500" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-2 space-y-1.5", children: u2.lessons.map((l2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Link,
+            {
+              to: l2.slug ? `/lessons/${l2.slug}` : "/lessons",
+              className: "flex items-center justify-between gap-2 text-sm rounded-lg px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-800",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate text-slate-700 dark:text-slate-200", children: l2.title }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex gap-1 shrink-0", children: TASKS.map((t2) => {
+                  const ok2 = l2.done.includes(t2.key);
+                  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "span",
+                    {
+                      title: `${t2.label}: ${ok2 ? "done" : "not yet"}`,
+                      className: `w-6 h-6 rounded-md text-[11px] font-black flex items-center justify-center ${ok2 ? "bg-emerald-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`,
+                      children: t2.short
+                    },
+                    t2.key
+                  );
+                }) })
+              ]
+            },
+            l2.id
+          )) })
+        ] }, u2.title);
+      }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "culture", className: `${card$1} p-5 scroll-mt-20`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white mb-3", children: "Culture tasks" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-2 sm:grid-cols-2 lg:grid-cols-3", children: culture.map((c) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Link,
+        {
+          to: "/culture",
+          className: `flex items-center gap-2 text-sm rounded-xl border px-3 py-2 ${c.done ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-slate-200 text-slate-600 dark:border-slate-800 dark:text-slate-300"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-black", children: c.done ? "\u2713" : "\u25CB" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: c.title })
+          ]
+        },
+        c.id
+      )) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "tests", className: `${card$1} p-5 scroll-mt-20 space-y-4`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-baseline justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "Language tests" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test", className: "text-sm font-bold text-indigo-600 underline", children: "All tests \u2192" })
+      ] }),
+      Object.entries(TEST_NAMES).map(([key, info]) => {
+        const t2 = tests.find((x2) => x2.key === key);
+        return t2 ? /* @__PURE__ */ jsxRuntimeExports.jsx(TestCard, { info, summary: t2 }, key) : /* @__PURE__ */ jsxRuntimeExports.jsx(EmptyTest, { title: info.title, to: info.to }, key);
+      }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid gap-2 sm:grid-cols-2 lg:grid-cols-4", children: ["Hiragana", "Katakana", "Vocabulary", "Sentences"].map((name) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border border-dashed border-slate-300 dark:border-slate-700 px-3 py-2 text-sm text-slate-500", children: [
+        name,
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] font-bold uppercase", children: "\xB7 coming soon" })
+      ] }, name)) })
+    ] }),
+    quizzes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: `${card$1} p-5`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white mb-3", children: "Class vocabulary quizzes" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "w-full text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "text-left text-slate-500 border-b border-slate-200 dark:border-slate-800", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1.5 pr-3", children: "Quiz" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1.5 pr-3", children: "Best" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1.5 pr-3", children: "Tries" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "py-1.5", children: "Last" })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: quizzes.map((q2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-100 dark:border-slate-800", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-3", children: q2.title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "py-1.5 pr-3 font-bold", children: [
+            q2.best,
+            " / ",
+            q2.total,
+            " (",
+            pct(q2.best, q2.total),
+            "%)"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5 pr-3", children: q2.tries }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "py-1.5", children: day(q2.last) })
+        ] }, q2.title + q2.last)) })
+      ] }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { id: "typing", className: `${card$1} p-5 scroll-mt-20`, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-baseline justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-black text-slate-900 dark:text-white", children: "Touch typing" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/test/typing", className: "text-sm font-bold text-indigo-600 underline", children: "Practise \u2192" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300 mt-1", children: [
+        typingPassed,
+        " of ",
+        TYPING_LESSON_COUNT,
+        " lessons passed",
+        typingPassed > 0 && ` \xB7 best speed ${Math.max(...Object.values(typing).map((t2) => (t2 == null ? void 0 : t2.kpm) ?? 0))} keys per minute`
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Bar, { percent: pct(typingPassed, TYPING_LESSON_COUNT), color: "bg-emerald-500" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400 mt-2", children: "Typing progress is kept on this device only." })
+    ] })
+  ] }) }) });
+}
+function Summary({ href, label, value, percent, color }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href, className: `${card$1} p-4 hover:border-indigo-300 transition`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-2xl font-black text-slate-900 dark:text-white", children: value }),
+    percent !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Bar, { percent, color })
+  ] });
+}
+function Bar({ percent, color }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-2", role: "progressbar", "aria-valuenow": percent, "aria-valuemin": 0, "aria-valuemax": 100, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `h-full ${color}`, style: { width: `${percent}%` } }) });
+}
+function EmptyTest({ title, to }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: title }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to, className: "text-sm font-bold text-indigo-600 underline", children: "Take your first test \u2192" })
+  ] });
+}
+function TestCard({ info, summary }) {
+  const { title, to, unit } = info;
+  const all = summary.attempts;
+  const full = all.filter((a) => a.scope === "all");
+  const series = full.length ? full : all;
+  const accuracy = (a) => pct(a.correct, a.count);
+  const first = series[0];
+  const latest = series[series.length - 1];
+  const best = series.reduce((b, a) => a.avgMs < b.avgMs ? a : b, series[0]);
+  const worst = series.reduce((b, a) => a.avgMs > b.avgMs ? a : b, series[0]);
+  const recent = series.slice(-3);
+  const recentAvg = recent.reduce((n2, a) => n2 + a.avgMs, 0) / recent.length;
+  const prevBest = series.length > 1 ? Math.min(...series.slice(0, -1).map((a) => a.avgMs)) : null;
+  const breakthrough = prevBest !== null && prevBest - latest.avgMs >= info.breakthroughMs;
+  const trend = series.length < 2 ? "First result \u2014 come back and beat it!" : breakthrough ? "\u{1F680} Breakthrough! Your latest test was much faster than ever before." : latest.avgMs < first.avgMs ? "\u{1F4C8} Steady growth \u2014 you are getting faster little by little." : `Keep going \u2014 practise your weak ${unit === "kanji" ? "kanji" : "characters"} below.`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "font-black text-slate-900 dark:text-white", children: [
+        title,
+        " ",
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-bold text-slate-400", children: [
+          "\xB7 ",
+          all.length,
+          " attempts"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to, className: "text-sm font-bold text-indigo-600 underline", children: "Try again \u2192" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 sm:grid-cols-5 gap-2 text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Stat, { label: "First", value: sec(first.avgMs), sub: `${accuracy(first)}% \xB7 ${day(first.at)}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Stat, { label: "Best", value: sec(best.avgMs), sub: `${accuracy(best)}% \xB7 ${day(best.at)}`, strong: true }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Stat, { label: "Slowest", value: sec(worst.avgMs), sub: `${accuracy(worst)}% \xB7 ${day(worst.at)}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Stat, { label: "Last 3 average", value: sec(recentAvg), sub: `${recent.length} test${recent.length > 1 ? "s" : ""}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Stat, { label: "Latest", value: sec(latest.avgMs), sub: `${accuracy(latest)}% \xB7 ${day(latest.at)}` })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-slate-500", children: [
+      "Seconds per ",
+      unit,
+      " (lower is better)",
+      full.length ? `, ${info.fullLabel}` : "",
+      ". Target: ",
+      info.targetSec,
+      " seconds."
+    ] }),
+    series.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkline, { values: series.map((a) => a.avgMs), highlightLast: breakthrough }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm font-bold ${breakthrough ? "text-indigo-600" : "text-slate-700 dark:text-slate-200"}`, children: trend }),
+    summary.weak.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-slate-900 dark:text-white mb-1", children: [
+        unit === "kanji" ? "Kanji" : "Characters",
+        " to practise (from your last 5 tests)"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: summary.weak.map((w2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "span",
+        {
+          title: `${w2.misses} wrong, ${w2.slow} slow, average ${sec(w2.avgMs)}`,
+          className: `rounded-lg border px-2 py-1 text-center ${w2.misses ? "border-rose-300 bg-rose-50" : "border-amber-300 bg-amber-50"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl block leading-none text-slate-900", children: w2.c }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-slate-500", children: w2.misses ? `\u2717${w2.misses}` : `${(w2.avgMs / 1e3).toFixed(1)}s` })
+          ]
+        },
+        w2.c
+      )) })
+    ] })
+  ] });
+}
+function Stat({ label, value, sub, strong }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `rounded-lg p-2 ${strong ? "bg-indigo-50 border border-indigo-200" : "bg-slate-50 dark:bg-slate-800"}`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-slate-500", children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-black font-mono text-slate-900 dark:text-white", children: value }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] text-slate-500", children: sub })
+  ] });
+}
+function Sparkline({ values, highlightLast }) {
+  const pts = reactExports.useMemo(() => {
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const span = Math.max(max - min, 1);
+    return values.map((v2, i) => ({ x: values.length === 1 ? 50 : i / (values.length - 1) * 100, y: 10 + (max - v2) / span * 80 }));
+  }, [values]);
+  const last = pts[pts.length - 1];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 100 100", preserveAspectRatio: "none", className: "w-full h-16", "aria-label": "Seconds per character over time. Higher on the chart means faster.", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: pts.map((p2) => `${p2.x},${100 - p2.y}`).join(" "), fill: "none", stroke: "currentColor", strokeWidth: "2", vectorEffect: "non-scaling-stroke", className: "text-indigo-500" }),
+    pts.map((p2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: p2.x, cy: 100 - p2.y, r: "2.5", vectorEffect: "non-scaling-stroke", className: "fill-indigo-500" }, i)),
+    highlightLast && /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: last.x, cy: 100 - last.y, r: "5", className: "fill-amber-400", vectorEffect: "non-scaling-stroke" })
+  ] });
+}
+var route70 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: ProgressPage,
   loader: loader$5,
   meta: meta$5
 }, Symbol.toStringTag, { value: "Module" }));
@@ -86027,13 +92723,506 @@ function Contact() {
     }
   );
 }
-var route58 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route71 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Contact,
   loader: loader$4,
   meta: meta$4
 }, Symbol.toStringTag, { value: "Module" }));
+var ACTIVITIES = [
+  { key: "text", name: "Text chat with AI Yamato", unit: "turns", cost: CREDIT_COSTS.textChat },
+  { key: "image", name: "Text chat with 1 photo", unit: "turns", cost: CREDIT_COSTS.imageAttachment },
+  { key: "drill", name: "EOY Oral Drill", unit: "questions", cost: CREDIT_COSTS.oralDrill },
+  { key: "elaborate", name: "EOY Oral Elaborate", unit: "questions", cost: CREDIT_COSTS.oralElaborate },
+  { key: "mock", name: "Full Mock exam (approx. 15 min)", unit: "mocks", cost: CREDIT_COSTS.mockFull }
+];
+var STYLES = [
+  {
+    key: "balanced",
+    label: "Balanced",
+    description: "Credits split evenly: 20% on each of the five activities.",
+    share: { text: 20, image: 20, drill: 20, elaborate: 20, mock: 20 }
+  },
+  {
+    key: "oral",
+    label: "VCE oral exam prep",
+    description: "Mostly speaking practice for the oral exam: 30% Drill, 30% Elaborate, 20% Full Mock, 10% each for chat.",
+    share: { text: 10, image: 10, drill: 30, elaborate: 30, mock: 20 }
+  },
+  {
+    key: "chat",
+    label: "Everyday learning",
+    description: "Mostly asking AI Yamato questions: 50% text chat, 30% chat with photos, 10% each for Drill and Elaborate.",
+    share: { text: 50, image: 30, drill: 10, elaborate: 10, mock: 0 }
+  }
+];
+function columnsFrom(plans) {
+  const cols = [];
+  for (const key of ["starter", "standard", "pro"]) {
+    const p2 = plans[key];
+    if (!p2)
+      continue;
+    const credits = (p2.regularCredits ?? 0) + (p2.bonusCredits ?? 0);
+    const centsPerCredit = credits > 0 ? p2.priceAUD * 100 / credits : 0;
+    cols.push({
+      key,
+      name: p2.name.replace(/\b\w+/g, (w2) => w2[0] + w2.slice(1).toLowerCase()),
+      price: p2.price,
+      credits,
+      note: centsPerCredit ? `${centsPerCredit.toFixed(2)}\xA2 per credit` : "",
+      highlight: key === "standard"
+    });
+  }
+  return cols;
+}
+function PlanUsageComparison({ plans }) {
+  const [styleKey, setStyleKey] = reactExports.useState(STYLES[0].key);
+  const style = STYLES.find((s2) => s2.key === styleKey) ?? STYLES[0];
+  const columns = columnsFrom(plans);
+  if (columns.length === 0)
+    return null;
+  const timesFor = (credits, a) => Math.floor(credits * style.share[a.key] / 100 / a.cost);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm space-y-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "font-bold text-slate-900 dark:text-white text-base flex items-center justify-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Calculator, { className: "w-4 h-4 text-blue-600" }),
+        " What can you do with each pack?"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Every pack can use the same AI Yamato features, as long as you have enough credits. Choose a study style to compare." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap justify-center gap-2", role: "tablist", "aria-label": "Study style", children: STYLES.map((s2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        role: "tab",
+        "aria-selected": styleKey === s2.key,
+        onClick: () => setStyleKey(s2.key),
+        className: `px-4 py-2 rounded-full text-xs font-bold border cursor-pointer transition-colors ${styleKey === s2.key ? "bg-blue-600 border-blue-600 text-white" : "bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50"}`,
+        children: s2.label
+      },
+      s2.key
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-center text-slate-500 dark:text-slate-400", children: style.description }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "min-w-full text-sm", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "border-b border-slate-200 dark:border-slate-800", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("th", { className: "text-left font-semibold text-slate-600 dark:text-slate-300 p-3 min-w-[12rem]", children: "Activity (credits each)" }),
+        columns.map((c) => /* @__PURE__ */ jsxRuntimeExports.jsxs("th", { className: `p-3 text-center min-w-[8rem] ${c.highlight ? "bg-blue-50 dark:bg-blue-950/30" : ""}`, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-slate-900 dark:text-white", children: c.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs font-semibold text-slate-500", children: [
+            c.price,
+            " \xB7 ",
+            c.credits.toLocaleString("en-AU"),
+            " credits"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-[10px] font-normal text-slate-400", children: c.note })
+        ] }, c.key))
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: ACTIVITIES.map((a) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: `border-b border-slate-100 dark:border-slate-800 ${style.share[a.key] === 0 ? "opacity-40" : ""}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: "p-3 text-slate-700 dark:text-slate-300", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-semibold", children: a.name }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-slate-500", children: [
+            a.cost,
+            " credits each \xB7 ",
+            style.share[a.key],
+            "% of credits"
+          ] })
+        ] }),
+        columns.map((c) => {
+          const n2 = timesFor(c.credits, a);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { className: `p-3 text-center ${c.highlight ? "bg-blue-50/60 dark:bg-blue-950/20" : ""}`, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-lg font-black text-slate-900 dark:text-white", children: n2.toLocaleString("en-AU") }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-[11px] text-slate-500", children: a.unit })
+          ] }, c.key);
+        })
+      ] }, a.key)) })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[11px] text-center text-slate-400 dark:text-slate-500 max-w-3xl mx-auto", children: "Estimates only, rounded down. Each number shows how many times you could use that activity with its share of the pack's credits. Other features (Mock Sections 1 and 2, EOY Oral Superb, chats with 2\u20134 photos, Kanji AI Lookup) use credits as shown in the Credit Consumption Guide above." })
+  ] });
+}
+var PLAN_OFFERS = {
+  ai_trial: { kind: "trial", priceCents: 100, credits: 100, name: "AI Trial" },
+  basic_monthly: { kind: "subscription", plan: "basic", interval: "month", priceCents: 500, credits: 200, name: "Basic (monthly)" },
+  basic_yearly: { kind: "subscription", plan: "basic", interval: "year", priceCents: 5100, credits: 200, name: "Basic (yearly)" },
+  plus_monthly: { kind: "subscription", plan: "plus", interval: "month", priceCents: 1e3, credits: 700, name: "Plus (monthly)" },
+  plus_yearly: { kind: "subscription", plan: "plus", interval: "year", priceCents: 10200, credits: 700, name: "Plus (yearly)" },
+  season_3m: { kind: "season", months: 3, priceCents: 1500, credits: 700, name: "3-Month Pass" },
+  season_6m: { kind: "season", months: 6, priceCents: 3e3, credits: 1500, name: "6-Month Pass" }
+};
+var LP_RETURN_KEY = "lp-return-to-free-plan";
+var rememberReturn = () => {
+  try {
+    if (window.location.pathname === "/")
+      window.sessionStorage.setItem(LP_RETURN_KEY, String(Date.now()));
+  } catch {
+  }
+};
+var FREE_FEATURES = [
+  { label: "Genkoyoshi Editor", note: "write on Japanese manuscript paper", to: "/vce/writing/genkoyoshi-editor-vce" },
+  {
+    label: "VCE Kanji & Grammar Checker",
+    note: "type in your own sentences (reading handwriting with AI uses credits)",
+    to: "/vce/writing/kanji-grammar-checker"
+  },
+  { label: "Oral Exam Questions", note: "questions that may come up in the oral exam", to: "/vce/speaking/oral-exam-questions" },
+  { label: "Textbook lessons", note: "the first lesson of each textbook", to: "/lessons" },
+  { label: "All reference pages", note: "kanji, grammar, vocabulary, text types and writing styles", to: "/reference" },
+  { label: "Character-learning games", to: "/games" },
+  { label: "Japanese culture games", to: "/games" }
+];
+function FreePlanFeatures({ dark = false }) {
+  const [open, setOpen] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (!open)
+      return;
+    const onKey = (e) => {
+      if (e.key === "Escape")
+        setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        onClick: () => setOpen(true),
+        className: "inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 underline hover:text-indigo-800 cursor-pointer",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4 text-emerald-600", "aria-hidden": "true" }),
+          "See what you can use for free"
+        ]
+      }
+    ),
+    open && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-labelledby": "free-plan-title",
+        className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 text-left",
+        onClick: () => setOpen(false),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: `w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-6 space-y-4 ${dark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100"}`,
+            onClick: (e) => e.stopPropagation(),
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { id: "free-plan-title", className: "text-lg font-black", children: "What you can use on the Free plan" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 mt-1", children: "These need no AI and no credits. Tap a name to open the page." })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => setOpen(false),
+                    "aria-label": "Close",
+                    className: "p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-5 h-5" })
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5", children: FREE_FEATURES.map((f2) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-start gap-2 text-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-4 h-4 mt-0.5 shrink-0 text-emerald-600", "aria-hidden": "true" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-slate-600 dark:text-slate-300", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: f2.to, onClick: rememberReturn, className: "font-bold text-indigo-600 underline hover:text-indigo-800", children: f2.label }),
+                  f2.note ? ` \u2014 ${f2.note}` : ""
+                ] })
+              ] }, f2.label)) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "The AI features (AI Yamato chat, oral practice with AI feedback, writing feedback and more) need the AI Trial or a plan." })
+            ]
+          }
+        )
+      }
+    )
+  ] });
+}
+var dollars$1 = (cents) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
+var card = "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm";
+function AgreeNote() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500 mt-2", children: [
+    "By purchasing, you agree to our",
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+    " ",
+    "&",
+    " ",
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+    "."
+  ] });
+}
+var btn = "w-full py-3 px-4 rounded-xl font-bold text-sm text-center transition-all cursor-pointer disabled:opacity-50 block";
+function SectionHeading({ title, subtitle }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white", children: title }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300 max-w-2xl mx-auto", children: subtitle })
+  ] });
+}
+function SubscriptionPlans({
+  signedIn,
+  onSignIn,
+  freePlan
+}) {
+  const [interval, setInterval2] = reactExports.useState("month");
+  const [myPlan, setMyPlan] = reactExports.useState(null);
+  const [busy, setBusy] = reactExports.useState(null);
+  const [error, setError] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    fetchMyPlan().then(setMyPlan);
+  }, [signedIn]);
+  const buy = async (key) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session)
+      return onSignIn();
+    setBusy(key);
+    setError(await startPlanCheckout(key));
+    setBusy(null);
+  };
+  const discount = (myPlan == null ? void 0 : myPlan.first_plan_coupon) === "FIRST_SUB_TRIAL" ? 2 : (myPlan == null ? void 0 : myPlan.first_plan_coupon) === "FIRST_SUB" ? 1 : myPlan ? 0 : 1;
+  const hasSubscription = Boolean(myPlan == null ? void 0 : myPlan.plan);
+  const hasPass = Boolean(myPlan == null ? void 0 : myPlan.season_ends_at);
+  const yearly = interval === "year";
+  const planCard = (tier) => {
+    const monthly = PLAN_OFFERS[`${tier}_monthly`];
+    const key = yearly ? `${tier}_yearly` : `${tier}_monthly`;
+    const offer = PLAN_OFFERS[key];
+    const featured = tier === "plus";
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: card, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-indigo-600", children: tier === "basic" ? "Basic" : "Plus" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: dollars$1(offer.priceCents) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: yearly ? "/ year" : "/ month" })
+        ] }),
+        yearly && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-emerald-700", children: [
+          "= ",
+          dollars$1(Math.round(offer.priceCents / 12)),
+          " / month on average (monthly plan: ",
+          dollars$1(monthly.priceCents),
+          " / month)"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+          "All lessons and VCE tools + ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+            offer.credits,
+            " AI credits every month"
+          ] }),
+          featured ? ". For students who practise with AI a lot." : "."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Each month\u2019s credits expire 2 months after you receive them." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => buy(key),
+          disabled: busy !== null || hasSubscription || hasPass,
+          className: `${btn} mt-6 bg-indigo-600 hover:bg-indigo-700 text-white`,
+          children: busy === key ? "Opening\u2026" : hasSubscription ? "You have a plan" : hasPass ? "Available after your pass ends" : `Choose ${tier === "basic" ? "Basic" : "Plus"}`
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AgreeNote, {})
+    ] });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SectionHeading,
+        {
+          title: "Subscription plans",
+          subtitle: "Full access to all lessons and VCE tools, with AI credits every month. Renews automatically \u2014 cancel any time."
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center space-y-2", children: [
+        discount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "inline-block text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200", children: [
+          "\u{1F381} A$",
+          discount,
+          " off your first plan or pass",
+          discount === 2 ? " (thank you for trying the AI Trial!)" : ""
+        ] }),
+        (myPlan == null ? void 0 : myPlan.plan) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-indigo-600", children: [
+          "You\u2019re on the ",
+          myPlan.plan === "basic" ? "Basic" : "Plus",
+          " plan. Manage it from My Account."
+        ] }),
+        hasPass && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm font-bold text-indigo-600", children: [
+          "Your pass is active until ",
+          formatDate(myPlan.season_ends_at),
+          ". You can start a subscription after it ends."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex rounded-xl border border-slate-200 dark:border-slate-700 p-1 bg-white dark:bg-slate-900", children: ["month", "year"].map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          type: "button",
+          onClick: () => setInterval2(v2),
+          className: `px-4 py-2 rounded-lg text-sm font-bold cursor-pointer ${interval === v2 ? "bg-indigo-600 text-white" : "text-slate-600 dark:text-slate-300"}`,
+          children: v2 === "month" ? "Monthly" : "Yearly \xB7 15% off"
+        },
+        v2
+      )) }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch", children: [
+        freePlan && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: card, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: freePlan.name }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: freePlan.price }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: freePlan.period })
+            ] }),
+            freePlan.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold", children: freePlan.badge }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: freePlan.description }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(FreePlanFeatures, {})
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Link,
+            {
+              to: freePlan.ctaLink || "/",
+              className: `${btn} mt-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200`,
+              children: freePlan.ctaText || "Get Started Free"
+            }
+          )
+        ] }),
+        planCard("basic"),
+        planCard("plus")
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto text-xs text-slate-500 dark:text-slate-400 space-y-1.5 leading-relaxed", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Automatic renewal:" }),
+          " Basic and Plus renew automatically every month or every year until you cancel. Yearly members get an email reminder before each renewal."
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Cancel any time:" }),
+          " once you have subscribed, a \u201CManage plan, card and receipts\u201D button appears in My Account (under \u201CYour plan\u201D). Press it to cancel on the secure Stripe page. Your plan stays active until the end of the period you have paid for."
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SectionHeading,
+        {
+          title: "One-off payments",
+          subtitle: "Pay once \u2014 these never renew. Try the AI features, or get full access for a few months of focused study, for example before an exam."
+        }
+      ),
+      (myPlan == null ? void 0 : myPlan.season_ends_at) && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-sm font-bold text-indigo-600", children: [
+        "Your pass is active until ",
+        formatDate(myPlan.season_ends_at),
+        ". Buying another pass adds its months after that date."
+      ] }),
+      hasSubscription && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm font-bold text-indigo-600", children: "Your subscription already gives you full access. For more AI credits, see Top-up credits below." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: card, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: "AI Trial" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: dollars$1(PLAN_OFFERS.ai_trial.priceCents) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: "one-off" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+                PLAN_OFFERS.ai_trial.credits,
+                " AI credits"
+              ] }),
+              " to try any AI feature. One per person. Your A$1 comes back as a discount when you choose a plan or pass."
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Credits can be used for 1 year." })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: () => buy("ai_trial"),
+              disabled: busy !== null || Boolean(myPlan == null ? void 0 : myPlan.trial_done) || Boolean(myPlan == null ? void 0 : myPlan.paid_access),
+              className: `${btn} mt-6 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200`,
+              children: (myPlan == null ? void 0 : myPlan.trial_done) ? "Trial used" : (myPlan == null ? void 0 : myPlan.paid_access) ? "Included in your plan" : busy === "ai_trial" ? "Opening\u2026" : "Try AI for A$1"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AgreeNote, {})
+        ] }),
+        ["season_3m", "season_6m"].map((key) => {
+          const o = PLAN_OFFERS[key];
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: card, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-amber-600", children: o.name }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: dollars$1(o.priceCents) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: "one payment" })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs font-bold text-emerald-700", children: [
+                "= ",
+                dollars$1(Math.round(o.priceCents / (o.months ?? 1))),
+                " / month"
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-300", children: [
+                "Full access for ",
+                o.months,
+                " months + ",
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+                  o.credits.toLocaleString(),
+                  " AI credits"
+                ] }),
+                " up front. For focused study, for example in the months before an exam."
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "Credits can be used until the pass ends. Does not renew." })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => buy(key),
+                disabled: busy !== null || hasSubscription,
+                className: `${btn} mt-6 bg-amber-500 hover:bg-amber-600 text-white`,
+                children: busy === key ? "Opening\u2026" : hasSubscription ? "Included in your subscription" : hasPass ? `Extend with ${o.name}` : `Choose ${o.name}`
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(AgreeNote, {})
+          ] }, key);
+        })
+      ] }),
+      error && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm text-rose-600", children: error }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "max-w-3xl mx-auto text-xs text-slate-500 dark:text-slate-400 text-center", children: "Prices are in Australian dollars. Payments are processed securely by Stripe." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("section", { className: "max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-3 text-sm text-slate-700 dark:text-slate-300", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-bold text-slate-900 dark:text-white", children: "How long do credits last?" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { children: [
+        "Credits expire a set time ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "after the day you buy" }),
+        " \u2014 not at the end of a calendar month. How long they last depends on what you buy:"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "list-disc pl-5 space-y-1.5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Basic and Plus (monthly or yearly):" }),
+          " each month\u2019s credits last ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "2 months" }),
+          " from the day you receive them. You receive them on the same date each month. ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("i", { children: "Example: subscribe on 28 January \u2192 the credits you get that day expire on 28 March, and the credits you get on 28 February expire on 28 April." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "3-Month and 6-Month Pass:" }),
+          " credits last until the pass ends. ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("i", { children: "Example: buy a 6-Month Pass on 5 May \u2192 your credits expire on 5 November." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "AI Trial and top-ups:" }),
+          " credits last ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "1 year" }),
+          ". ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("i", { children: "Example: buy a top-up on 10 March 2027 \u2192 those credits expire on 10 March 2028." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "Daily quiz credits:" }),
+          " last ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: "7 days" }),
+          "."
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "When you use AI, the credits that expire soonest are used first. You can see your credit history in My Account." })
+    ] }) })
+  ] });
+}
 async function loader$3({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
@@ -86054,12 +93243,11 @@ function Prices() {
   const [priceData, setPriceData] = reactExports.useState(null);
   const [loading, setLoading] = reactExports.useState(true);
   const [error, setError] = reactExports.useState(false);
-  const [isSpecsOpen, setIsSpecsOpen] = reactExports.useState(false);
   const [loadingPriceId, setLoadingPriceId] = reactExports.useState(null);
   const layoutRef = reactExports.useRef(null);
   const rootData = useRouteLoaderData("root");
   const user = (rootData == null ? void 0 : rootData.user) ?? null;
-  (rootData == null ? void 0 : rootData.credits) ?? 10;
+  (rootData == null ? void 0 : rootData.credits) ?? 0;
   (rootData == null ? void 0 : rootData.nickname) ?? "";
   const loadData = reactExports.useCallback(async () => {
     setLoading(true);
@@ -86083,7 +93271,8 @@ function Prices() {
   }, [loadData]);
   const handleCheckout = async (priceId) => {
     var _a;
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
       return;
     }
@@ -86116,292 +93305,153 @@ function Prices() {
       errorTitle: "Unable to Load Data",
       errorMessage: "Failed to load PRICE_PLANS from Supabase (kl_app).",
       onRetry: loadData,
-      children: priceData && pricePlans && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "flex-grow", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "pt-14 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs sm:text-sm font-medium mb-4 shadow-sm", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-4 h-4" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Transparent & Flexible Pricing" })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4", children: "Plans & Credit Packs" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed", children: "Start for free with daily credits, or top up with prepaid charge packs for intensive study." }),
-          priceData.creditConsumptionGuide && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Coins, { className: "w-4 h-4 text-amber-500" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Credit Consumption Guide" })
+      children: priceData && pricePlans && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { className: "flex-grow", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "pt-14 pb-8 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs sm:text-sm font-medium mb-4 shadow-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldCheck, { className: "w-4 h-4" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Transparent & Flexible Pricing" })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 text-slate-500 dark:text-slate-400", children: priceData.creditConsumptionGuide.map((row, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: row.item }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-semibold text-slate-700 dark:text-slate-300", children: row.cost })
-            ] }, idx)) })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24", children: [
-          priceData.campaignNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center space-y-4 max-w-3xl mx-auto mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Flame, { className: "w-4 h-4 text-orange-500 shrink-0 animate-bounce" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: priceData.campaignNotice.rawText || priceData.campaignNotice.description })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch", children: [
-            pricePlans.free && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: pricePlans.free.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.free.price }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.free.period })
-                ] }),
-                pricePlans.free.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold", children: pricePlans.free.badge }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.free.description }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.free.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-                ] }, idx)) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4", children: "Plans & Credit Packs" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed", children: "Start for free, choose a subscription or a pass for full access, and top up if you need more AI credits." }),
+            priceData.creditConsumptionGuide && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-xl mx-auto mt-6 p-4 rounded-2xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm text-xs text-left", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center space-x-2 font-bold mb-3 text-slate-800 dark:text-slate-200", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Coins, { className: "w-4 h-4 text-amber-500" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Credit Consumption Guide" })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-6 space-y-3", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Link,
-                {
-                  to: pricePlans.free.ctaLink || "/",
-                  className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block",
-                  children: pricePlans.free.ctaText || "Get Started Free"
-                }
-              ) })
-            ] }),
-            pricePlans.starter && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.starter.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.starter.price }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.starter.period })
-                ] }),
-                pricePlans.starter.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.starter.badge }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.starter.description }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.starter.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-                ] }, idx)) })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleCheckout(pricePlans.starter.id),
-                    disabled: loadingPriceId === pricePlans.starter.id,
-                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.starter.id ? "Processing..." : pricePlans.starter.ctaText || "Buy Starter Pack" })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-                  "By purchasing, you agree to our ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-                  " & ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-                  "."
-                ] })
-              ] })
-            ] }),
-            pricePlans.standard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Most Popular" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 pt-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.standard.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.standard.price }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.standard.period })
-                ] }),
-                pricePlans.standard.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.standard.badge }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.standard.description }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.standard.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600 shrink-0" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-                ] }, idx)) })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleCheckout(pricePlans.standard.id),
-                    disabled: loadingPriceId === pricePlans.standard.id,
-                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.standard.id ? "Processing..." : pricePlans.standard.ctaText || "Buy Standard Pack" })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-                  "By purchasing, you agree to our ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-                  " & ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-                  "."
-                ] })
-              ] })
-            ] }),
-            pricePlans.pro && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-purple-600", children: pricePlans.pro.name }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.pro.price }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.pro.period })
-                ] }),
-                pricePlans.pro.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal", children: pricePlans.pro.badge }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.pro.description }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2.5 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.pro.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-purple-600 shrink-0" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-                ] }, idx)) })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => handleCheckout(pricePlans.pro.id),
-                    disabled: loadingPriceId === pricePlans.pro.id,
-                    className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.pro.id ? "Processing..." : pricePlans.pro.ctaText || "Buy Pro Pack" })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-                  "By purchasing, you agree to our ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-                  " & ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-                  "."
-                ] })
-              ] })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2 text-slate-500 dark:text-slate-400", children: priceData.creditConsumptionGuide.map((row, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: row.item }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-semibold text-slate-700 dark:text-slate-300", children: row.cost })
+              ] }, idx)) })
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-10", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "button",
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SubscriptionPlans,
+            {
+              signedIn: Boolean(user),
+              onSignIn: () => {
+                var _a;
+                return (_a = layoutRef.current) == null ? void 0 : _a.openAuthModal("signin");
+              },
+              freePlan: pricePlans.free
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-6", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              SectionHeading,
               {
-                type: "button",
-                onClick: () => setIsSpecsOpen(!isSpecsOpen),
-                className: "w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(SlidersHorizontal, { className: "w-4 h-4 text-blue-600" }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "View Detailed Plan Specs & Study Volume Estimates" })
-                  ] }),
-                  isSpecsOpen ? /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "w-5 h-5 text-slate-400" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "w-5 h-5 text-slate-400" })
-                ]
+                title: "Top-up credits",
+                subtitle: "For heavy users who need more AI credits than their plan includes. Available to members with a subscription or a pass. Credits can be used for 1 year."
               }
             ),
-            isSpecsOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-4 space-y-4 animate-fadeIn", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-bold text-slate-900 dark:text-white text-base", children: "Plan Specifications & Learning Volume Breakdown" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mt-1", children: "All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume." })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Free Plan" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Daily Earnings:" }),
-                      " 4 Credits (Promo until Oct 29, normally 2)"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost per Credit:" }),
-                      " Free"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                      " ~0.2 sessions / day"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Credit Expiry:" }),
-                      " 7 days"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Feature Access:" }),
-                      " Full AI Chat & Tools"
-                    ] })
-                  ] })
-                ] }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Starter Pack ($10)" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                      " 2,000"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                      " Standard"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                      " ~6\u20138 sessions"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                      " ~40\u201350 mins"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                      " Oct 29"
-                    ] })
-                  ] })
-                ] }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm", children: "Popular Specs" }),
+            priceData.campaignNotice && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-center space-y-4 max-w-3xl mx-auto mb-12", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Flame, { className: "w-4 h-4 text-orange-500 shrink-0 animate-bounce" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: priceData.campaignNotice.rawText || priceData.campaignNotice.description })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left items-stretch", children: [
+              pricePlans.starter && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.starter.name }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", lang: "ja", children: "\u3061\u3087\u3063\u3068 = a little" }),
                   /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1", children: "Standard ($25)" }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                        " 5,600 (+120% value)"
-                      ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                        " High Value"
-                      ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                        " ~18\u201322 sessions"
-                      ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                        " ~110\u2013140 mins"
-                      ] }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                        " Oct 29"
-                      ] })
-                    ] })
-                  ] })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.starter.price }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.starter.period })
+                  ] }),
+                  pricePlans.starter.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.starter.badge }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.starter.description })
                 ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800", children: "Pro Intensivist ($50)" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("ul", { className: "space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4", children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Total Credits:" }),
-                      " 12,000 (Maximum)"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Cost efficiency:" }),
-                      " Best Value"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Essay Practice:" }),
-                      " ~40\u201350 sessions"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Voice Roleplay:" }),
-                      " ~240\u2013300 mins"
-                    ] }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { className: "text-slate-900 dark:text-white", children: "Bonus Expiry:" }),
-                      " Oct 29"
-                    ] })
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => handleCheckout(pricePlans.starter.id),
+                      disabled: loadingPriceId === pricePlans.starter.id,
+                      className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.starter.id ? "Processing..." : pricePlans.starter.ctaText || "Buy Top Up Chotto" })
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                    "By purchasing, you agree to our ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                    " & ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                    "."
                   ] })
-                ] }) })
+                ] })
+              ] }),
+              pricePlans.standard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.standard.name }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", lang: "ja", children: "\u3044\u3063\u3071\u3044 = lots" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.standard.price }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.standard.period })
+                  ] }),
+                  pricePlans.standard.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.standard.badge }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.standard.description })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => handleCheckout(pricePlans.standard.id),
+                      disabled: loadingPriceId === pricePlans.standard.id,
+                      className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.standard.id ? "Processing..." : pricePlans.standard.ctaText || "Buy Top Up Ippai" })
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                    "By purchasing, you agree to our ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                    " & ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                    "."
+                  ] })
+                ] })
+              ] }),
+              pricePlans.pro && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-purple-600", children: pricePlans.pro.name }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", lang: "ja", children: "\u3081\u3063\u3061\u3083 = super (casual)" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black text-slate-900 dark:text-white", children: pricePlans.pro.price }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.pro.period })
+                  ] }),
+                  pricePlans.pro.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal", children: pricePlans.pro.badge }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed", children: pricePlans.pro.description })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      onClick: () => handleCheckout(pricePlans.pro.id),
+                      disabled: loadingPriceId === pricePlans.pro.id,
+                      className: "w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: loadingPriceId === pricePlans.pro.id ? "Processing..." : pricePlans.pro.ctaText || "Buy Top Up Meccha" })
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
+                    "By purchasing, you agree to our ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/terms", className: "underline hover:text-slate-600", children: "Terms" }),
+                    " & ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/legal/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
+                    "."
+                  ] })
+                ] })
               ] })
-            ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-12", children: /* @__PURE__ */ jsxRuntimeExports.jsx(PlanUsageComparison, { plans: pricePlans }) })
           ] })
-        ] })
-      ] }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
+      ] })
     }
   );
 }
-var route59 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route72 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -86426,6 +93476,161 @@ function NextQuizCountdown({ nextAt, onReached, className = "" }) {
     " ",
     /* @__PURE__ */ jsxRuntimeExports.jsx("span", { lang: "ja", className: "font-bold", title: formatEnglishDuration(secondsLeft), children: formatKanjiDuration(secondsLeft) })
   ] });
+}
+var IMAGE_SRC = "/images/yamato-character-3d.webp";
+var AUDIO_SRC = "/audio/yamato-intro.mp3";
+var INTRO_LINES = [
+  "\u3053\u3093\u306B\u3061\u306F\uFF01\u30E4\u30DE\u30C8\u3067\u3059\u3002",
+  "\u4E00\u7DD2\u306B\u697D\u3057\u304F\u65E5\u672C\u8A9E\u3092\u52C9\u5F37\u3057\u307E\u3057\u3087\u3046\u3002",
+  "24\u6642\u9593\u3001\u3044\u3064\u3067\u3082\u30DA\u30FC\u30B8\u306E\u53F3\u4E0B\u304B\u3089\u30C1\u30E3\u30C3\u30C8\u3092\u304A\u304F\u3063\u3066\u304F\u3060\u3055\u3044\u3002"
+];
+var logPlayError = (err) => console.warn("[YamatoIntro] \u97F3\u58F0\u3092\u518D\u751F\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F:", err);
+function YamatoIntroButton({ isDarkMode }) {
+  const audioRef = reactExports.useRef(null);
+  const [isOpen, setIsOpen] = reactExports.useState(false);
+  const [playing, setPlaying] = reactExports.useState(false);
+  const play = reactExports.useCallback(() => {
+    const audio2 = audioRef.current;
+    if (!audio2)
+      return;
+    audio2.currentTime = 0;
+    audio2.play().catch(logPlayError);
+  }, []);
+  const togglePlay = reactExports.useCallback(() => {
+    const audio2 = audioRef.current;
+    if (!audio2)
+      return;
+    if (!audio2.paused) {
+      audio2.pause();
+      return;
+    }
+    if (audio2.ended)
+      audio2.currentTime = 0;
+    audio2.play().catch(logPlayError);
+  }, []);
+  const open = () => {
+    setIsOpen(true);
+    play();
+  };
+  const close = reactExports.useCallback(() => {
+    var _a;
+    (_a = audioRef.current) == null ? void 0 : _a.pause();
+    setIsOpen(false);
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: open,
+        "aria-label": "Meet Yamato",
+        title: "Meet Yamato",
+        className: "inline-flex align-middle ml-2 w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white ring-2 ring-blue-400 shadow-md hover:scale-110 hover:ring-blue-600 transition-transform cursor-pointer",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: IMAGE_SRC, alt: "", width: 48, height: 48, className: "w-full h-full object-cover object-top scale-150 translate-y-[18%]" })
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "audio",
+      {
+        ref: audioRef,
+        src: AUDIO_SRC,
+        preload: "none",
+        onPlay: () => setPlaying(true),
+        onPause: () => setPlaying(false),
+        onEnded: () => setPlaying(false),
+        onError: () => {
+          var _a;
+          return console.warn("[YamatoIntro] \u97F3\u58F0\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F:", AUDIO_SRC, (_a = audioRef.current) == null ? void 0 : _a.error);
+        }
+      }
+    ),
+    isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      YamatoIntroModal,
+      {
+        isDarkMode,
+        playing,
+        onTogglePlay: togglePlay,
+        onClose: close
+      }
+    )
+  ] });
+}
+function YamatoIntroModal({ isDarkMode, playing, onTogglePlay, onClose }) {
+  const closeButtonRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    var _a;
+    (_a = closeButtonRef.current) == null ? void 0 : _a.focus();
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape")
+        onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+  const bubbleColors = isDarkMode ? "bg-slate-800 text-slate-100 border-slate-700" : "bg-blue-50 text-slate-800 border-blue-200";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-label": "Yamato",
+      className: "fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4",
+      onClick: onClose,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: `relative w-full max-w-sm rounded-2xl shadow-2xl px-6 pt-10 pb-6 flex flex-col items-center text-left ${isDarkMode ? "bg-slate-900 border border-slate-800" : "bg-white"}`,
+          onClick: (e) => e.stopPropagation(),
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                ref: closeButtonRef,
+                type: "button",
+                onClick: onClose,
+                "aria-label": "Close",
+                className: `absolute top-2 right-2 p-2 rounded-full transition cursor-pointer ${isDarkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "w-5 h-5" })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `relative w-full rounded-2xl border px-4 py-3 text-sm font-medium leading-relaxed shadow-sm ${bubbleColors}`, children: [
+              INTRO_LINES.map((line) => /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: line }, line)),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  "aria-hidden": "true",
+                  className: `absolute left-1/2 -bottom-2 w-4 h-4 -translate-x-1/2 rotate-45 border-r border-b ${bubbleColors}`
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "button",
+              {
+                type: "button",
+                onClick: onTogglePlay,
+                "aria-label": playing ? "Stop Yamato\u2019s voice" : "Play Yamato\u2019s voice",
+                title: playing ? "\u6B62\u3081\u308B" : "\u30E4\u30DE\u30C8\u306E\u58F0\u3092\u805E\u304F",
+                className: "relative mt-4 rounded-2xl cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "img",
+                    {
+                      src: IMAGE_SRC,
+                      alt: "Yamato, the mascot of jptutoraiyamato.com",
+                      width: 320,
+                      height: 320,
+                      className: `w-52 sm:w-60 h-auto drop-shadow-xl transition-transform ${playing ? "animate-pulse" : "hover:scale-105"}`
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "absolute bottom-2 right-2 w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md", children: playing ? /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "w-4 h-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Volume2, { className: "w-4 h-4" }) })
+                ]
+              }
+            )
+          ]
+        }
+      )
+    }
+  );
 }
 function HeroDemoChat({
   isDarkMode,
@@ -86525,6 +93730,7 @@ function HeroDemoChat({
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-4xl sm:text-6xl font-black tracking-tight leading-tight", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent", children: hero == null ? void 0 : hero.title }),
+      (hero == null ? void 0 : hero.title) && /* @__PURE__ */ jsxRuntimeExports.jsx(YamatoIntroButton, { isDarkMode }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300", children: hero == null ? void 0 : hero.subtitle })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-base sm:text-lg max-w-2xl mx-auto ${isDarkMode ? "text-slate-400" : "text-slate-600"}`, children: hero == null ? void 0 : hero.description }),
@@ -86782,185 +93988,116 @@ var ChatYamatoConcierge = ({
     }
   );
 };
-function PricingSection({
-  isDarkMode,
-  checkoutLoadingPriceId,
-  onCheckout,
-  onOpenAuthModal
-}) {
+var dollars = (cents) => `A$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
+function PricingSection({ isDarkMode }) {
+  var _a;
   const [priceData, setPriceData] = reactExports.useState(null);
   const [loading, setLoading] = reactExports.useState(true);
-  const [error, setError] = reactExports.useState(false);
+  const navigationType = useNavigationType();
+  const freeCardRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         const data2 = await fetchPricePlansData(supabase);
-        if (data2 && data2.pricePlans) {
+        if (data2 && data2.pricePlans)
           setPriceData(data2);
-        } else {
-          setError(true);
-        }
       } catch (err) {
         console.error("Failed to load price plans:", err);
-        setError(true);
       } finally {
         setLoading(false);
       }
     }
     loadData();
   }, []);
+  reactExports.useEffect(() => {
+    if (loading)
+      return;
+    let mark = null;
+    try {
+      mark = window.sessionStorage.getItem(LP_RETURN_KEY);
+      window.sessionStorage.removeItem(LP_RETURN_KEY);
+    } catch {
+      return;
+    }
+    if (!mark || navigationType !== "POP" || Date.now() - Number(mark) > 30 * 60 * 1e3)
+      return;
+    const timer = setTimeout(() => {
+      var _a2;
+      return (_a2 = freeCardRef.current) == null ? void 0 : _a2.scrollIntoView({ block: "center" });
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [loading, navigationType]);
   if (loading) {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-12 text-center py-12", id: "pricing", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-8 h-8 animate-spin mx-auto text-blue-600" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-400", children: "Loading pricing plans..." })
     ] });
   }
-  if (error || !priceData || !priceData.pricePlans) {
-    return null;
-  }
-  const { pricePlans, creditConsumptionGuide, campaignNotice } = priceData;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-12 text-center", id: "pricing", children: [
+  const free = (_a = priceData == null ? void 0 : priceData.pricePlans) == null ? void 0 : _a.free;
+  const creditConsumptionGuide = priceData == null ? void 0 : priceData.creditConsumptionGuide;
+  const campaignNotice = priceData == null ? void 0 : priceData.campaignNotice;
+  const card2 = `p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"} shadow-sm`;
+  const muted = isDarkMode ? "text-slate-400" : "text-slate-600";
+  const paidCard = (tier) => {
+    const offer = PLAN_OFFERS[tier === "basic" ? "basic_monthly" : "plus_monthly"];
+    const yearly = PLAN_OFFERS[tier === "basic" ? "basic_yearly" : "plus_yearly"];
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: card2, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-indigo-600", children: tier === "basic" ? "Basic" : "Plus" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: dollars(offer.priceCents) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: "/ month" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `text-xs font-bold ${isDarkMode ? "text-emerald-400" : "text-emerald-700"}`, children: [
+        "or ",
+        dollars(yearly.priceCents),
+        " / year (15% off)"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `text-sm ${muted}`, children: [
+        "All lessons and VCE tools + ",
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+          offer.credits,
+          " AI credits every month"
+        ] }),
+        "."
+      ] })
+    ] }) });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-10 text-center", id: "pricing", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4 max-w-3xl mx-auto", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-extrabold tracking-tight", children: "Choose Your Plan & Credit Packs" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm ${isDarkMode ? "text-slate-400" : "text-slate-600"}`, children: "Start for free with daily credits, or top up with prepaid charge packs for intensive study." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-3xl font-extrabold tracking-tight", children: "Plans" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm ${muted}`, children: "Start for free. Choose a plan for full access to all lessons and VCE tools, with AI credits every month." }),
       campaignNotice && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4 rounded-2xl bg-gradient-to-r from-red-600/10 via-orange-600/10 to-amber-600/10 border border-red-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(Flame, { className: "w-4 h-4 text-red-600 shrink-0 animate-bounce" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: campaignNotice.rawText || campaignNotice.description })
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left", children: [
-      pricePlans.free && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"} shadow-sm`, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: pricePlans.free.name }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: pricePlans.free.price }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.free.period })
-          ] }),
-          pricePlans.free.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold", children: pricePlans.free.badge }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: pricePlans.free.description }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.free.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-          ] }, idx)) })
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-5xl mx-auto", children: [
+      free && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: card2, ref: freeCardRef, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-500", children: free.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: free.price }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: free.period })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: () => onOpenAuthModal("signup"),
-            className: "mt-6 w-full py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer",
-            children: pricePlans.free.ctaText || "Get Started Free"
-          }
-        )
-      ] }),
-      pricePlans.starter && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"} shadow-sm`, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.starter.name }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: pricePlans.starter.price }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.starter.period })
-          ] }),
-          pricePlans.starter.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.starter.badge }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: pricePlans.starter.description }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.starter.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-          ] }, idx)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              onClick: () => onCheckout(pricePlans.starter.id),
-              disabled: checkoutLoadingPriceId === pricePlans.starter.id,
-              className: "w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer",
-              children: [
-                checkoutLoadingPriceId === pricePlans.starter.id && /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-3.5 h-3.5 animate-spin" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: pricePlans.starter.ctaText || "Buy Starter Pack" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-            "By purchasing, you agree to our ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-            " & ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-            "."
-          ] })
-        ] })
-      ] }),
-      pricePlans.standard && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-3xl border-2 border-blue-600 flex flex-col justify-between relative ${isDarkMode ? "bg-slate-900" : "bg-white"} shadow-xl`, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full", children: "Most Popular" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-blue-600", children: pricePlans.standard.name }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: pricePlans.standard.price }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.standard.period })
-          ] }),
-          pricePlans.standard.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold leading-normal", children: pricePlans.standard.badge }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: pricePlans.standard.description }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.standard.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-blue-600" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-          ] }, idx)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              onClick: () => onCheckout(pricePlans.standard.id),
-              disabled: checkoutLoadingPriceId === pricePlans.standard.id,
-              className: "w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer",
-              children: [
-                checkoutLoadingPriceId === pricePlans.standard.id && /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-3.5 h-3.5 animate-spin" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: pricePlans.standard.ctaText || "Buy Standard Pack" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-            "By purchasing, you agree to our ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-            " & ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-            "."
-          ] })
-        ] })
-      ] }),
-      pricePlans.pro && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-6 rounded-3xl border flex flex-col justify-between ${isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"} shadow-sm`, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-purple-600", children: pricePlans.pro.name }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-4xl font-black", children: pricePlans.pro.price }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-slate-500 ml-1", children: pricePlans.pro.period })
-          ] }),
-          pricePlans.pro.badge && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-block px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-600 text-xs font-bold leading-normal", children: pricePlans.pro.badge }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: pricePlans.pro.description }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-2 text-xs text-slate-600 dark:text-slate-300", children: pricePlans.pro.features.map((feat, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "flex items-center space-x-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "w-3.5 h-3.5 text-purple-600" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: feat })
-          ] }, idx)) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-6 space-y-3", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              onClick: () => onCheckout(pricePlans.pro.id),
-              disabled: checkoutLoadingPriceId === pricePlans.pro.id,
-              className: "w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer",
-              children: [
-                checkoutLoadingPriceId === pricePlans.pro.id && /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "w-3.5 h-3.5 animate-spin" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: pricePlans.pro.ctaText || "Buy Pro Pack" })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-[10px] text-center text-slate-400 dark:text-slate-500", children: [
-            "By purchasing, you agree to our ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/terms", className: "underline hover:text-slate-600", children: "Terms" }),
-            " & ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/disclaimer", className: "underline hover:text-slate-600", children: "Disclaimer" }),
-            "."
-          ] })
-        ] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: `text-sm ${muted}`, children: free.description }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(FreePlanFeatures, { dark: isDarkMode })
+      ] }) }),
+      paidCard("basic"),
+      paidCard("plus")
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Link,
+        {
+          to: "/prices",
+          className: "inline-block px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-colors",
+          children: "See all plans"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: `text-xs ${muted}`, children: [
+        "Also available: a ",
+        dollars(PLAN_OFFERS.ai_trial.priceCents),
+        " AI Trial, and 3-month or 6-month passes that don\u2019t renew."
       ] })
     ] }),
     creditConsumptionGuide && creditConsumptionGuide.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "pricing-credits-guide", className: `max-w-2xl mx-auto p-4 rounded-2xl border text-xs ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-white border-slate-200"} shadow-sm scroll-mt-20`, children: [
@@ -87002,6 +94139,10 @@ function PortalModulesGrid({
         return /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className });
       case "Landmark":
         return /* @__PURE__ */ jsxRuntimeExports.jsx(Landmark, { className });
+      case "ClipboardCheck":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardCheck, { className });
+      case "MessagesSquare":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(MessagesSquare, { className });
       default:
         return /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className });
     }
@@ -87069,7 +94210,7 @@ function PortalModulesGrid({
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-junior", className: "space-y-4 pt-4 scroll-mt-20", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "\u{1F371}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { children: "Japanese Lessons & Textbook Hub" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { children: "Lessons & Tasks" })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: [
           renderCard(
@@ -87081,6 +94222,36 @@ function PortalModulesGrid({
               category: "Curriculum Hub",
               iconName: "BookOpen",
               actionLabel: "Explore Lessons",
+              isComingSoon: false,
+              creditRequirement: null,
+              accentColor: "orange"
+            },
+            "orange"
+          ),
+          renderCard(
+            {
+              id: "tests-hub",
+              name: "Tests & Touch Typing",
+              description: "How quickly and accurately can you answer in Japanese? Language tests for kana, kanji and words, plus a step-by-step touch typing course.",
+              path: "/test",
+              category: "Tests",
+              iconName: "ClipboardCheck",
+              actionLabel: "Take a Test",
+              isComingSoon: false,
+              creditRequirement: null,
+              accentColor: "orange"
+            },
+            "orange"
+          ),
+          renderCard(
+            {
+              id: "speaking-tasks",
+              name: "Speaking Tasks",
+              description: "All speaking tasks in one place: order food from an AI clerk, lesson speaking tasks and VCE oral exam practice.",
+              path: "/speaking",
+              category: "Speaking",
+              iconName: "Mic",
+              actionLabel: "Start Speaking",
               isComingSoon: false,
               creditRequirement: null,
               accentColor: "orange"
@@ -87103,13 +94274,15 @@ function PortalModulesGrid({
             "orange"
           )
         ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-general", className: "space-y-4 pt-6 scroll-mt-20", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F30D}" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-extrabold text-lg text-slate-800 dark:text-slate-200", children: "Global & General Japanese Learners" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-games", className: "space-y-4 pt-6 scroll-mt-20", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F3AE}" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "font-extrabold text-base text-red-600 dark:text-red-400", children: "Interactive Learning Arcade & Games" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: renderCard(
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { id: "section-games", className: "scroll-mt-24 flex", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex flex-col [&>div]:flex-1", children: renderCard(
           {
             id: "games-arcade",
             name: (gamesData == null ? void 0 : gamesData.subtitle) || "Japanese Learning Arcade",
@@ -87120,18 +94293,27 @@ function PortalModulesGrid({
             actionLabel: "View Arcade",
             isComingSoon: false,
             creditRequirement: null,
-            accentColor: "red"
+            accentColor: "blue"
           },
-          "red"
-        ) })
+          "blue"
+        ) }) }),
+        renderCard(
+          {
+            id: "yamato-town",
+            name: "Yamato Town",
+            description: "Meet other Japanese learners in a little Japanese town and greet them with set phrases and stamps. Talk to an AI character in every place. Personal accounts only.",
+            path: "/world",
+            category: "Meet Learners \xB7 BETA",
+            iconName: "MessagesSquare",
+            actionLabel: "Enter Town",
+            isComingSoon: false,
+            creditRequirement: null,
+            accentColor: "blue"
+          },
+          "blue"
+        ),
+        generalModules.map((mod) => renderCard(mod, "blue"))
       ] })
-    ] }),
-    generalModules.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { id: "section-general", className: "space-y-4 pt-6 scroll-mt-20", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xl", children: "\u{1F30D}" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-extrabold text-lg text-slate-800 dark:text-slate-200", children: "Global & General Japanese Learners" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", children: generalModules.map((mod) => renderCard(mod, "blue")) })
     ] })
   ] });
 }
@@ -87711,7 +94893,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route60 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route73 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -87810,7 +94992,7 @@ function AboutPage() {
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "w-2 h-2 rounded-full bg-blue-600" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Credits & Daily Rewards" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 leading-relaxed", children: "Platform access uses a flexible credit system. Credits can be purchased or earned through welcome bonuses and daily interactive quizzes." })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs sm:text-sm text-slate-600 leading-relaxed", children: "Platform access uses a flexible credit system. Credits can be purchased or earned through the daily quiz." })
         ] })
       ] })
     ] }),
@@ -87857,7 +95039,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route61 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route74 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -88102,13 +95284,13 @@ function FaqPage() {
     }
   );
 }
-var route62 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route75 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-wlJaY5NB.js", "imports": ["/assets/components-BXNPK-9s.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-BT5O4oN6.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-Cm6BwV3z.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-Di9HABAd.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-ByuLwZq7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/rotate-ccw-CsTWviG-.js", "/assets/check-CbjvxR1u.js", "/assets/book-open-DJN--ztW.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-BJVLirtx.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/loader-circle-DGDkIsnz.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CUkK-Gfl.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-CtF81cAq.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/OralExaminerAvatar-B0lfs1zT.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/credit-costs-CsvKcApb.js", "/assets/OralUserAnswersHooks-ejDs8V4G.js", "/assets/OralPracticeHooks-Biu9KR5T.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/trash-ByzNyJic.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-QFu45VmS.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-Di9HABAd.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.speaking.eoy-oral-superb": { "id": "routes/vce.speaking.eoy-oral-superb", "parentId": "root", "path": "vce/speaking/eoy-oral-superb", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-superb-2BUSy5_v.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/ChatYamatoEoyOralDrill-C7inmI4y.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-CsvKcApb.js", "/assets/OralExaminerAvatar-B0lfs1zT.js", "/assets/OralMockReport-FD-GaKc9.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-DDbKiaQA.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/OralExaminerAvatar-B0lfs1zT.js", "/assets/ChatYamatoEoyOralDrill-C7inmI4y.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/credit-costs-CsvKcApb.js", "/assets/OralUserAnswersHooks-ejDs8V4G.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-Biu9KR5T.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-CaIrddHl.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-C5g3Eo8_.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-CsvKcApb.js", "/assets/OralExaminerAvatar-B0lfs1zT.js", "/assets/OralPracticeHooks-Biu9KR5T.js", "/assets/OralMockReport-FD-GaKc9.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/games.hiragana-solitaire": { "id": "routes/games.hiragana-solitaire", "parentId": "root", "path": "games/hiragana-solitaire", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-solitaire-BOS_lPtH.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-B6PlyQ26.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-dXvOCpCY.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-DA6HKcAI.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-DvDE0Ewd.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-Di9HABAd.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/class-quiz.$homeworkId": { "id": "routes/class-quiz.$homeworkId", "parentId": "root", "path": "class-quiz/:homeworkId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-quiz._homeworkId-Ca9NoDqt.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/useSoundEffect-DEDEgHVI.js", "/assets/languages-BG2JnU5a.js", "/assets/rotate-ccw-CsTWviG-.js", "/assets/volume-2-DkEeZBfM.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-D1uXqBZ8.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/price-plans-Bin1l42d.js", "/assets/credit-costs-CsvKcApb.js", "/assets/chatThemeColor-qTygGRQT.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-CIENemZx.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-Da9iVSSp.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BrEPVvXy.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-D2mosuF-.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-C74bgFWF.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-BetNkpHY.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-BbqRNIOa.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/api.lesson-settings": { "id": "routes/api.lesson-settings", "parentId": "root", "path": "api/lesson-settings", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-settings-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-Hhr0p1Ix.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-YIHxZV2J.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-DDwEvaMC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-BYqEVFeo.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-DuCHu7dn.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/shuffle-Direv13U.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-GE7X-DE8.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BrEPVvXy.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-BzwNw5cJ.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-BhRarjcW.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.teacher-vocab": { "id": "routes/api.teacher-vocab", "parentId": "root", "path": "api/teacher-vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-vocab-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-Dv2Uqp94.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/SchoolAccountLink-BVdYXKOa.js", "/assets/users-DEAGI1sd.js", "/assets/check-CbjvxR1u.js", "/assets/pen-line-ByuLwZq7.js", "/assets/gamepad-2-Dw0cxViz.js", "/assets/lock-open-DCRnfouV.js", "/assets/refresh-cw-BmjM-DHm.js", "/assets/trash-ByzNyJic.js", "/assets/book-open-DJN--ztW.js", "/assets/languages-BG2JnU5a.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-iOiA2smx.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-CpibI2js.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-B0eIwouR.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/culture-tasks-Ch58bEZZ.js", "/assets/useSoundEffect-DEDEgHVI.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-Di9HABAd.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-CijpPTCD.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-DIG1i6-0.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/api.auth.logout": { "id": "routes/api.auth.logout", "parentId": "root", "path": "api/auth/logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-CHB4Rj69.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-BUJNA1gY.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/culture-tasks-Ch58bEZZ.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/useSoundEffect-DEDEgHVI.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-oFDm9Bxr.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-CL0TOe42.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-Cqk1uzgt.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-8jz3klZh.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-B0eIwouR.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/culture-tasks-Ch58bEZZ.js", "/assets/useSoundEffect-DEDEgHVI.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-Di9HABAd.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-C_RPSJqx.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/lock-open-DCRnfouV.js", "/assets/gamepad-2-Dw0cxViz.js", "/assets/grid-3x3-B9WthICt.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-D6r2gFiX.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-BMaXvRU6.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-BXSZth-Z.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-Bgei-RmV.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/volume-2-DkEeZBfM.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/users-DEAGI1sd.js", "/assets/log-in-CGlN0kuW.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-B6QRd_0U.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/SchoolAccountLink-BVdYXKOa.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/users-DEAGI1sd.js", "/assets/languages-BG2JnU5a.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-DqErSfIs.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-DDwEvaMC.js", "/assets/content-vce-writing-BhRarjcW.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-Cl3hEcxH.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/IframeGamePage-CAkav3LB.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/GameAccessGate-BghU1dKG.js", "/assets/useGameAccess-7FpDTZyn.js", "/assets/log-in-CGlN0kuW.js", "/assets/refresh-cw-BmjM-DHm.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-CUYhWr_J.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-D-Et1VT6.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/price-plans-Bin1l42d.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/flame-CiBI7iBT.js", "/assets/check-CbjvxR1u.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/credit-costs-CsvKcApb.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index--JFLMkIg.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/flame-CiBI7iBT.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/check-CbjvxR1u.js", "/assets/yamato-configs-BhS5-Csu.js", "/assets/price-plans-Bin1l42d.js", "/assets/loader-circle-DGDkIsnz.js", "/assets/book-open-DJN--ztW.js", "/assets/gamepad-2-Dw0cxViz.js", "/assets/grid-3x3-B9WthICt.js", "/assets/content-vce-speaking-DDwEvaMC.js", "/assets/content-vce-writing-BhRarjcW.js", "/assets/content-reference-DIG1i6-0.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/chatThemeColor-qTygGRQT.js", "/assets/credit-costs-CsvKcApb.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-D0HLQ2lU.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/book-open-DJN--ztW.js", "/assets/users-DEAGI1sd.js", "/assets/DataErrorState-DRoNXp96.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-lj4PRIxx.js", "imports": ["/assets/components-BXNPK-9s.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-CLYMp1e-.js", "/assets/ScrollTopButton-CBUmx11q.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-BrEPVvXy.js", "/assets/DataErrorState-DRoNXp96.js"], "css": [] } }, "url": "/assets/manifest-a251b5aa.js", "version": "a251b5aa" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-beQJ8Odh.js", "imports": ["/assets/components-cQBx1qLm.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-DHMR3rWp.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-D5ucPzZx.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-BNCMes_T.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/rotate-ccw-CDJfDj30.js", "/assets/check-CTBxRf77.js", "/assets/book-open-BRGstXjJ.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-BAH1F63r.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/loader-circle-BJe_4Wk3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-BHKHhSgw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-D8JPZvDn.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/trash-CZ9afL-o.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-D8Gyqk0z.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-superb": { "id": "routes/vce.speaking.eoy-oral-superb", "parentId": "root", "path": "vce/speaking/eoy-oral-superb", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-superb-CaTdgmsM.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/oral-topics-DETRyncq.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-CsLcNCBr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-Dk1GBJCc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BTdPyV3U.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/oral-topics-DETRyncq.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.hiragana-solitaire": { "id": "routes/games.hiragana-solitaire", "parentId": "root", "path": "games/hiragana-solitaire", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-solitaire-Dtovtpg-.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-Ciul9TPw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-BNeQMBBE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-sAXtO6y2.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/test.lookalike_.answers": { "id": "routes/test.lookalike_.answers", "parentId": "root", "path": "test/lookalike/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike_.answers-gIDgmt41.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-26arvpsc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/class-quiz.$homeworkId": { "id": "routes/class-quiz.$homeworkId", "parentId": "root", "path": "class-quiz/:homeworkId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-quiz._homeworkId-BLvXCUI5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/languages-f5rc3Mk7.js", "/assets/rotate-ccw-CDJfDj30.js", "/assets/volume-2-DlMUskwB.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-_pGxLHlr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-CIr4zR1g.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-Cr0JD7eY.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-CYN3RrhV.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DnFiUaoK.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-CSz-LCvw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CIpVHEF5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.lesson-progress": { "id": "routes/api.lesson-progress", "parentId": "root", "path": "api/lesson-progress", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-progress-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.lesson-settings": { "id": "routes/api.lesson-settings", "parentId": "root", "path": "api/lesson-settings", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-settings-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-D44cFWbU.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/test.kanji_.answers": { "id": "routes/test.kanji_.answers", "parentId": "root", "path": "test/kanji/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji_.answers-Dqb-KgU_.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-Cq1jxk5i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-BO3kiPqp.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-DBlkj-PE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/shuffle-Direv13U.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-h1XP00Xl.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-D3DAOUzJ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.teacher-vocab": { "id": "routes/api.teacher-vocab", "parentId": "root", "path": "api/teacher-vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-vocab-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.test-attempts": { "id": "routes/api.test-attempts", "parentId": "root", "path": "api/test-attempts", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.test-attempts-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-BcFCTGns.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/homework-status-BDxcHou9.js", "/assets/users-DZxb_BmH.js", "/assets/check-CTBxRf77.js", "/assets/pen-line-BNCMes_T.js", "/assets/refresh-cw-CjqU7v3J.js", "/assets/trash-CZ9afL-o.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/lock-open-CGHurGbI.js", "/assets/book-open-BRGstXjJ.js", "/assets/languages-f5rc3Mk7.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DPJ83gPC.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-CbzhgaZb.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-p6zxhtLp.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-YDGOigFf.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.logout": { "id": "routes/api.auth.logout", "parentId": "root", "path": "api/auth/logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-kyE4xxO2.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/speaking._index": { "id": "routes/speaking._index", "parentId": "root", "path": "speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._index-C12JH2lW.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Cjfntb0Y.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/culture-tasks-gcwModMq.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useSoundEffect-4xvled9u.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BbwgLsPa.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-_bNvlbMR.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/speaking.$task": { "id": "routes/speaking.$task", "parentId": "root", "path": "speaking/:task", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._task-D-asWaCE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/test.lookalike": { "id": "routes/test.lookalike", "parentId": "root", "path": "test/lookalike", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike-CKQxyh5k.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-Bmp_4wqE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-BF7_C2pk.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-p6zxhtLp.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-Ci-apAfr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/lock-open-CGHurGbI.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/grid-3x3-CGlWQa9D.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-CRdYFQGa.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/world.$place": { "id": "routes/world.$place", "parentId": "root", "path": "world/:place", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._place-BEjpzc1i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/world._index": { "id": "routes/world._index", "parentId": "root", "path": "world", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._index-BziB17ez.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CA1QpMF0.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-Bu39KJ4i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test.typing": { "id": "routes/test.typing", "parentId": "root", "path": "test/typing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.typing-B8utSbBL.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test._index": { "id": "routes/test._index", "parentId": "root", "path": "test", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test._index-BNWt8Ph-.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-DhOrPpKM.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/volume-2-DlMUskwB.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/users-DZxb_BmH.js", "/assets/log-in-D0rZrxE0.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-13811aDc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/homework-status-BDxcHou9.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/billing-client-DAJJrg7K.js", "/assets/users-DZxb_BmH.js", "/assets/languages-f5rc3Mk7.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/test.kanji": { "id": "routes/test.kanji", "parentId": "root", "path": "test/kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji-CHmtk0Op.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-ZOYq2lMX.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-Czw61IK9.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/progress": { "id": "routes/progress", "parentId": "root", "path": "progress", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/progress-BNzrHLxZ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-CfLYGk2L.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-Bn3Y60wV.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/FreePlanFeatures-DDWzzX7f.js", "/assets/billing-client-DAJJrg7K.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/check-CTBxRf77.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CtOopfJJ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/volume-2-DlMUskwB.js", "/assets/FreePlanFeatures-DDWzzX7f.js", "/assets/check-CTBxRf77.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/price-plans-CbxlD04y.js", "/assets/loader-circle-BJe_4Wk3.js", "/assets/book-open-BRGstXjJ.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/grid-3x3-CGlWQa9D.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/credit-costs-_rK41Fr1.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-BPXO0CLB.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/book-open-BRGstXjJ.js", "/assets/users-DZxb_BmH.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DYXaTrss.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] } }, "url": "/assets/manifest-68b4fe3a.js", "version": "68b4fe3a" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -88245,13 +95427,21 @@ var routes = {
     caseSensitive: void 0,
     module: route15
   },
+  "routes/test.lookalike_.answers": {
+    id: "routes/test.lookalike_.answers",
+    parentId: "root",
+    path: "test/lookalike/answers",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route16
+  },
   "routes/vce.writing.eoy-writing": {
     id: "routes/vce.writing.eoy-writing",
     parentId: "root",
     path: "vce/writing/eoy-writing",
     index: void 0,
     caseSensitive: void 0,
-    module: route16
+    module: route17
   },
   "routes/class-quiz.$homeworkId": {
     id: "routes/class-quiz.$homeworkId",
@@ -88259,7 +95449,7 @@ var routes = {
     path: "class-quiz/:homeworkId",
     index: void 0,
     caseSensitive: void 0,
-    module: route17
+    module: route18
   },
   "routes/developer.test-yamato": {
     id: "routes/developer.test-yamato",
@@ -88267,7 +95457,7 @@ var routes = {
     path: "developer/test-yamato",
     index: void 0,
     caseSensitive: void 0,
-    module: route18
+    module: route19
   },
   "routes/games.ogre-star-sword": {
     id: "routes/games.ogre-star-sword",
@@ -88275,7 +95465,7 @@ var routes = {
     path: "games/ogre-star-sword",
     index: void 0,
     caseSensitive: void 0,
-    module: route19
+    module: route20
   },
   "routes/reference.vce-grammar": {
     id: "routes/reference.vce-grammar",
@@ -88283,7 +95473,7 @@ var routes = {
     path: "reference/vce-grammar",
     index: void 0,
     caseSensitive: void 0,
-    module: route20
+    module: route21
   },
   "routes/api.teacher-register": {
     id: "routes/api.teacher-register",
@@ -88291,7 +95481,7 @@ var routes = {
     path: "api/teacher-register",
     index: void 0,
     caseSensitive: void 0,
-    module: route21
+    module: route22
   },
   "routes/developer.image-test": {
     id: "routes/developer.image-test",
@@ -88299,7 +95489,7 @@ var routes = {
     path: "developer/image-test",
     index: void 0,
     caseSensitive: void 0,
-    module: route22
+    module: route23
   },
   "routes/developer.test-audio": {
     id: "routes/developer.test-audio",
@@ -88307,7 +95497,7 @@ var routes = {
     path: "developer/test-audio",
     index: void 0,
     caseSensitive: void 0,
-    module: route23
+    module: route24
   },
   "routes/games.character-maze": {
     id: "routes/games.character-maze",
@@ -88315,7 +95505,7 @@ var routes = {
     path: "games/character-maze",
     index: void 0,
     caseSensitive: void 0,
-    module: route24
+    module: route25
   },
   "routes/reference.text-types": {
     id: "routes/reference.text-types",
@@ -88323,7 +95513,15 @@ var routes = {
     path: "reference/text-types",
     index: void 0,
     caseSensitive: void 0,
-    module: route25
+    module: route26
+  },
+  "routes/api.lesson-progress": {
+    id: "routes/api.lesson-progress",
+    parentId: "root",
+    path: "api/lesson-progress",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route27
   },
   "routes/api.lesson-settings": {
     id: "routes/api.lesson-settings",
@@ -88331,7 +95529,7 @@ var routes = {
     path: "api/lesson-settings",
     index: void 0,
     caseSensitive: void 0,
-    module: route26
+    module: route28
   },
   "routes/games.tunnel-escape": {
     id: "routes/games.tunnel-escape",
@@ -88339,7 +95537,15 @@ var routes = {
     path: "games/tunnel-escape",
     index: void 0,
     caseSensitive: void 0,
-    module: route27
+    module: route29
+  },
+  "routes/test.kanji_.answers": {
+    id: "routes/test.kanji_.answers",
+    parentId: "root",
+    path: "test/kanji/answers",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route30
   },
   "routes/vce.speaking._index": {
     id: "routes/vce.speaking._index",
@@ -88347,7 +95553,7 @@ var routes = {
     path: "vce/speaking",
     index: true,
     caseSensitive: void 0,
-    module: route28
+    module: route31
   },
   "routes/games.kanji-sudoku": {
     id: "routes/games.kanji-sudoku",
@@ -88355,7 +95561,7 @@ var routes = {
     path: "games/kanji-sudoku",
     index: void 0,
     caseSensitive: void 0,
-    module: route29
+    module: route32
   },
   "routes/games.memory-match": {
     id: "routes/games.memory-match",
@@ -88363,7 +95569,7 @@ var routes = {
     path: "games/memory-match",
     index: void 0,
     caseSensitive: void 0,
-    module: route30
+    module: route33
   },
   "routes/reference.200kanji": {
     id: "routes/reference.200kanji",
@@ -88371,7 +95577,7 @@ var routes = {
     path: "reference/200kanji",
     index: void 0,
     caseSensitive: void 0,
-    module: route31
+    module: route34
   },
   "routes/vce.writing._index": {
     id: "routes/vce.writing._index",
@@ -88379,7 +95585,7 @@ var routes = {
     path: "vce/writing",
     index: true,
     caseSensitive: void 0,
-    module: route32
+    module: route35
   },
   "routes/api.auth.callback": {
     id: "routes/api.auth.callback",
@@ -88387,7 +95593,7 @@ var routes = {
     path: "api/auth/callback",
     index: void 0,
     caseSensitive: void 0,
-    module: route33
+    module: route36
   },
   "routes/api.teacher-vocab": {
     id: "routes/api.teacher-vocab",
@@ -88395,7 +95601,15 @@ var routes = {
     path: "api/teacher-vocab",
     index: void 0,
     caseSensitive: void 0,
-    module: route34
+    module: route37
+  },
+  "routes/api.test-attempts": {
+    id: "routes/api.test-attempts",
+    parentId: "root",
+    path: "api/test-attempts",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route38
   },
   "routes/teacher-dashboard": {
     id: "routes/teacher-dashboard",
@@ -88403,7 +95617,7 @@ var routes = {
     path: "teacher-dashboard",
     index: void 0,
     caseSensitive: void 0,
-    module: route35
+    module: route39
   },
   "routes/game-frame.$name": {
     id: "routes/game-frame.$name",
@@ -88411,7 +95625,7 @@ var routes = {
     path: "game-frame/:name",
     index: void 0,
     caseSensitive: void 0,
-    module: route36
+    module: route40
   },
   "routes/legal.disclaimer": {
     id: "routes/legal.disclaimer",
@@ -88419,7 +95633,7 @@ var routes = {
     path: "legal/disclaimer",
     index: void 0,
     caseSensitive: void 0,
-    module: route37
+    module: route41
   },
   "routes/lessons.family-1": {
     id: "routes/lessons.family-1",
@@ -88427,7 +95641,7 @@ var routes = {
     path: "lessons/family-1",
     index: void 0,
     caseSensitive: void 0,
-    module: route38
+    module: route42
   },
   "routes/reference._index": {
     id: "routes/reference._index",
@@ -88435,7 +95649,7 @@ var routes = {
     path: "reference",
     index: true,
     caseSensitive: void 0,
-    module: route39
+    module: route43
   },
   "routes/api.auth.logout": {
     id: "routes/api.auth.logout",
@@ -88443,7 +95657,7 @@ var routes = {
     path: "api/auth/logout",
     index: void 0,
     caseSensitive: void 0,
-    module: route40
+    module: route44
   },
   "routes/api.game-access": {
     id: "routes/api.game-access",
@@ -88451,7 +95665,7 @@ var routes = {
     path: "api/game-access",
     index: void 0,
     caseSensitive: void 0,
-    module: route41
+    module: route45
   },
   "routes/reference.vocab": {
     id: "routes/reference.vocab",
@@ -88459,7 +95673,15 @@ var routes = {
     path: "reference/vocab",
     index: void 0,
     caseSensitive: void 0,
-    module: route42
+    module: route46
+  },
+  "routes/speaking._index": {
+    id: "routes/speaking._index",
+    parentId: "root",
+    path: "speaking",
+    index: true,
+    caseSensitive: void 0,
+    module: route47
   },
   "routes/culture._index": {
     id: "routes/culture._index",
@@ -88467,7 +95689,7 @@ var routes = {
     path: "culture",
     index: true,
     caseSensitive: void 0,
-    module: route43
+    module: route48
   },
   "routes/games.hanafuda": {
     id: "routes/games.hanafuda",
@@ -88475,7 +95697,7 @@ var routes = {
     path: "games/hanafuda",
     index: void 0,
     caseSensitive: void 0,
-    module: route44
+    module: route49
   },
   "routes/lessons._index": {
     id: "routes/lessons._index",
@@ -88483,7 +95705,23 @@ var routes = {
     path: "lessons",
     index: true,
     caseSensitive: void 0,
-    module: route45
+    module: route50
+  },
+  "routes/speaking.$task": {
+    id: "routes/speaking.$task",
+    parentId: "root",
+    path: "speaking/:task",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route51
+  },
+  "routes/test.lookalike": {
+    id: "routes/test.lookalike",
+    parentId: "root",
+    path: "test/lookalike",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route52
   },
   "routes/legal.privacy": {
     id: "routes/legal.privacy",
@@ -88491,7 +95729,7 @@ var routes = {
     path: "legal/privacy",
     index: void 0,
     caseSensitive: void 0,
-    module: route46
+    module: route53
   },
   "routes/lessons.$slug": {
     id: "routes/lessons.$slug",
@@ -88499,7 +95737,7 @@ var routes = {
     path: "lessons/:slug",
     index: void 0,
     caseSensitive: void 0,
-    module: route47
+    module: route54
   },
   "routes/sitemap[.]xml": {
     id: "routes/sitemap[.]xml",
@@ -88507,7 +95745,7 @@ var routes = {
     path: "sitemap.xml",
     index: void 0,
     caseSensitive: void 0,
-    module: route48
+    module: route55
   },
   "routes/games._index": {
     id: "routes/games._index",
@@ -88515,7 +95753,7 @@ var routes = {
     path: "games",
     index: true,
     caseSensitive: void 0,
-    module: route49
+    module: route56
   },
   "routes/legal._index": {
     id: "routes/legal._index",
@@ -88523,7 +95761,7 @@ var routes = {
     path: "legal",
     index: true,
     caseSensitive: void 0,
-    module: route50
+    module: route57
   },
   "routes/print-report": {
     id: "routes/print-report",
@@ -88531,7 +95769,23 @@ var routes = {
     path: "print-report",
     index: void 0,
     caseSensitive: void 0,
-    module: route51
+    module: route58
+  },
+  "routes/world.$place": {
+    id: "routes/world.$place",
+    parentId: "root",
+    path: "world/:place",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route59
+  },
+  "routes/world._index": {
+    id: "routes/world._index",
+    parentId: "root",
+    path: "world",
+    index: true,
+    caseSensitive: void 0,
+    module: route60
   },
   "routes/games.shogi": {
     id: "routes/games.shogi",
@@ -88539,7 +95793,7 @@ var routes = {
     path: "games/shogi",
     index: void 0,
     caseSensitive: void 0,
-    module: route52
+    module: route61
   },
   "routes/legal.terms": {
     id: "routes/legal.terms",
@@ -88547,7 +95801,23 @@ var routes = {
     path: "legal/terms",
     index: void 0,
     caseSensitive: void 0,
-    module: route53
+    module: route62
+  },
+  "routes/test.typing": {
+    id: "routes/test.typing",
+    parentId: "root",
+    path: "test/typing",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route63
+  },
+  "routes/test._index": {
+    id: "routes/test._index",
+    parentId: "root",
+    path: "test",
+    index: true,
+    caseSensitive: void 0,
+    module: route64
   },
   "routes/class-game": {
     id: "routes/class-game",
@@ -88555,7 +95825,7 @@ var routes = {
     path: "class-game",
     index: void 0,
     caseSensitive: void 0,
-    module: route54
+    module: route65
   },
   "routes/my-account": {
     id: "routes/my-account",
@@ -88563,7 +95833,15 @@ var routes = {
     path: "my-account",
     index: void 0,
     caseSensitive: void 0,
-    module: route55
+    module: route66
+  },
+  "routes/test.kanji": {
+    id: "routes/test.kanji",
+    parentId: "root",
+    path: "test/kanji",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route67
   },
   "routes/vce._index": {
     id: "routes/vce._index",
@@ -88571,7 +95849,7 @@ var routes = {
     path: "vce",
     index: true,
     caseSensitive: void 0,
-    module: route56
+    module: route68
   },
   "routes/games.igo": {
     id: "routes/games.igo",
@@ -88579,7 +95857,15 @@ var routes = {
     path: "games/igo",
     index: void 0,
     caseSensitive: void 0,
-    module: route57
+    module: route69
+  },
+  "routes/progress": {
+    id: "routes/progress",
+    parentId: "root",
+    path: "progress",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route70
   },
   "routes/contact": {
     id: "routes/contact",
@@ -88587,7 +95873,7 @@ var routes = {
     path: "contact",
     index: void 0,
     caseSensitive: void 0,
-    module: route58
+    module: route71
   },
   "routes/prices": {
     id: "routes/prices",
@@ -88595,7 +95881,7 @@ var routes = {
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route59
+    module: route72
   },
   "routes/_index": {
     id: "routes/_index",
@@ -88603,7 +95889,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route60
+    module: route73
   },
   "routes/about": {
     id: "routes/about",
@@ -88611,7 +95897,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route61
+    module: route74
   },
   "routes/faq": {
     id: "routes/faq",
@@ -88619,7 +95905,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route62
+    module: route75
   }
 };
 

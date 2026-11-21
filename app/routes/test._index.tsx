@@ -53,6 +53,12 @@ const SECTIONS: TestSection[] = [
         description: 'See a kanji, type its English meaning. Total time and average seconds per kanji. You can check the accepted answers first.',
         to: '/test/kanji',
       },
+      {
+        title: 'Look-alike Characters',
+        jp: 'しつ・シツ・持待',
+        description: 'Hiragana, katakana and kanji that are easy to mix up (し・つ, シ・ツ, 持・待・寺). Answer each one quickly and accurately.',
+        to: '/test/lookalike',
+      },
     ],
   },
   {

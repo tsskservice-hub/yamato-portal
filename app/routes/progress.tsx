@@ -119,7 +119,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         s.seen += 1;
         s.ms += Number(d?.ms) || 0;
         if (!d?.ok) s.misses += 1;
-        else if (Number(d?.ms) > SLOW_MS) s.slow += 1;
+        else if (Number(d?.ms) > (TEST_NAMES[key]?.slowMs ?? SLOW_MS)) s.slow += 1;
         stats.set(c, s);
       }
     }
@@ -174,8 +174,26 @@ const sec = (ms: number) => `${(ms / 1000).toFixed(2)} s`;
 const day = (iso: string) => (iso ? new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : '');
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 
-const TEST_NAMES: Record<string, { title: string; to: string }> = {
-  'kanji-vce200': { title: 'VCE Kanji 200', to: '/test/kanji' },
+type TestInfo = {
+  title: string;
+  to: string;
+  /** 「〜あたり」の言い方（kanji / character） */
+  unit: string;
+  /** 目標（1 字の平均秒数） */
+  targetSec: number;
+  /** 遅いとみなす 1 字の時間 */
+  slowMs: number;
+  /** Breakthrough とみなす短縮 */
+  breakthroughMs: number;
+  /** scope = 'all' の回の説明 */
+  fullLabel: string;
+};
+
+const TEST_NAMES: Record<string, TestInfo> = {
+  'kanji-vce200': { title: 'VCE Kanji 200', to: '/test/kanji', unit: 'kanji', targetSec: 3, slowMs: SLOW_MS, breakthroughMs: BREAKTHROUGH_MS, fullLabel: 'full 200-kanji tests only' },
+  'lookalike-hiragana': { title: 'Look-alike Hiragana', to: '/test/lookalike?type=hiragana', unit: 'character', targetSec: 2, slowMs: 3000, breakthroughMs: 300, fullLabel: 'tests with all sets only' },
+  'lookalike-katakana': { title: 'Look-alike Katakana', to: '/test/lookalike?type=katakana', unit: 'character', targetSec: 2, slowMs: 3000, breakthroughMs: 300, fullLabel: 'tests with all sets only' },
+  'lookalike-kanji': { title: 'Look-alike Kanji', to: '/test/lookalike?type=kanji', unit: 'kanji', targetSec: 3, slowMs: SLOW_MS, breakthroughMs: BREAKTHROUGH_MS, fullLabel: 'tests with all sets only' },
 };
 
 export default function ProgressPage() {
@@ -309,7 +327,7 @@ export default function ProgressPage() {
             </div>
             {Object.entries(TEST_NAMES).map(([key, info]) => {
               const t = tests.find((x) => x.key === key);
-              return t ? <TestCard key={key} title={info.title} to={info.to} summary={t} /> : <EmptyTest key={key} title={info.title} to={info.to} />;
+              return t ? <TestCard key={key} info={info} summary={t} /> : <EmptyTest key={key} title={info.title} to={info.to} />;
             })}
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {['Hiragana', 'Katakana', 'Vocabulary', 'Sentences'].map((name) => (
@@ -401,7 +419,8 @@ function EmptyTest({ title, to }: { title: string; to: string }) {
   );
 }
 
-function TestCard({ title, to, summary }: { title: string; to: string; summary: TestSummary }) {
+function TestCard({ info, summary }: { info: TestInfo; summary: TestSummary }) {
+  const { title, to, unit } = info;
   const all = summary.attempts;
   // 範囲の違う回を比べないよう、伸びは「全部（all）」の回で見る。全部の回が無ければ、すべての回で見る
   const full = all.filter((a) => a.scope === 'all');
@@ -414,7 +433,7 @@ function TestCard({ title, to, summary }: { title: string; to: string; summary: 
   const recent = series.slice(-3);
   const recentAvg = recent.reduce((n, a) => n + a.avgMs, 0) / recent.length;
   const prevBest = series.length > 1 ? Math.min(...series.slice(0, -1).map((a) => a.avgMs)) : null;
-  const breakthrough = prevBest !== null && prevBest - latest.avgMs >= BREAKTHROUGH_MS;
+  const breakthrough = prevBest !== null && prevBest - latest.avgMs >= info.breakthroughMs;
   const trend =
     series.length < 2
       ? 'First result — come back and beat it!'
@@ -422,7 +441,7 @@ function TestCard({ title, to, summary }: { title: string; to: string; summary: 
         ? '🚀 Breakthrough! Your latest test was much faster than ever before.'
         : latest.avgMs < first.avgMs
           ? '📈 Steady growth — you are getting faster little by little.'
-          : 'Keep going — practise your weak kanji below.';
+          : `Keep going — practise your weak ${unit === 'kanji' ? 'kanji' : 'characters'} below.`;
 
   return (
     <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
@@ -442,13 +461,13 @@ function TestCard({ title, to, summary }: { title: string; to: string; summary: 
         <Stat label="Latest" value={sec(latest.avgMs)} sub={`${accuracy(latest)}% · ${day(latest.at)}`} />
       </div>
       <p className="text-xs text-slate-500">
-        Seconds per kanji (lower is better){full.length ? ', full 200-kanji tests only' : ''}. Target: 3 seconds.
+        Seconds per {unit} (lower is better){full.length ? `, ${info.fullLabel}` : ''}. Target: {info.targetSec} seconds.
       </p>
       {series.length > 1 && <Sparkline values={series.map((a) => a.avgMs)} highlightLast={breakthrough} />}
       <p className={`text-sm font-bold ${breakthrough ? 'text-indigo-600' : 'text-slate-700 dark:text-slate-200'}`}>{trend}</p>
       {summary.weak.length > 0 && (
         <div>
-          <p className="text-sm font-bold text-slate-900 dark:text-white mb-1">Kanji to practise (from your last 5 tests)</p>
+          <p className="text-sm font-bold text-slate-900 dark:text-white mb-1">{unit === 'kanji' ? 'Kanji' : 'Characters'} to practise (from your last 5 tests)</p>
           <div className="flex flex-wrap gap-1.5">
             {summary.weak.map((w) => (
               <span
@@ -487,7 +506,7 @@ function Sparkline({ values, highlightLast }: { values: number[]; highlightLast:
   }, [values]);
   const last = pts[pts.length - 1];
   return (
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-16" aria-label="Seconds per kanji over time. Higher on the chart means faster.">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-16" aria-label="Seconds per character over time. Higher on the chart means faster.">
       <polyline points={pts.map((p) => `${p.x},${100 - p.y}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" className="text-indigo-500" />
       {pts.map((p, i) => (
         <circle key={i} cx={p.x} cy={100 - p.y} r="2.5" vectorEffect="non-scaling-stroke" className="fill-indigo-500" />

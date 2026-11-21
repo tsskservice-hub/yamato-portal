@@ -9,7 +9,7 @@
 
 ## 1. About these Terms
 
-JP Tutor AI Yamato ("Yamato", "we", "us") is a Japanese learning website at jptutoraiyamato.com, run by [operator's legal name] ([ABN if any]), Victoria, Australia.
+JP Tutor AI Yamato ("Yamato", "we", "us") is a Japanese learning website at jptutoraiyamato.com, run by JP TUTOR AI YAMATO (ABN 60 402 594 691), Victoria, Australia.
 
 By creating an account or using the site, you agree to these Terms, our Privacy Policy and our Disclaimer. If you do not agree, please do not use the site.
 
@@ -142,7 +142,7 @@ When you use the site, you must not:
 ## 16. Suspending or closing accounts
 
 - We may suspend or close an account that seriously or repeatedly breaks these Terms. If we do, credits from purchases may be cancelled, except where the law says otherwise.
-- You can delete your account at any time in **My Account**. Credits and any plan end when the account is deleted. Please cancel your subscription first.
+- You can delete your account at any time in **My Account**. Credits and any plan or pass end when the account is deleted. If you have a subscription, it is cancelled straight away, so you will not be charged again.
 - **If we close the service,** we will tell you at least 30 days before. We will refund the unused part of any subscription or pass, and the value of unused paid credits.
 
 ## 17. Availability and changes to the site

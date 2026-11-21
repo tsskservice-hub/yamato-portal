@@ -18,6 +18,7 @@ import { PlanSection } from '~/components/billing/PlanSection';
 import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
+import { cancelUserSubscriptions } from '~/lib/stripe-cancel.server';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
 import { loadQuizStats, loadStudentAssignments } from '~/lib/assignments.server';
 import { getClassLockUntil } from '~/lib/homework-lock.server';
@@ -134,6 +135,12 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
+
+    // サブスクを先にすぐ解約する（アカウントが消えたあとも請求が続かないように）。解約できなければ、アカウントは消さない
+    const cancel = await cancelUserSubscriptions(supabaseAdmin, user.id, context);
+    if (!cancel.ok) {
+      return json({ error: cancel.error, success: false }, { status: 500 });
+    }
 
     // 手書きの写真とライティングの提出記録を先に消す（アカウントを消しても写真のファイルが残らないように）
     // 失敗しても削除は止めない。記録が消えれば、写真はデータベースの削除待ちリストから毎日の処理で消える（SQL 20）

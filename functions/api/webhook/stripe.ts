@@ -7,7 +7,7 @@
  *     … クレジットパック・AI 体験・シーズンプランの支払い完了、サブスクの申し込み完了
  *   invoice.paid … サブスクの毎回の支払い（月額は毎月、年払いは毎年）→ その月の分のクレジット
  *   customer.subscription.created / updated / deleted … サブスクの状態（解約の予約・終了など）
- *   charge.refunded … 返金（記録だけ）
+ *   charge.refunded … 全額返金 → その支払いの使っていないクレジットを消し、パス・サブスクを終える（SQL 66）。一部返金は記録だけ
  *
  * ・本物の Stripe からの通知かを署名で確かめる
  * ・同じ通知が何度来ても、クレジットは 1 回しか渡さない（データベース関数が決済 ID で見分ける。49・51）
@@ -88,11 +88,8 @@ export async function onRequestPost(context: {
       case "customer.subscription.deleted":
         await saveSubscription(event.data.object as Stripe.Subscription, admin);
         return json({ received: true }, 200);
-      case "charge.refunded": {
-        const charge = event.data.object as Stripe.Charge;
-        console.log(`Stripe webhook: charge ${charge.id} refunded (${charge.amount_refunded} cents).`);
-        return json({ received: true }, 200);
-      }
+      case "charge.refunded":
+        return await handleRefund(event.data.object as Stripe.Charge, stripe, admin);
       default:
         return json({ received: true }, 200);
     }
@@ -246,7 +243,14 @@ async function saveSubscription(sub: Stripe.Subscription, admin: any) {
     p_period_end: period.end,
     p_cancel_at_period_end: Boolean(sub.cancel_at_period_end || (sub as any).cancel_at),
   });
-  if (error) throw new RetryableError(`upsert_subscription: ${error.message}`);
+  if (error) {
+    // アカウントがもう削除されている（削除のときにサブスクを解約した → そのあと届く通知）。送り直しても同じなので飛ばす
+    if (error.code === "23503") {
+      console.log(`Stripe webhook: subscription ${sub.id} belongs to a deleted account — skipped.`);
+      return;
+    }
+    throw new RetryableError(`upsert_subscription: ${error.message}`);
+  }
   const { error: custError } = await admin.rpc("save_stripe_customer", { p_user_id: userId, p_customer_id: customerId });
   if (custError) throw new RetryableError(`save_stripe_customer: ${custError.message}`);
 }
@@ -279,5 +283,83 @@ async function handleInvoicePaid(invoice: Stripe.Invoice, stripe: Stripe, admin:
   });
   if (error) throw new RetryableError(`grant_subscription_invoice: ${error.message}`);
   console.log(`Stripe webhook: invoice ${invoice.id} → ${JSON.stringify(data)}`);
+  return json({ received: true }, 200);
+}
+
+// ---------- 返金 ----------
+/**
+ * 全額返金されたら、その支払いでもらったクレジットのうち使っていない分を消す（利用規約 8 章）。
+ * パスはすぐ終わり、今の期間のサブスクの請求なら Stripe 側のサブスクも解約する。
+ * 一部返金は自動では何もしない（記録だけ。必要なら tool_adjust_credits.sql で手で調整する）。
+ */
+async function handleRefund(charge: Stripe.Charge, stripe: Stripe, admin: any) {
+  if (!charge.refunded) {
+    console.log(`Stripe webhook: charge ${charge.id} partly refunded (${charge.amount_refunded} of ${charge.amount} cents) — credits not changed.`);
+    return json({ received: true, partial: true }, 200);
+  }
+  const piId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+  if (!piId) {
+    console.warn(`Stripe webhook: refunded charge ${charge.id} has no payment_intent.`);
+    return json({ received: true, skipped: true }, 200);
+  }
+
+  // 1) パック・AI 体験・パス（Checkout の 1 回払い）
+  const sessions = await stripe.checkout.sessions.list({ payment_intent: piId, limit: 1 });
+  const session = sessions.data[0];
+  if (session && session.mode === "payment") {
+    const { data, error } = await admin.rpc("revoke_refunded_payment", { p_reference: session.id });
+    if (error) throw new RetryableError(`revoke_refunded_payment: ${error.message}`);
+    console.log(`Stripe webhook: refund of session ${session.id} → ${JSON.stringify(data)}`);
+    return json({ received: true }, 200);
+  }
+
+  // 2) サブスクの請求（invoice）
+  let invoiceId: string | undefined;
+  try {
+    const payments = await stripe.invoicePayments.list({ payment: { type: "payment_intent", payment_intent: piId }, limit: 1 } as any);
+    const inv: any = payments.data[0]?.invoice;
+    invoiceId = typeof inv === "string" ? inv : inv?.id;
+  } catch (err: any) {
+    console.warn(`Stripe webhook: invoicePayments.list failed for ${piId}: ${err?.message}`);
+  }
+  if (!invoiceId) {
+    const old: any = (charge as any).invoice; // 古い API の形
+    invoiceId = typeof old === "string" ? old : old?.id;
+  }
+  if (!invoiceId) {
+    console.warn(`Stripe webhook: refunded charge ${charge.id} — no checkout session or invoice found.`);
+    return json({ received: true, skipped: true }, 200);
+  }
+
+  const invoice: any = await stripe.invoices.retrieve(invoiceId);
+  const subId: string | undefined =
+    (typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id) ??
+    invoice.parent?.subscription_details?.subscription ??
+    undefined;
+  const line: any = invoice.lines?.data?.[0];
+  const periodStart = iso(line?.period?.start);
+  const periodEnd = iso(line?.period?.end);
+  const { data, error } = await admin.rpc("revoke_refunded_payment", {
+    p_reference: invoice.id,
+    p_subscription_id: subId ?? null,
+    p_period_start: periodStart,
+    p_period_end: periodEnd,
+  });
+  if (error) throw new RetryableError(`revoke_refunded_payment: ${error.message}`);
+  console.log(`Stripe webhook: refund of invoice ${invoice.id} → ${JSON.stringify(data)}`);
+
+  // 今の期間の請求を返金したら、サブスクも終える（すぐに解約。次の請求は来ない）
+  if (subId && periodEnd && new Date(periodEnd).getTime() > Date.now()) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(subId);
+      if (sub.status !== "canceled" && sub.status !== "incomplete_expired") {
+        await stripe.subscriptions.cancel(subId, {}, { idempotencyKey: `refund-cancel-${invoice.id}` });
+        console.log(`Stripe webhook: subscription ${subId} cancelled after refund of ${invoice.id}.`);
+      }
+    } catch (err: any) {
+      // 解約に失敗しても、データベースではもう終わっている。Stripe の画面で手で解約できる
+      console.error(`Stripe webhook: could not cancel subscription ${subId} after refund: ${err?.message}`);
+    }
+  }
   return json({ received: true }, 200);
 }

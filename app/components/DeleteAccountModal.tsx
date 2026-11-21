@@ -21,6 +21,9 @@ export function DeleteAccountModal({ className = "" }: DeleteAccountModalProps) 
         <p className="text-sm text-gray-600 mt-1">
           Deleting your account will permanently erase all saved data, learning history, purchased credits, and personal information. This action cannot be undone.
         </p>
+        <p className="text-sm text-gray-600 mt-1">
+          If you have a subscription, it will be cancelled straight away and you will not be charged again. The rest of the current period is not refunded.
+        </p>
       </div>
 
       <div className="flex justify-end">
