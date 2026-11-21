@@ -5,11 +5,15 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowRight, ArrowDown, Send } from 'lucide-react';
+import { NextQuizCountdown } from '~/components/NextQuizCountdown';
+import { YamatoIntroButton } from '~/components/layout/YamatoFeature';
 
 export interface HeroDemoChatProps {
   isDarkMode: boolean;
   user: any;
   hasCompletedTodayQuiz: boolean;
+  nextQuizAt?: number | null; // 次のクイズを解ける時刻（ミリ秒）。解答済みのときだけ入る
+  onNextQuizReached?: () => void;
   onOpenAuthModal: (mode: 'signin' | 'signup') => void;
   onOpenQuizModal: () => void;
   validateFeatureCredits: (featureType: 'textAi' | 'imageAi') => Promise<boolean>;
@@ -20,6 +24,8 @@ export function HeroDemoChat({
   isDarkMode,
   user,
   hasCompletedTodayQuiz,
+  nextQuizAt,
+  onNextQuizReached,
   onOpenAuthModal,
   onOpenQuizModal,
   validateFeatureCredits,
@@ -128,6 +134,8 @@ export function HeroDemoChat({
         <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-red-600 bg-clip-text text-transparent">
           {hero?.title}
         </span>
+        {/* タイトルのすぐ後ろの小さなボタン → ヤマトの自己紹介モーダル */}
+        {hero?.title && <YamatoIntroButton isDarkMode={isDarkMode} />}
         <span className="block text-2xl sm:text-3xl font-bold mt-3 text-slate-700 dark:text-slate-300">
           {hero?.subtitle}
         </span>
@@ -163,6 +171,11 @@ export function HeroDemoChat({
                 ? quizBanner?.completedText 
                 : quizBanner?.defaultText}
             </p>
+            {user && hasCompletedTodayQuiz && nextQuizAt && (
+              <p className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+                <NextQuizCountdown nextAt={nextQuizAt} onReached={onNextQuizReached} />
+              </p>
+            )}
           </div>
         </div>
         <button

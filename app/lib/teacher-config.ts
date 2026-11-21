@@ -68,6 +68,27 @@ export const LESSON_TASKS = [
 
 export type LessonTaskKey = (typeof LESSON_TASKS)[number]['key'];
 
+// 宿題（homework）と授業内の課題（classwork）。動きは同じで、一覧と集計を分ける（edu_homework.kind / SQL 42）
+export const ASSIGNMENT_KINDS = [
+  { key: 'homework', label: 'Homework' },
+  { key: 'classwork', label: 'Classwork' },
+] as const;
+export type AssignmentKind = (typeof ASSIGNMENT_KINDS)[number]['key'];
+export function isAssignmentKind(value: unknown): value is AssignmentKind {
+  return value === 'homework' || value === 'classwork';
+}
+export const assignmentKindLabel = (kind: string) => ASSIGNMENT_KINDS.find((k) => k.key === kind)?.label ?? 'Homework';
+
+// 教師が作る語彙クイズ（4 択なので 4 語以上）
+export const VOCAB_QUIZ_LIMITS = {
+  minWords: 4,
+  maxWords: 50,
+  maxQuizzesPerTeacher: 50,
+  jpMax: 50,
+  englishMax: 100,
+  titleMax: 100,
+} as const;
+
 export function isLessonTaskKey(value: unknown): value is LessonTaskKey {
   return typeof value === 'string' && LESSON_TASKS.some((t) => t.key === value);
 }

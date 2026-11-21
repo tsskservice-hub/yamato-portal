@@ -20,6 +20,9 @@ import {
   SlidersHorizontal 
 } from 'lucide-react';
 import { fetchPricePlansData, PricePlansKnowledge } from '~/data/price-plans';
+import { PlanUsageComparison } from '~/components/PlanUsageComparison';
+import ScrollTopButton from '~/components/layout/ScrollTopButton';
+import { SubscriptionPlans, SectionHeading } from '~/components/billing/SubscriptionPlans';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -47,7 +50,6 @@ export default function Prices() {
   const [priceData, setPriceData] = useState<PricePlansKnowledge | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
-  const [isSpecsOpen, setIsSpecsOpen] = useState<boolean>(false);
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null);
   const layoutRef = useRef<PageLayoutRef>(null);
 
@@ -59,7 +61,7 @@ export default function Prices() {
   } | undefined;
 
   const user = rootData?.user ?? null;
-  const credits = rootData?.credits ?? 10;
+  const credits = rootData?.credits ?? 0;
   const nickname = rootData?.nickname ?? "";
 
   // Supabase より PRICE_PLANS データをフェッチ
@@ -86,7 +88,9 @@ export default function Prices() {
   }, [loadData]);
 
   const handleCheckout = async (priceId: string) => {
-    if (!user) {
+    // サーバーのクッキーが切れていても、ブラウザがログインしていれば買える（支払いの処理はブラウザの情報を使う）
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       layoutRef.current?.openAuthModal('signin');
       return;
     }
@@ -137,7 +141,7 @@ export default function Prices() {
                 Plans & Credit Packs
               </h1>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Start for free with daily credits, or top up with prepaid charge packs for intensive study.
+                Start for free, choose a subscription or a pass for full access, and top up if you need more AI credits.
               </p>
 
               {/* クレジット消費ガイド */}
@@ -159,8 +163,19 @@ export default function Prices() {
               )}
             </section>
 
-            {/* キャンペーンバナー & 価格カード */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+            {/* サブスク・シーズンプラン・AI 体験（SQL 51・Stripe の Lookup key） */}
+            <SubscriptionPlans
+              signedIn={Boolean(user)}
+              onSignIn={() => layoutRef.current?.openAuthModal('signin')}
+              freePlan={pricePlans.free}
+            />
+
+            {/* 3. 追加クレジット（プランを使っている人だけが買える。サーバーも確かめる） */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-6">
+              <SectionHeading
+                title="Top-up credits"
+                subtitle="For heavy users who need more AI credits than their plan includes. Available to members with a subscription or a pass. Credits can be used for 1 year."
+              />
               {priceData.campaignNotice && (
                 <div className="text-center space-y-4 max-w-3xl mx-auto mb-12">
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/30 flex items-center justify-center space-x-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 shadow-sm">
@@ -170,47 +185,13 @@ export default function Prices() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
-                {/* Free Plan */}
-                {pricePlans.free && (
-                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-                    <div className="space-y-4">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{pricePlans.free.name}</span>
-                      <div>
-                        <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.free.price}</span>
-                        <span className="text-xs text-slate-500 ml-1">{pricePlans.free.period}</span>
-                      </div>
-                      {pricePlans.free.badge && (
-                        <div className="inline-block px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 text-xs font-bold">
-                          {pricePlans.free.badge}
-                        </div>
-                      )}
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.free.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.free.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="mt-6 space-y-3">
-                      <Link
-                        to={pricePlans.free.ctaLink || "/"}
-                        className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-center transition-all block"
-                      >
-                        {pricePlans.free.ctaText || "Get Started Free"}
-                      </Link>
-                    </div>
-                  </div>
-                )}
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left items-stretch">
                 {/* Starter Pack */}
                 {pricePlans.starter && (
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
                     <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.starter.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">ちょっと = a little</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.starter.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.starter.period}</span>
@@ -221,14 +202,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.starter.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.starter.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -237,10 +210,10 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.starter.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.starter.id ? 'Processing...' : (pricePlans.starter.ctaText || 'Buy Starter Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.starter.id ? 'Processing...' : (pricePlans.starter.ctaText || 'Buy Top Up Chotto')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>
@@ -248,12 +221,10 @@ export default function Prices() {
 
                 {/* Standard Pack */}
                 {pricePlans.standard && (
-                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 flex flex-col justify-between shadow-xl relative">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-                      Most Popular
-                    </div>
-                    <div className="space-y-4 pt-2">
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
+                    <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-blue-600">{pricePlans.standard.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">いっぱい = lots</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.standard.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.standard.period}</span>
@@ -264,14 +235,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.standard.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.standard.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -280,10 +243,10 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.standard.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white text-center shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.standard.id ? 'Processing...' : (pricePlans.standard.ctaText || 'Buy Standard Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.standard.id ? 'Processing...' : (pricePlans.standard.ctaText || 'Buy Top Up Ippai')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>
@@ -294,6 +257,7 @@ export default function Prices() {
                   <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
                     <div className="space-y-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{pricePlans.pro.name}</span>
+                      <p className="text-xs text-slate-500" lang="ja">めっちゃ = super (casual)</p>
                       <div>
                         <span className="text-4xl font-black text-slate-900 dark:text-white">{pricePlans.pro.price}</span>
                         <span className="text-xs text-slate-500 ml-1">{pricePlans.pro.period}</span>
@@ -304,14 +268,6 @@ export default function Prices() {
                         </div>
                       )}
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{pricePlans.pro.description}</p>
-                      <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
-                        {pricePlans.pro.features.map((feat: string, idx: number) => (
-                          <li key={idx} className="flex items-center space-x-2">
-                            <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                     <div className="mt-6 space-y-3">
                       <button
@@ -320,104 +276,24 @@ export default function Prices() {
                         disabled={loadingPriceId === pricePlans.pro.id}
                         className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-center shadow-md shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        <span>{loadingPriceId === pricePlans.pro.id ? 'Processing...' : (pricePlans.pro.ctaText || 'Buy Pro Pack')}</span>
+                        <span>{loadingPriceId === pricePlans.pro.id ? 'Processing...' : (pricePlans.pro.ctaText || 'Buy Top Up Meccha')}</span>
                       </button>
                       <p className="text-[10px] text-center text-slate-400 dark:text-slate-500">
-                        By purchasing, you agree to our <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
+                        By purchasing, you agree to our <Link to="/legal/terms" className="underline hover:text-slate-600">Terms</Link> & <Link to="/legal/disclaimer" className="underline hover:text-slate-600">Disclaimer</Link>.
                       </p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* 詳細スペック表のトグル */}
-              <div className="mt-10">
-                <button
-                  type="button"
-                  onClick={() => setIsSpecsOpen(!isSpecsOpen)}
-                  className="w-full py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2">
-                    <SlidersHorizontal className="w-4 h-4 text-blue-600" />
-                    <span>View Detailed Plan Specs & Study Volume Estimates</span>
-                  </div>
-                  {isSpecsOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                </button>
-
-                {isSpecsOpen && (
-                  <div className="mt-4 space-y-4 animate-fadeIn">
-                    <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-base">Plan Specifications & Learning Volume Breakdown</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        All tiers grant full access to all AI Yamato features; differences lie solely in credit allocation and volume.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left items-stretch">
-                      {/* Free Plan Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-slate-700 dark:text-slate-300 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Free Plan</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Daily Earnings:</strong> 4 Credits (Promo until Oct 29, normally 2)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost per Credit:</strong> Free</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~0.2 sessions / day</li>
-                            <li><strong className="text-slate-900 dark:text-white">Credit Expiry:</strong> 7 days</li>
-                            <li><strong className="text-slate-900 dark:text-white">Feature Access:</strong> Full AI Chat & Tools</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Starter Pack Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Starter Pack ($10)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 2,000</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Standard</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~6–8 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~40–50 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Standard Pack Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-blue-600 shadow-xl space-y-4 flex flex-col justify-between relative">
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-sm">
-                          Popular Specs
-                        </div>
-                        <div>
-                          <div className="font-bold text-blue-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800 pt-1">Standard ($25)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 5,600 (+120% value)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> High Value</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~18–22 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~110–140 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* Pro Intensivist Specs */}
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div>
-                          <div className="font-bold text-purple-600 text-sm pb-2 border-b border-slate-100 dark:border-slate-800">Pro Intensivist ($50)</div>
-                          <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 mt-4">
-                            <li><strong className="text-slate-900 dark:text-white">Total Credits:</strong> 12,000 (Maximum)</li>
-                            <li><strong className="text-slate-900 dark:text-white">Cost efficiency:</strong> Best Value</li>
-                            <li><strong className="text-slate-900 dark:text-white">Essay Practice:</strong> ~40–50 sessions</li>
-                            <li><strong className="text-slate-900 dark:text-white">Voice Roleplay:</strong> ~240–300 mins</li>
-                            <li><strong className="text-slate-900 dark:text-white">Bonus Expiry:</strong> Oct 29</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {/* それぞれのパックで、何をどのぐらい使えるかの比較（使い方の型を選べる） */}
+              <div className="mt-12">
+                <PlanUsageComparison plans={pricePlans} />
               </div>
             </section>
           </main>
+          {/* 右下の「上へ戻る」ボタン（FAQ と同じ） */}
+          <ScrollTopButton floatingClass="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" />
         </div>
       )}
     </ToolPageWrapper>

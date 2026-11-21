@@ -174,10 +174,13 @@ export default function OralExamQuestions() {
             <div className="bg-white border-2 border-amber-300 rounded-2xl p-6 sm:p-8 shadow-xl mb-10 text-center relative overflow-hidden">
               <div className="absolute -right-1 -bottom-1 text-amber-100 text-9xl select-none pointer-events-none">🎙️</div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3">
-                VCE Oral Exam: Frequently Used Examiner Questions Audio Library
+                VCE Oral Exam: Practice Question Audio Library
               </h1>
               <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-                Listen to authentic examiner questions with exam-style speed and pronunciation. Switch between learning paces and sections to start improving your listening skills!
+                Practice questions commonly asked in the VCE Japanese oral exam, read at exam-style speed and pronunciation. Choose a section and a conversation difficulty (easy, medium or hard) to start improving your listening skills!
+              </p>
+              <p className="text-slate-500 max-w-2xl mx-auto text-xs mt-3">
+                These questions were written for practice. They are not official VCAA material, and the questions in your exam may be different.
               </p>
             </div>
 
@@ -203,7 +206,7 @@ export default function OralExamQuestions() {
               </div>
 
               <div className="w-full md:w-auto">
-                <label className="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">Learning Pace</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">Conversation Difficulty</label>
                 <div className="inline-flex rounded-xl bg-white p-1 shadow-xs border border-amber-200 w-full sm:w-auto">
                   {(["steady", "normal", "accelerated"] as const).map((pace) => (
                     <button
@@ -216,7 +219,7 @@ export default function OralExamQuestions() {
                           : "text-slate-700 hover:text-amber-700"
                       }`}
                     >
-                      {pace}
+                      {{ steady: "easy", normal: "medium", accelerated: "hard" }[pace]}
                     </button>
                   ))}
                 </div>

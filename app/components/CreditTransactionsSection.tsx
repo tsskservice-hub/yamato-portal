@@ -34,6 +34,7 @@ export function CreditTransactionsSection({
       </h2>
       <p className="text-xs text-gray-500">
         A complete record of all credits earned (such as daily quizzes or top-ups) and credits consumed across AI features.
+        {transactions.length > 10 && <> Newest first – scroll down to see older ones ({transactions.length} in total).</>}
       </p>
 
       {isLoading ? (
@@ -45,9 +46,10 @@ export function CreditTransactionsSection({
           No credit transactions recorded yet.
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        // 💡 最新の 10 件ほどが見える高さにして、それより前はスクロールで見る（見出しの行は上に固定）
+        <div className="overflow-auto max-h-[33rem] border border-gray-100 rounded-md">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="border-b border-gray-200 bg-gray-50 text-gray-600">
                 <th className="py-2.5 px-3 font-semibold">Date / Time</th>
                 <th className="py-2.5 px-3 font-semibold">Feature / Type</th>

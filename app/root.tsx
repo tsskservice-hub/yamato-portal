@@ -22,6 +22,7 @@ import { supabase } from "./lib/supabaseClient";
 
 // Vite の URL インポート機能を使用して Tailwind CSS を確実に読み込む
 import stylesheet from "./tailwind.css?url";
+import KanjiLookup from "~/components/KanjiLookup";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -142,7 +143,13 @@ export default function App() {
     };
   }, [data.user?.id, revalidator]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      {/* 🔍 漢字AI検索（どのページにも出す。色はそのページのヤマトチャットに合わせる） */}
+      <KanjiLookup />
+    </>
+  );
 }
 
 /**

@@ -26,6 +26,7 @@ import Footer from "./Footer";
 import { Breadcrumbs } from "./Breadcrumbs"; // 💡 切り出したパンくずモジュールのインポート
 import { supabase } from "../../lib/supabaseClient";
 import { signUpAndRegisterPasskey, signInWithPasskey } from "../../lib/passkey";
+import { OPEN_AUTH_EVENT, type OpenAuthDetail } from "~/utils/openAuthModal";
 
 /**
  * 💡 リアルタイムクレジット更新通知ヘルパー関数
@@ -164,13 +165,20 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
   }, []);
 
   const handleSignOut = async () => {
-    if (propOnSignOut) {
-      await propOnSignOut();
-    } else {
-      await supabase.auth.signOut();
+    try {
+      if (propOnSignOut) {
+        await propOnSignOut();
+      } else {
+        await supabase.auth.signOut();
+      }
+    } finally {
+      // 🔐 サーバー用のログイン Cookie も消す（残ると共有パソコンで次の人が前の人として扱われる）
+      await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+      setUser(null);
+      setNickname("");
+      // サーバーから読み込んだ情報（先生かどうか等）も消すため、ページを読み込み直す
+      window.location.reload();
     }
-    setUser(null);
-    setNickname("");
   };
 
   // 認証モーダル・パスキーのステート管理
@@ -207,6 +215,27 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
       handleOpenAuthModal(mode);
     }
   }));
+
+  // 🔐 どの部品からでもサインイン画面を開けるようにする（utils/openAuthModal.ts の requestAuthModal）
+  //   ・"open-auth-modal" の合図を受け取ったら、その場でモーダルを開く（ページは移動しない）
+  //   ・URL が /#auth・/#auth-signup で開かれたときも、モーダルを開く（PageLayout が無いページからの移動先）
+  useEffect(() => {
+    const onOpenAuth = (e: Event) => {
+      const detail = (e as CustomEvent<OpenAuthDetail>).detail;
+      if (detail) detail.handled = true;
+      handleOpenAuthModal(detail?.mode === 'signup' ? 'signup' : 'signin');
+    };
+    window.addEventListener(OPEN_AUTH_EVENT, onOpenAuth);
+
+    const hash = window.location.hash;
+    if (hash === '#auth' || hash === '#auth-signup') {
+      handleOpenAuthModal(hash === '#auth-signup' ? 'signup' : 'signin');
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
+    return () => window.removeEventListener(OPEN_AUTH_EVENT, onOpenAuth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePasskeyAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -402,9 +431,9 @@ const PageLayout = forwardRef<PageLayoutRef, PageLayoutProps>(({
                         We have a <strong>free teacher account</strong> (limited features) with its own Teacher Dashboard:
                       </p>
                       <ul className="text-[11px] text-slate-700 space-y-1 list-disc pl-4">
-                        <li>Set lesson tasks on AI Yamato as homework for your class</li>
-                        <li>Track each student&apos;s progress on every task</li>
-                        <li>See what percentage of homework each student completed over any period</li>
+                        <li>Set lesson tasks or your own vocabulary quizzes as homework or classwork, for the whole class or selected students</li>
+                        <li>Track each student&apos;s progress on every task and their quiz scores</li>
+                        <li>See what percentage of homework and classwork each student completed over any period</li>
                         <li>View your students&apos; handwritten writing submissions</li>
                       </ul>
                       <p className="text-[10px] text-slate-500">

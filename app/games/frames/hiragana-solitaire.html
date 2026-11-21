@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiragana Solitaire</title>
+<style>
+  :root{
+    --ink:#2b2620; --muted:#7a6f63; --paper:#f7f2e6; --panel:#fffdf6;
+    --line:#e2d8c2; --green:#2f6b4f; --green-d:#245540; --red:#c0392b;
+    --accent:#b7791f; --card-w:78px; --card-h:106px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Hiragino Sans","Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:var(--paper); color:var(--ink);
+    background-image:radial-gradient(circle at 20% 10%, #fff8e6 0, transparent 42%), radial-gradient(circle at 85% 0%, #eef3e8 0, transparent 38%);
+  }
+  #app{max-width:1080px;margin:0 auto;padding:14px 14px 28px}
+  header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+  .title h1{margin:0;font-size:30px;letter-spacing:.02em;line-height:1.1}
+  .title h1 span{color:var(--red)}
+  .title p{margin:4px 0 0;color:var(--muted);font-size:14px}
+  .topbtns{display:flex;gap:8px;flex-wrap:wrap}
+  button{
+    font:inherit;cursor:pointer;border:1px solid #d8cdb4;background:#fffdf6;color:var(--ink);
+    border-radius:10px;padding:8px 12px;box-shadow:0 1px 0 rgba(0,0,0,.05);
+  }
+  button:hover{background:#fff6dd}
+  button.primary{background:var(--green);border-color:var(--green-d);color:#fff}
+  button.primary:hover{background:var(--green-d)}
+  button:disabled{opacity:.45;cursor:default}
+  button[hidden]{display:none}
+  .stats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:14px}
+  .stat b{font-variant-numeric:tabular-nums}
+  #message{min-height:22px;margin:2px 0 10px;color:#5b4d3a;font-size:14px}
+  #message.good{color:var(--green);font-weight:600}
+  h2.sec{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+  /* Foundations */
+  #foundations{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}
+  .found{border:1px dashed #cbbd9c;border-radius:12px;background:#fffdf6;padding:6px 4px 8px;text-align:center;min-height:132px;cursor:pointer}
+  .found.hot{outline:3px solid #f2c94c;outline-offset:1px}
+  .found .flabel{font-size:12px;font-weight:700;letter-spacing:.06em}
+  .found .frange{font-size:11px;color:var(--muted);margin-top:1px}
+  .found .slot{margin-top:6px;display:flex;justify-content:center;min-height:var(--card-h)}
+  .found .slot .card{position:static}
+  .found .next{font-size:22px;color:#b9ad93;margin-top:28px}
+  /* Stock row */
+  #stockRow{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .pile-label{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+  .pile-wrap{width:var(--card-w);text-align:center}
+  .pile{width:var(--card-w);height:var(--card-h);border-radius:10px;border:1px dashed #cbbd9c;background:#fffdf6;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .pile:focus-visible{outline:3px solid #2f6b4f;outline-offset:2px}
+  .pile.hot{outline:3px solid #f2c94c}
+  .pile .count{position:absolute;right:6px;bottom:4px;font-size:12px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:20px;padding:1px 7px}
+  .pile .empty{color:#b9ad93;font-size:13px;padding:0 6px;text-align:center}
+  #wasteWrap{flex:1;min-width:200px}
+  #wasteHint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5}
+  /* Tableau */
+  #tableau{display:flex;gap:10px;align-items:flex-start;margin-top:6px}
+  .col{flex:1;min-width:0;border-radius:12px;background:rgba(47,107,79,.06);border:1px solid #e6ddc6;padding:6px 4px 10px;min-height:190px}
+  .col.hot{outline:3px solid #f2c94c}
+  .col .chead{font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px}
+  .col .cards{position:relative}
+  /* Cards */
+  .card{
+    width:var(--card-w);height:var(--card-h);max-width:100%;
+    border-radius:10px;border:1px solid #d9cdb2;background:#fff;
+    box-shadow:0 2px 6px rgba(60,45,20,.14);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;
+  }
+  .card .kana{font-size:34px;line-height:1;font-weight:700;margin-top:18px}
+  .card .roma{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+  .card .toproma{position:absolute;top:7px;left:8px;font-size:11px;font-weight:700;color:#a99a7d;letter-spacing:.02em}
+  .card .corner{position:absolute;top:4px;right:8px;font-size:16px;font-weight:700;color:var(--ink)}
+  /* Row colors (light pastels, so the dark text stays readable). Only when #app has .colored. */
+  #app.colored .card.row-0{background:#ffffff}
+  #app.colored .card.row-1{background:#fff9bf}
+  #app.colored .card.row-2{background:#cfe8ff}
+  #app.colored .card.row-3{background:#c8e6c9}
+  #app.colored .card.row-4{background:#e8dcc8}
+  #app.colored .card.row-5{background:#fbd3e0}
+  #app.colored .card.row-6{background:#e3d4f5}
+  #app.colored .card.row-7{background:#ffe0b2}
+  #app.colored .card.row-8{background:#ffcdd2}
+  #app.colored .card.row-9{background:#e3e3e3}
+  #app.colored .card .toproma{color:#857654}
+  /* While the last cards fly up by themselves, clicks are ignored. */
+  #app.finishing{pointer-events:none}
+  .card.face-down{
+    background:repeating-linear-gradient(45deg,#2f6b4f 0 10px,#2a5f47 10px 20px);
+    border-color:#245540;color:#fff;justify-content:center;
+  }
+  .card.face-down .back{font-size:26px}
+  .card.face-down .back small{display:block;font-size:10px;letter-spacing:.18em;margin-top:4px;opacity:.85}
+  .card.selected{outline:3px solid #e67e22;outline-offset:1px;transform:translateY(-3px)}
+  .card.hint-flash{animation:flash .7s ease-in-out 2}
+  @keyframes flash{50%{outline:3px solid #f2c94c;box-shadow:0 0 0 6px rgba(242,201,76,.35)}}
+  .col .cards .card{position:absolute;left:50%;transform:translateX(-50%)}
+  .col .cards .card.selected{transform:translateX(-50%) translateY(-3px)}
+  .pile .card,.found .slot .card{width:100%;height:100%}
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(40,30,15,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .overlay.show{display:flex}
+  .modal{background:#fffdf6;border-radius:16px;max-width:620px;width:100%;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.25);max-height:88vh;overflow:auto}
+  .modal h2{margin:0 0 8px;font-size:24px}
+  .modal p,.modal li{line-height:1.65;font-size:15px}
+  .modal ul{padding-left:20px}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+  .win-big{font-size:44px;text-align:center}
+  footer{margin-top:18px;color:var(--muted);font-size:13px;line-height:1.6}
+  @media (max-width:760px){
+    :root{--card-w:60px;--card-h:84px}
+    .title h1{font-size:24px}
+    #foundations{grid-template-columns:repeat(5,1fr)}
+    .found{min-height:112px}
+    .card .kana{font-size:27px}
+    #tableau{gap:6px}
+    .col{padding:5px 2px 8px}
+  }
+  @media (max-width:420px){
+    :root{--card-w:48px;--card-h:68px}
+    .card .kana{font-size:22px}
+    .card .roma{font-size:10px}
+  }
+</style>
+</head>
+<body>
+<div id="app" class="colored">
+  <header>
+    <div class="title">
+      <h1>Hiragana <span>Solitaire</span></h1>
+      <p>Arrange all 46 hiragana in gojūon order — one row at a time.</p>
+    </div>
+    <div class="topbtns">
+      <button id="btnNew" type="button">New Game</button>
+      <button id="btnUndo" type="button">Undo</button>
+      <button id="btnHint" type="button">Hint</button>
+      <button id="btnAuto" type="button">Auto Collect</button>
+      <button id="btnSound" type="button" aria-pressed="true">Sound: On</button>
+      <button id="btnColor" type="button" aria-pressed="true">Card Colors: On</button>
+      <button id="btnRules" type="button">How to Play</button>
+      <button id="btnFull" type="button">Open Fullscreen</button>
+    </div>
+  </header>
+
+  <div class="stats" aria-live="polite">
+    <span class="stat">Time <b id="statTime">0:00</b></span>
+    <span class="stat">Moves <b id="statMoves">0</b></span>
+    <span class="stat">Collected <b id="statCollected">0 / 46</b></span>
+    <span class="stat">Stock <b id="statStock">18</b></span>
+  </div>
+  <div id="message" role="status">Click a card, then click where it should go. Double-click (or double-tap) a card to try its row pile.</div>
+
+  <h2 class="sec">Finish piles — build each row in order</h2>
+  <div id="foundations"></div>
+
+  <h2 class="sec">Stock &amp; waste</h2>
+  <div id="stockRow">
+    <div class="pile-wrap">
+      <div class="pile" id="stockPile" role="button" tabindex="0" aria-label="Stock pile. Press to draw a card."><span class="empty" id="stockEmpty">Stock</span><span class="count" id="stockCount">18</span></div>
+      <div class="pile-label">Stock — click to draw</div>
+    </div>
+    <div class="pile-wrap">
+      <div class="pile" id="wastePile" aria-label="Waste pile"><span class="empty">Waste</span></div>
+      <div class="pile-label">Waste</div>
+    </div>
+    <div id="wasteHint">Tip: a card goes on the card that comes <b>just before it in the same row</b>. <b>い</b> goes on <b>あ</b>, <b>き</b> on <b>か</b>.</div>
+  </div>
+
+  <h2 class="sec">Tableau — build up in gojūon order</h2>
+  <div id="tableau"></div>
+
+  <footer>46 cards · 10 rows · 7 columns. Face-down cards turn over when uncovered. Unlimited Undo, unlimited stock recycling, and Auto Collect are always available. Every deal can be finished.</footer>
+</div>
+
+<div class="overlay" id="rulesOverlay" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="modal">
+    <h2 id="rulesTitle">How to Play</h2>
+    <p><b>Goal:</b> move all 46 hiragana to the 10 finish piles at the top — one pile for each row.</p>
+    <ul>
+      <li><b>Finish piles:</b> build each row in reverse order, o → e → u → i → a, so the a-kana ends on top. The A pile takes お → え → う → い → あ. The KA pile takes こ → け → く → き → か. The YA pile takes よ → ゆ → や, and the WA pile takes ん → を → わ.</li>
+      <li><b>Tableau (7 columns):</b> place a card on the card that comes <b>just before it in the same row</b>. い goes on あ, う goes on い, き goes on か. A row never continues into the next one: nothing goes on お, こ, そ … (the last card of each row). You can move a whole face-up stack together.</li>
+      <li><b>Empty column:</b> any card (or stack) can start a new column.</li>
+      <li><b>Stock:</b> click the stock to draw one card to the waste. When the stock is empty, click it again to recycle the waste.</li>
+      <li><b>Shortcuts:</b> double-click (or double-tap) a card to try its finish pile. <b>Hint</b> shows a move. <b>Auto Collect</b> moves every card it can to the finish piles (one Undo takes it all back). <b>Undo</b> takes back your last move.</li>
+      <li>Face-down cards turn over when the card above them is moved away.</li>
+      <li><b>Automatic finish:</b> once no face-down card is left in the columns, the remaining cards go up to the finish piles by themselves, one by one.</li>
+      <li><b>Every game can be finished.</b> Each new deal is checked before you play it. If you get stuck, the game tells you and offers to go back to the last position you can still win from.</li>
+      <li>The clock stops while you are away from this tab.</li>
+      <li><b>Card Colors:</b> switch between colored cards (one light color per row) and plain white cards.</li>
+    </ul>
+    <div class="actions"><button id="btnCloseRules" type="button" class="primary">Got it</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="stuckOverlay" role="dialog" aria-modal="true" aria-labelledby="stuckTitle">
+  <div class="modal">
+    <h2 id="stuckTitle">No more moves</h2>
+    <p id="stuckText">No card can move any more, so this game cannot be finished from here.</p>
+    <div class="actions">
+      <button id="btnStuckClose" type="button">Look at the board</button>
+      <button id="btnStuckNew" type="button">New Game</button>
+      <button id="btnStuckBack" type="button" class="primary">Go back</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div class="modal">
+    <div class="win-big">🎉</div>
+    <h2 id="winTitle" style="text-align:center">You finished all 46!</h2>
+    <p id="winText" style="text-align:center"></p>
+    <div class="actions" style="justify-content:center"><button id="btnAgain" type="button" class="primary">Play Again</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ================= Data: 46 seion in gojuuon order ================= */
+var ROWS=[
+  {label:"A",  kana:["あ","い","う","え","お"], roma:["a","i","u","e","o"]},
+  {label:"KA", kana:["か","き","く","け","こ"], roma:["ka","ki","ku","ke","ko"]},
+  {label:"SA", kana:["さ","し","す","せ","そ"], roma:["sa","shi","su","se","so"]},
+  {label:"TA", kana:["た","ち","つ","て","と"], roma:["ta","chi","tsu","te","to"]},
+  {label:"NA", kana:["な","に","ぬ","ね","の"], roma:["na","ni","nu","ne","no"]},
+  {label:"HA", kana:["は","ひ","ふ","へ","ほ"], roma:["ha","hi","fu","he","ho"]},
+  {label:"MA", kana:["ま","み","む","め","も"], roma:["ma","mi","mu","me","mo"]},
+  {label:"YA", kana:["や","ゆ","よ"],           roma:["ya","yu","yo"]},
+  {label:"RA", kana:["ら","り","る","れ","ろ"], roma:["ra","ri","ru","re","ro"]},
+  {label:"WA", kana:["わ","を","ん"],           roma:["wa","wo","n"]}
+];
+var CARDS=[]; // {id, order, kana, roma, row, pos}
+ROWS.forEach(function(r,ri){
+  r.kana.forEach(function(k,i){
+    CARDS.push({id:CARDS.length, order:CARDS.length, kana:k, roma:r.roma[i], row:ri, pos:i});
+  });
+});
+var TOTAL=CARDS.length; // 46
+function cardById(id){ return CARDS[id]; }
+/* Card ids start at 0 (あ is id 0), so "no card" must always be tested with == null, never with a truthiness check. */
+
+/* ================= State ================= */
+var state=null, history=[], sel=null, timer=null, seconds=0, started=false, won=false;
+var soundOn=true;
+var winnable=true; // can the current position still be finished? (checked after each move)
+var finishing=false; // the automatic finish is moving the last cards up
+var finishGen=0;     // bumped by New Game, so an old finish stops
+
+function freshState(deck){
+  return {
+    foundations: ROWS.map(function(){return [];}), // arrays of card ids, top = last
+    tableau: [[],[],[],[],[],[],[]],              // arrays of {id, faceUp}
+    stock: deck.slice(),                          // draw from end
+    waste: [],                                    // draw pile, top = last
+    moves: 0
+  };
+}
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function deal(){
+  var ids=CARDS.map(function(c){return c.id;});
+  shuffle(ids);
+  var s=freshState(ids);
+  // Deal 1..7 cards to the 7 columns; only the top card of each column is face up.
+  for(var col=0;col<7;col++){
+    for(var k=0;k<=col;k++){
+      var id=s.stock.pop();
+      s.tableau[col].push({id:id, faceUp:(k===col)});
+    }
+  }
+  return s;
+}
+function hasOpeningMove(s){
+  // A foundation move or a tableau move from a face-up top card / waste is available.
+  var tops=[];
+  s.tableau.forEach(function(c){ var top=c[c.length-1]; if(top&&top.faceUp) tops.push(top.id); });
+  if(s.waste.length) tops.push(s.waste[s.waste.length-1]);
+  for(var i=0;i<tops.length;i++){
+    if(canFoundation(tops[i],s)) return true;
+    for(var col=0;col<7;col++){
+      var t=s.tableau[col]; var tt=t[t.length-1];
+      if(tt&&tt.faceUp&&canTableau(tops[i],tt.id)) return true;
+      if(!t.length) return true; // empty column takes any card
+    }
+  }
+  return false;
+}
+/* ================= Solver =================
+   Can this position still be finished? The stock and waste can be recycled without limit, so
+   every card in them can always be reached: the solver treats them as cards that can be played
+   at any time. It is used (1) to deal only games that can be finished, and (2) after each move,
+   to notice when a move has made the game impossible and to find the last position that was
+   still winnable. It knows the face-down cards, which is fine: it only answers yes / no. */
+var SOLVER_LIMIT=20000;
+function solvable(s){
+  var nodes=0, seen={};
+  var rowLen=ROWS.map(function(r){ return r.kana.length; });
+  function fits(id, f){ var c=cardById(id); return f[c.row]===rowLen[c.row]-1-c.pos; }
+  function settle(st){ // always-safe steps: cards to their finish pile, turning cards over
+    var changed=true;
+    while(changed){
+      changed=false;
+      for(var ci=0;ci<st.cols.length;ci++){
+        var c=st.cols[ci];
+        if(!c.u.length && c.d.length){ c.u.push(c.d.pop()); changed=true; }
+        var top=c.u[c.u.length-1];
+        if(top!=null && fits(top, st.f)){ c.u.pop(); st.f[cardById(top).row]++; changed=true; }
+      }
+      for(var i=0;i<st.r.length;i++){
+        var id=st.r[i];
+        if(fits(id, st.f)){ st.r.splice(i,1); st.f[cardById(id).row]++; changed=true; i--; }
+      }
+    }
+  }
+  function copy(st){ return {cols:st.cols.map(function(c){ return {d:c.d.slice(), u:c.u.slice()}; }), r:st.r.slice(), f:st.f.slice()}; }
+  function keyOf(st){
+    return st.cols.map(function(c){ return c.d.length+":"+c.u.join(","); }).sort().join("|")+"#"+
+           st.r.slice().sort(function(a,b){ return a-b; }).join(",");
+  }
+  function dfs(st){
+    settle(st);
+    var done=true;
+    for(var r=0;r<rowLen.length;r++) if(st.f[r]!==rowLen[r]) { done=false; break; }
+    if(done) return true;
+    if(++nodes>SOLVER_LIMIT) return false;
+    var k=keyOf(st);
+    if(seen[k]) return false;
+    seen[k]=true;
+    var moves=[];
+    st.cols.forEach(function(c,ci){
+      if(!c.u.length) return;
+      var base=c.u[0];
+      st.cols.forEach(function(t,ti){
+        if(ti===ci) return;
+        var tt=t.u[t.u.length-1];
+        if(tt!=null){ if(follows(base, tt)) moves.push({p:c.d.length?0:1, from:ci, to:ti}); }
+        else if(!t.d.length && c.d.length) moves.push({p:0, from:ci, to:ti});
+      });
+    });
+    var empty=-1;
+    st.cols.forEach(function(c,ci){ if(empty<0 && !c.u.length && !c.d.length) empty=ci; });
+    st.r.forEach(function(id){
+      st.cols.forEach(function(t,ti){ var tt=t.u[t.u.length-1]; if(tt!=null && follows(id, tt)) moves.push({p:1, card:id, to:ti}); });
+      if(empty>=0) moves.push({p:2, card:id, to:empty});
+    });
+    moves.sort(function(a,b){ return a.p-b.p; });
+    for(var m=0;m<moves.length;m++){
+      var mv=moves[m], n=copy(st);
+      if(mv.card==null){ n.cols[mv.to].u=n.cols[mv.to].u.concat(n.cols[mv.from].u); n.cols[mv.from].u=[]; }
+      else { n.r.splice(n.r.indexOf(mv.card),1); n.cols[mv.to].u.push(mv.card); }
+      if(dfs(n)) return true;
+      if(nodes>SOLVER_LIMIT) return false;
+    }
+    return false;
+  }
+  var start={
+    cols:s.tableau.map(function(col){
+      return {d:col.filter(function(e){ return !e.faceUp; }).map(function(e){ return e.id; }),
+              u:col.filter(function(e){ return e.faceUp; }).map(function(e){ return e.id; })};
+    }),
+    r:s.stock.concat(s.waste),
+    f:s.foundations.map(function(p){ return p.length; })
+  };
+  return dfs(start);
+}
+
+function newGame(){
+  var s, tries=0;
+  // Deal until the game can be finished (about 9 deals in 10 can; checking takes a few ms).
+  do { s=deal(); tries++; } while((!hasOpeningMove(s) || !solvable(s)) && tries<60);
+  winnable=true;
+  closeStuck();
+  // Stop an automatic finish that may still be running for the old game
+  finishGen++; finishing=false; document.getElementById("app").classList.remove("finishing");
+  state=s; history=[]; sel=null; seconds=0; started=false; won=false;
+  stopTimer(); render(); setMessage("New game dealt. Good luck!");
+}
+function snapshot(){ return JSON.parse(JSON.stringify(state)); }
+function pushHistory(){ history.push({state:snapshot(), started:started, won:won}); if(history.length>500) history.shift(); }
+function undo(){
+  if(finishing) return;
+  if(!history.length){ setMessage("Nothing to undo yet."); return; }
+  var h=history.pop();
+  // The clock is not rewound or stopped: Undo takes back the move, not the time spent.
+  state=h.state; won=h.won; sel=null;
+  if(started && !won && !timer) startTimer();
+  closeStuck();
+  winnable=solvable(state);
+  render(); setMessage(winnable ? "Undone." : "Undone. From here the game still cannot be finished — undo more to try another way.");
+}
+
+/* ================= Rules ================= */
+function canFoundation(cardId, s){
+  s=s||state;
+  var c=cardById(cardId);
+  var pile=s.foundations[c.row];
+  // Foundations build o -> e -> u -> i -> a, so the a-kana ends on top.
+  return pile.length===(ROWS[c.row].kana.length-1-c.pos);
+}
+/* A card goes on the card just before it IN THE SAME ROW (い on あ, き on か).
+   A row never continues into the next one: nothing goes on お, こ, そ … */
+function follows(cardId, targetId){
+  var c=cardById(cardId), t=cardById(targetId);
+  return c.row===t.row && c.pos===t.pos+1;
+}
+function canTableau(cardId, targetId){
+  if(targetId==null) return true; // empty column takes any card
+  return follows(cardId, targetId);
+}
+function collected(){ return state.foundations.reduce(function(n,p){return n+p.length;},0); }
+function flipExposed(){
+  state.tableau.forEach(function(col){
+    if(col.length && !col[col.length-1].faceUp) col[col.length-1].faceUp=true;
+  });
+}
+function markStarted(){
+  if(!started){ started=true; startTimer(); }
+}
+/* The card a foundation move would take (top of a tableau column or of the waste), or null. */
+function foundationSource(from){
+  if(from.type==="tableau"){
+    var col=state.tableau[from.col];
+    var entry=col&&col[col.length-1];
+    return entry&&entry.faceUp ? entry.id : null;
+  }
+  return state.waste.length ? state.waste[state.waste.length-1] : null;
+}
+/* Move one card to its finish pile without recording history or redrawing. */
+function applyFoundation(from, cardId){
+  if(from.type==="tableau") state.tableau[from.col].pop(); else state.waste.pop();
+  state.foundations[cardById(cardId).row].push(cardId);
+  state.moves++; flipExposed();
+}
+function moveToFoundation(from){
+  // from: {type:"tableau",col} | {type:"waste"}
+  var cardId=foundationSource(from);
+  if(cardId==null) return false;
+  if(!canFoundation(cardId)) { setMessage(cardById(cardId).kana+" ("+cardById(cardId).roma+") does not go on its row pile yet."); return false; }
+  pushHistory(); markStarted();
+  applyFoundation(from, cardId);
+  afterMove(cardId);
+  return true;
+}
+function moveTableauToTableau(fromCol, fromIndex, toCol){
+  if(fromCol===toCol) return false;
+  var src=state.tableau[fromCol];
+  var moving=src.slice(fromIndex);
+  if(!moving.length||!moving[0].faceUp) return false;
+  // Stack must already be in correct ascending order (each next card follows the one below it).
+  for(var i=0;i<moving.length-1;i++){
+    if(!follows(moving[i+1].id, moving[i].id)) return false;
+  }
+  var dst=state.tableau[toCol];
+  var targetId=dst.length?dst[dst.length-1].id:null;
+  if(dst.length && !dst[dst.length-1].faceUp) return false;
+  if(!canTableau(moving[0].id, targetId)) return false;
+  pushHistory(); markStarted();
+  state.tableau[fromCol]=src.slice(0,fromIndex);
+  moving.forEach(function(e){ dst.push(e); });
+  state.moves++; flipExposed(); afterMove(moving[0].id);
+  return true;
+}
+function moveTableauToFoundation(col){
+  return moveToFoundation({type:"tableau",col:col});
+}
+function moveWasteToTableau(toCol){
+  if(!state.waste.length) return false;
+  var cardId=state.waste[state.waste.length-1];
+  var dst=state.tableau[toCol];
+  var targetId=dst.length?dst[dst.length-1].id:null;
+  if(dst.length && !dst[dst.length-1].faceUp) return false;
+  if(!canTableau(cardId,targetId)) return false;
+  pushHistory(); markStarted();
+  state.waste.pop(); dst.push({id:cardId, faceUp:true});
+  state.moves++; afterMove(cardId);
+  return true;
+}
+function drawStock(){
+  if(won || finishing) return;
+  sel=null;
+  // Nothing to draw or recycle: do nothing (no history entry, and the clock does not start).
+  if(!state.stock.length && !state.waste.length){
+    setMessage("Stock and waste are both empty.");
+    render();
+    return;
+  }
+  pushHistory(); markStarted();
+  if(state.stock.length){
+    state.waste.push(state.stock.pop());
+    state.moves++;
+    var drawn=cardById(state.waste[state.waste.length-1]);
+    setMessage("Drew "+drawn.kana+" ("+drawn.roma+").");
+  }else{
+    // Recycle waste back into stock, reversing so the order cycles.
+    state.stock=state.waste.slice().reverse();
+    state.waste=[];
+    state.moves++;
+    setMessage("Stock recycled. Draw again.");
+  }
+  render(); playTone(520,0.05);
+  checkProgress();
+}
+function autoCollect(){
+  if(finishing) return;
+  // Every card that can go up is moved in one go, as ONE step: a single Undo takes it all back.
+  var moved=0, guard=0, recorded=false;
+  while(guard++<200){
+    var from=null, cardId=null;
+    var w=foundationSource({type:"waste"});
+    if(w!=null && canFoundation(w)){ from={type:"waste"}; cardId=w; }
+    else{
+      for(var col=0;col<7;col++){
+        var id=foundationSource({type:"tableau",col:col});
+        if(id!=null && canFoundation(id)){ from={type:"tableau",col:col}; cardId=id; break; }
+      }
+    }
+    if(!from) break;
+    if(!recorded){ pushHistory(); markStarted(); recorded=true; }
+    applyFoundation(from, cardId);
+    moved++;
+  }
+  sel=null;
+  if(!moved){ render(); setMessage("Auto Collect found nothing to move."); return; }
+  setMessage("Auto Collect moved "+moved+" card"+(moved>1?"s":"")+" to the finish piles.", true);
+  afterMove(null);
+}
+/* Hint: the most useful move first.
+   1) a card to its finish pile, 2) a move that turns over a face-down card,
+   3) the waste card onto the tableau, 4) other moves that change something, 5) draw / recycle.
+   Moves that only shuffle cards around (e.g. a whole column into an empty column) are never suggested. */
+function findHint(){
+  var i,col,t,top;
+  var w=foundationSource({type:"waste"});
+  if(w!=null && canFoundation(w))
+    return {text:"Move "+cardById(w).kana+" from the waste to its "+ROWS[cardById(w).row].label+" pile.", el:"#wastePile", cardId:w};
+  for(col=0;col<7;col++){
+    t=state.tableau[col]; top=t[t.length-1];
+    if(top&&top.faceUp&&canFoundation(top.id))
+      return {text:"Move "+cardById(top.id).kana+" to its "+ROWS[cardById(top.id).row].label+" pile.", cardId:top.id};
+  }
+  var reveal=null, other=null;
+  for(col=0;col<7;col++){
+    t=state.tableau[col];
+    for(i=0;i<t.length;i++){
+      if(!t[i].faceUp) continue;
+      // Only the bottom face-up card of a column can usefully move (the cards above it follow it).
+      if(i>0 && t[i-1].faceUp) continue;
+      for(var to=0;to<7;to++){
+        if(to===col) continue;
+        var d=state.tableau[to];
+        if(d.length && !d[d.length-1].faceUp) continue;
+        var targetId=d.length?d[d.length-1].id:null;
+        if(targetId==null && i===0) continue; // a whole column into an empty column changes nothing
+        if(!canTableau(t[i].id,targetId)) continue;
+        var c=cardById(t[i].id);
+        var h={text:"Move "+c.kana+" ("+c.roma+") onto "+(targetId!=null?cardById(targetId).kana+" ("+cardById(targetId).roma+")":"an empty column")+".", cardId:t[i].id};
+        if(i>0 && !t[i-1].faceUp){ if(!reveal || targetId!=null) reveal=h; }
+        else if(!other) other=h;
+      }
+    }
+  }
+  if(reveal) return reveal;
+  if(w!=null){
+    for(col=0;col<7;col++){
+      var dd=state.tableau[col];
+      if(dd.length && !dd[dd.length-1].faceUp) continue;
+      var tid=dd.length?dd[dd.length-1].id:null;
+      if(canTableau(w,tid)){
+        var wc=cardById(w);
+        return {text:"Move "+wc.kana+" ("+wc.roma+") from the waste onto "+(tid!=null?cardById(tid).kana+" ("+cardById(tid).roma+")":"an empty column")+".", el:"#wastePile", cardId:w};
+      }
+    }
+  }
+  if(other) return other;
+  if(state.stock.length) return {text:"No moves on the board. Draw a card from the stock.", el:"#stockPile"};
+  if(state.waste.length) return {text:"No moves on the board. Recycle the waste into the stock and draw again.", el:"#stockPile"};
+  return {text:"No moves left. Try Undo or start a New Game."};
+}
+function afterMove(cardId){
+  render();
+  if(collected()===TOTAL && !won){
+    won=true; stopTimer();
+    playTone(880,0.25);
+    document.getElementById("winText").textContent="Time "+fmtTime(seconds)+" · "+state.moves+" moves";
+    document.getElementById("winOverlay").classList.add("show");
+    setMessage("You finished all 46! 🎉", true);
+  }else{
+    playTone(600,0.06);
+    checkProgress();
+  }
+}
+
+/* ================= Getting stuck =================
+   After each move: if no card can move any more, say so and offer to go back to the last
+   position that can still be finished (or a new game). If a move has made the game impossible
+   but some moves are still left, give a short warning. */
+function hasAnyMove(){
+  // Board moves (the same ones Hint can suggest)
+  if(findHint().cardId!=null) return true;
+  // Any stock or waste card that could be played somewhere (it can always be reached by drawing)
+  var reserve=state.stock.concat(state.waste);
+  var empty=state.tableau.some(function(c){ return !c.length; });
+  for(var i=0;i<reserve.length;i++){
+    var id=reserve[i];
+    if(canFoundation(id) || empty) return true;
+    for(var col=0;col<7;col++){
+      var t=state.tableau[col], top=t[t.length-1];
+      if(top && top.faceUp && follows(id, top.id)) return true;
+    }
+  }
+  return false;
+}
+/* How many Undo steps back to the most recent position that can still be finished (0 = none found). */
+function stepsBackToWinnable(){
+  for(var i=history.length-1;i>=0;i--){
+    if(solvable(history[i].state)) return history.length-i;
+  }
+  return 0;
+}
+var stuckBack=0;
+/* ================= Automatic finish =================
+   When no face-down card is left in the columns, every remaining card can simply go up to its
+   finish pile one by one (in a row, the card a card is waiting for is always on top of a column,
+   in the stock, or in the waste). Then the game does it for you, one card at a time.
+   It is one step: a single Undo takes the whole finish back. */
+var FINISH_STEP_MS=110;
+function canAutoFinish(){
+  if(won || finishing || collected()===TOTAL) return false;
+  return state.tableau.every(function(col){ return col.every(function(e){ return e.faceUp; }); });
+}
+/* The next card that can go up: the top of a column, or any stock / waste card. */
+function nextFinishCard(){
+  for(var col=0;col<7;col++){
+    var t=state.tableau[col], top=t[t.length-1];
+    if(top && canFoundation(top.id)) return {from:"tableau", col:col, id:top.id};
+  }
+  var piles=["waste","stock"];
+  for(var p=0;p<piles.length;p++){
+    var pile=state[piles[p]];
+    for(var i=0;i<pile.length;i++) if(canFoundation(pile[i])) return {from:piles[p], index:i, id:pile[i]};
+  }
+  return null;
+}
+function startAutoFinish(){
+  finishing=true; sel=null;
+  pushHistory(); markStarted();
+  document.getElementById("app").classList.add("finishing");
+  setMessage("Every card is face up — the rest go up to the finish piles by themselves.", true);
+  var gen=finishGen;
+  (function step(){
+    if(gen!==finishGen) return; // a new game was started meanwhile
+    var next=nextFinishCard();
+    if(!next){ // should not happen; stop safely
+      finishing=false; document.getElementById("app").classList.remove("finishing");
+      render(); return;
+    }
+    if(next.from==="tableau") state.tableau[next.col].pop();
+    else state[next.from].splice(next.index,1);
+    state.foundations[cardById(next.id).row].push(next.id);
+    state.moves++;
+    if(collected()===TOTAL){
+      finishing=false; document.getElementById("app").classList.remove("finishing");
+      afterMove(next.id); // shows the win
+      return;
+    }
+    render(); playTone(600+collected()*6,0.05);
+    setTimeout(step, FINISH_STEP_MS);
+  })();
+}
+
+function checkProgress(){
+  if(won || finishing) return;
+  if(canAutoFinish()){ startAutoFinish(); return; }
+  var wasWinnable=winnable;
+  winnable=solvable(state);
+  if(!hasAnyMove()){
+    stuckBack=stepsBackToWinnable();
+    var btn=document.getElementById("btnStuckBack");
+    if(stuckBack>0){
+      document.getElementById("stuckText").textContent="No card can move any more, so this game cannot be finished from here. "+
+        "Go back "+stuckBack+" move"+(stuckBack>1?"s":"")+" to the last position you can still win from, and try another way.";
+      btn.hidden=false;
+      btn.textContent="Go back "+stuckBack+" move"+(stuckBack>1?"s":"");
+    }else{
+      document.getElementById("stuckText").textContent="No card can move any more, so this game cannot be finished. Start a new game.";
+      btn.hidden=true;
+    }
+    document.getElementById("stuckOverlay").classList.add("show");
+    setMessage("No more moves. Go back a few moves, or start a new game.");
+    return;
+  }
+  if(wasWinnable && !winnable){
+    setMessage("Careful: after that move, this game can no longer be finished. Press Undo to try another way.");
+  }
+}
+function closeStuck(){ document.getElementById("stuckOverlay").classList.remove("show"); }
+
+/* ================= Sound (tiny WebAudio beeps) ================= */
+var audioCtx=null;
+function playTone(freq,dur){
+  if(!soundOn) return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    var now=audioCtx.currentTime;
+    var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.frequency.value=freq; o.type="sine";
+    g.gain.setValueAtTime(0.06, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(now); o.stop(now+dur);
+  }catch(e){}
+}
+
+/* ================= Timer ================= */
+function fmtTime(s){ return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function startTimer(){
+  stopTimer();
+  timer=setInterval(function(){
+    if(document.hidden) return; // the clock stops while you are away from this tab
+    seconds++;
+    var el=document.getElementById("statTime"); if(el) el.textContent=fmtTime(seconds);
+  },1000);
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+
+/* ================= Drag data =================
+   A drop can come from anywhere (another tab, another app), so its data is checked
+   before it is used: only a card that really is in this game, in that place, is accepted. */
+function readDrag(e){
+  var data;
+  try{ data=JSON.parse(e.dataTransfer.getData("text/plain")); }catch(err){ return null; }
+  if(!data || typeof data!=="object") return null;
+  if(data.type==="waste") return state.waste.length ? {type:"waste"} : null;
+  if(data.type==="tableau"){
+    var col=data.col, index=data.index;
+    if(typeof col!=="number" || typeof index!=="number" || col%1!==0 || index%1!==0) return null;
+    if(col<0 || col>6) return null;
+    var cards=state.tableau[col];
+    if(index<0 || index>=cards.length || !cards[index].faceUp) return null;
+    return {type:"tableau", col:col, index:index};
+  }
+  return null;
+}
+
+/* ================= Rendering ================= */
+var el={
+  foundations:document.getElementById("foundations"),
+  tableau:document.getElementById("tableau"),
+  stockPile:document.getElementById("stockPile"),
+  wastePile:document.getElementById("wastePile"),
+  stockCount:document.getElementById("stockCount"),
+  stockEmpty:document.getElementById("stockEmpty"),
+  message:document.getElementById("message")
+};
+function setMessage(text, good){
+  el.message.textContent=text;
+  el.message.className=good?"good":"";
+}
+function cardEl(cardId, faceUp, opts){
+  opts=opts||{};
+  var c=cardById(cardId);
+  var d=document.createElement("div");
+  d.className="card"+(faceUp?" row-"+c.row:" face-down");
+  d.dataset.cardId=cardId;
+  d.draggable=faceUp;
+  if(faceUp){
+    d.innerHTML='<span class="toproma">'+c.roma+'</span><span class="corner">'+c.kana+'</span><span class="kana">'+c.kana+'</span><span class="roma">'+c.roma+'</span>';
+    d.setAttribute("aria-label", c.kana+" ("+c.roma+")");
+  }else{
+    d.innerHTML='<span class="back">🌸<small>HIRAGANA</small></span>';
+    d.setAttribute("aria-label", "Face-down card");
+  }
+  if(opts.selected) d.classList.add("selected");
+  return d;
+}
+/* Double-click / double-tap: dblclick does not fire reliably on touch screens, and the board is
+   redrawn after every click (so the second click lands on a new element). Two clicks on the
+   same card within 400 ms count as a double-click instead. */
+var lastTap={key:null, at:0};
+function isDoubleTap(key){
+  var now=Date.now();
+  var dbl=lastTap.key===key && now-lastTap.at<400;
+  lastTap= dbl ? {key:null, at:0} : {key:key, at:now};
+  return dbl;
+}
+function cardHeight(){
+  var v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--card-h"));
+  return isFinite(v) && v>0 ? v : 106;
+}
+function render(){
+  document.getElementById("statTime").textContent=fmtTime(seconds);
+  document.getElementById("statMoves").textContent=state.moves;
+  document.getElementById("statCollected").textContent=collected()+" / "+TOTAL;
+  document.getElementById("statStock").textContent=state.stock.length;
+  document.getElementById("btnUndo").disabled=!history.length;
+
+  // Foundations
+  el.foundations.innerHTML="";
+  ROWS.forEach(function(r,ri){
+    var pile=state.foundations[ri];
+    var box=document.createElement("div");
+    box.className="found"; box.dataset.foundation=ri;
+    var top=pile.length?cardById(pile[pile.length-1]):null;
+    var next=pile.length<r.kana.length?r.kana[r.kana.length-1-pile.length]:null;
+    box.innerHTML='<div class="flabel">'+r.label+'</div><div class="frange">'+r.roma[r.roma.length-1]+" – "+r.roma[0]+'</div><div class="slot">'+
+      (top?'<div class="card row-'+ri+'"><span class="toproma">'+top.roma+'</span><span class="corner">'+top.kana+'</span><span class="kana">'+top.kana+'</span><span class="roma">'+top.roma+'</span></div>'
+          :'<div class="next">'+(next?("next: "+next):"✓")+'</div>')+
+      '</div>';
+    box.addEventListener("click", function(){ onFoundationClick(ri); });
+    box.addEventListener("dragover", function(e){ e.preventDefault(); });
+    box.addEventListener("drop", function(e){
+      e.preventDefault();
+      var data=readDrag(e);
+      if(!data) return;
+      if(data.type==="tableau"){
+        var col=state.tableau[data.col];
+        if(col.length-1!==data.index){ setMessage("Only the top card of a column can go to a finish pile."); return; }
+        if(cardById(col[data.index].id).row!==ri){ setMessage("That card belongs to a different row pile."); return; }
+        moveTableauToFoundation(data.col);
+      }else{
+        if(cardById(state.waste[state.waste.length-1]).row!==ri){ setMessage("That card belongs to a different row pile."); return; }
+        moveToFoundation({type:"waste"});
+      }
+    });
+    el.foundations.appendChild(box);
+  });
+
+  // Stock
+  el.stockEmpty.textContent=state.stock.length?("Stock"): (state.waste.length?"Recycle":"Empty");
+  el.stockCount.textContent=state.stock.length;
+  el.stockPile.classList.toggle("hot", false);
+
+  // Waste
+  el.wastePile.innerHTML="";
+  if(state.waste.length){
+    var wid=state.waste[state.waste.length-1];
+    var w=cardEl(wid, true, {selected: sel&&sel.type==="waste"});
+    w.addEventListener("click", function(e){
+      e.stopPropagation();
+      if(isDoubleTap("w"+wid)){ sel=null; if(!moveToFoundation({type:"waste"})) render(); return; }
+      onWasteClick();
+    });
+    w.addEventListener("dragstart", function(e){ e.dataTransfer.setData("text/plain", JSON.stringify({type:"waste"})); });
+    el.wastePile.appendChild(w);
+  }else{
+    el.wastePile.innerHTML='<span class="empty">Waste</span>';
+  }
+
+  // Tableau
+  var cardH=cardHeight();
+  el.tableau.innerHTML="";
+  state.tableau.forEach(function(col,ci){
+    var colEl=document.createElement("div");
+    colEl.className="col"; colEl.dataset.col=ci;
+    colEl.innerHTML='<div class="chead">Column '+(ci+1)+'</div><div class="cards"></div>';
+    var cardsEl=colEl.querySelector(".cards");
+    var offset=0;
+    col.forEach(function(entry,idx){
+      var isSel=sel&&sel.type==="tableau"&&sel.col===ci&&sel.index===idx;
+      var cd=cardEl(entry.id, entry.faceUp, {selected:isSel});
+      cd.style.top=offset+"px";
+      cd.style.zIndex=idx+1;
+      if(idx<col.length-1) offset+=entry.faceUp?34:16;
+      cd.addEventListener("click", function(e){
+        e.stopPropagation();
+        var isTop=idx===state.tableau[ci].length-1;
+        if(entry.faceUp && isTop && isDoubleTap("t"+entry.id)){
+          sel=null;
+          if(!moveTableauToFoundation(ci)) render();
+          return;
+        }
+        onTableauCardClick(ci, idx);
+      });
+      cd.addEventListener("dragstart", function(e){ if(!entry.faceUp){ e.preventDefault(); return; } e.dataTransfer.setData("text/plain", JSON.stringify({type:"tableau",col:ci,index:idx})); });
+      cardsEl.appendChild(cd);
+    });
+    cardsEl.style.height=(offset+cardH)+"px";
+    colEl.addEventListener("click", function(){ onColumnClick(ci); });
+    colEl.addEventListener("dragover", function(e){ e.preventDefault(); });
+    colEl.addEventListener("drop", function(e){
+      e.preventDefault();
+      var data=readDrag(e);
+      var ok=false;
+      if(data && data.type==="tableau") ok=moveTableauToTableau(data.col, data.index, ci);
+      else if(data && data.type==="waste") ok=moveWasteToTableau(ci);
+      if(!ok) setMessage("That card cannot go there. It needs the card just before it in the same row.");
+      sel=null; render();
+    });
+    el.tableau.appendChild(colEl);
+  });
+}
+
+/* ================= Click-to-move ================= */
+function clearSel(){ sel=null; render(); }
+function onTableauCardClick(col, index){
+  var entry=state.tableau[col][index];
+  if(!entry.faceUp){ setMessage("That card is face down. Move the cards above it first."); return; }
+  if(sel && sel.type==="tableau" && sel.col===col && sel.index===index){ clearSel(); return; }
+  if(sel){
+    if(sel.type==="tableau"){
+      if(moveTableauToTableau(sel.col, sel.index, col)) { sel=null; return; }
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
+      sel={type:"tableau",col:col,index:index}; render(); return;
+    }
+    if(sel.type==="waste"){
+      if(moveWasteToTableau(col)) { sel=null; return; }
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
+      sel=null; render(); return;
+    }
+  }
+  sel={type:"tableau",col:col,index:index}; render();
+  var c=cardById(entry.id);
+  setMessage("Selected "+c.kana+" ("+c.roma+"). Click a column or a finish pile.");
+}
+function onColumnClick(col){
+  if(!sel) return;
+  if(sel.type==="tableau"){
+    if(sel.col===col){ clearSel(); return; }
+    if(!moveTableauToTableau(sel.col, sel.index, col))
+      setMessage("That stack cannot go there. An empty column takes any card; otherwise it needs the card just before it in the same row.");
+    sel=null; render();
+  }else if(sel.type==="waste"){
+    if(!moveWasteToTableau(col))
+      setMessage("That card cannot go there. It needs the card just before it in the same row.");
+    sel=null; render();
+  }
+}
+function onWasteClick(){
+  if(!state.waste.length) return;
+  if(sel && sel.type==="waste"){ clearSel(); return; }
+  if(sel && sel.type==="tableau"){
+    setMessage("Tableau cards cannot go to the waste. Click a column or a finish pile.");
+    return;
+  }
+  sel={type:"waste"}; render();
+  var c=cardById(state.waste[state.waste.length-1]);
+  setMessage("Selected "+c.kana+" ("+c.roma+") from the waste. Click a column or its finish pile.");
+}
+function onFoundationClick(row){
+  if(sel){
+    if(sel.type==="tableau"){
+      var col=state.tableau[sel.col];
+      if(col.length-1!==sel.index){ setMessage("Only the top card of a column can go to a finish pile."); sel=null; render(); return; }
+      if(cardById(col[sel.index].id).row!==row){ setMessage("That card belongs to a different row pile."); sel=null; render(); return; }
+      moveTableauToFoundation(sel.col);
+      sel=null; return;
+    }
+    if(sel.type==="waste"){
+      if(!state.waste.length){ sel=null; render(); return; }
+      if(cardById(state.waste[state.waste.length-1]).row!==row){ setMessage("That card belongs to a different row pile."); sel=null; render(); return; }
+      moveToFoundation({type:"waste"});
+      sel=null; return;
+    }
+  }else{
+    setMessage("Finish piles build each row in order: "+ROWS[row].kana.slice().reverse().join(" → ")+".");
+  }
+}
+
+/* ================= Buttons ================= */
+document.getElementById("btnNew").addEventListener("click", function(){ if(!finishing) newGame(); });
+document.getElementById("btnUndo").addEventListener("click", undo);
+document.getElementById("btnHint").addEventListener("click", function(){
+  var h=findHint();
+  setMessage("Hint: "+h.text);
+  if(h.el){
+    var target=document.querySelector(h.el);
+    if(target){ target.classList.add("hint-flash"); setTimeout(function(){ target.classList.remove("hint-flash"); },1600); }
+  }
+  if(h.cardId!=null){
+    var card=document.querySelector('.card[data-card-id="'+h.cardId+'"]');
+    if(card){ card.classList.add("hint-flash"); setTimeout(function(){ card.classList.remove("hint-flash"); },1600); }
+  }
+});
+document.getElementById("btnAuto").addEventListener("click", autoCollect);
+document.getElementById("btnSound").addEventListener("click", function(){
+  soundOn=!soundOn;
+  this.textContent="Sound: "+(soundOn?"On":"Off");
+  this.setAttribute("aria-pressed", String(soundOn));
+});
+var colorOn=true;
+document.getElementById("btnColor").addEventListener("click", function(){
+  colorOn=!colorOn;
+  document.getElementById("app").classList.toggle("colored", colorOn);
+  this.textContent="Card Colors: "+(colorOn?"On":"Off");
+  this.setAttribute("aria-pressed", String(colorOn));
+});
+el.stockPile.addEventListener("click", drawStock);
+el.stockPile.addEventListener("keydown", function(e){
+  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); drawStock(); }
+});
+// A drop anywhere that is not a column or a finish pile does nothing.
+// (Without this, some browsers try to open dropped text as a web address.)
+document.addEventListener("dragover", function(e){ e.preventDefault(); });
+document.addEventListener("drop", function(e){ e.preventDefault(); });
+document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ sel=null; render(); closeRules(); closeStuck(); } });
+document.addEventListener("click", function(e){
+  if(sel && !e.target.closest(".card") && !e.target.closest(".col") && !e.target.closest(".found") && !e.target.closest("#wastePile")) { sel=null; render(); }
+});
+
+/* Rules modal */
+function openRules(){ document.getElementById("rulesOverlay").classList.add("show"); }
+function closeRules(){ document.getElementById("rulesOverlay").classList.remove("show"); }
+document.getElementById("btnRules").addEventListener("click", openRules);
+document.getElementById("btnCloseRules").addEventListener("click", closeRules);
+document.getElementById("rulesOverlay").addEventListener("click", function(e){ if(e.target===this) closeRules(); });
+document.getElementById("btnStuckBack").addEventListener("click", function(){
+  var n=stuckBack;
+  closeStuck();
+  for(var i=0;i<n && history.length;i++){
+    var h=history.pop();
+    state=h.state; won=h.won;
+  }
+  sel=null; winnable=true;
+  if(started && !won && !timer) startTimer();
+  render();
+  setMessage("Went back "+n+" move"+(n>1?"s":"")+". From here the game can still be finished — try another way.", true);
+});
+document.getElementById("btnStuckNew").addEventListener("click", function(){ closeStuck(); newGame(); });
+document.getElementById("btnStuckClose").addEventListener("click", closeStuck);
+document.getElementById("stuckOverlay").addEventListener("click", function(e){ if(e.target===this) closeStuck(); });
+document.getElementById("btnAgain").addEventListener("click", function(){
+  document.getElementById("winOverlay").classList.remove("show");
+  newGame();
+});
+
+/* ================= Fullscreen =================
+   Inside the AI Yamato portal the game runs in a frame, and the portal's own toolbar has the
+   fullscreen button (it also works on iPhone). So this button is shown only when the game is
+   opened on its own. */
+var embedded=false;
+try{ embedded=window.self!==window.top; }catch(err){ embedded=true; }
+var btnFull=document.getElementById("btnFull");
+if(embedded){
+  btnFull.hidden=true;
+}else{
+  var isFullscreen=function(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); };
+  var updateFullBtn=function(){ btnFull.textContent=isFullscreen()?"Exit Fullscreen":"Open Fullscreen"; };
+  document.addEventListener("fullscreenchange", updateFullBtn);
+  document.addEventListener("webkitfullscreenchange", updateFullBtn);
+  btnFull.addEventListener("click", function(){
+    if(isFullscreen()){
+      var exit=document.exitFullscreen||document.webkitExitFullscreen;
+      if(exit) exit.call(document);
+      return;
+    }
+    var req=document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen;
+    if(req){
+      var p=req.call(document.documentElement);
+      if(p&&p.catch) p.catch(function(){ setMessage("Fullscreen is not available in this browser."); });
+    }else{
+      setMessage("Fullscreen is not available in this browser.");
+    }
+  });
+}
+
+/* Start */
+newGame();
+})();
+</script>
+</body>
+</html>

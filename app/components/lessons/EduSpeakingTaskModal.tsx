@@ -256,6 +256,9 @@ export const EduSpeakingTaskModal: React.FC<EduSpeakingTaskModalProps> = ({
                 onReplyAgain={drill.replyAgain}
                 onTypedAnswerChange={drill.setTypedAnswer}
                 onSubmitTypedAnswer={drill.submitTypedAnswer}
+                typingPrompt={drill.typingPrompt}
+                typingPlaceholder={drill.typingPlaceholder}
+                typingNumeric={drill.typingNumeric}
               />
             )}
 

@@ -4,19 +4,25 @@
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
-import { createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
+import { appendClearAuthCookies, createAdminSupabaseClient, createServerSupabaseClient } from '~/lib/supabase.server';
 import { supabase } from '~/lib/supabaseClient';
 
 // モジュール化したコンポーネントのインポート
 import { TutorPreferencesSection } from '~/components/TutorPreferencesSection';
+import { TimezoneSection } from '~/components/TimezoneSection';
+import { PlanSection } from '~/components/billing/PlanSection';
 import { RegistrationDetails } from '~/components/RegistrationDetails';
 import { CreditTransactionsSection } from '~/components/CreditTransactionsSection';
 import { DeleteAccountModal } from '~/components/DeleteAccountModal';
+import { cancelUserSubscriptions } from '~/lib/stripe-cancel.server';
 import { StudentClassSection, type StudentHomeworkItem } from '~/components/StudentClassSection';
+import { loadQuizStats, loadStudentAssignments } from '~/lib/assignments.server';
+import { getClassLockUntil } from '~/lib/homework-lock.server';
+import { countsAsDone, homeworkStatus } from '~/lib/homework-status';
 import { getStudentClass, getVerifiedSchoolEmails, normaliseJoinCode, type VerifiedSchoolEmail } from '~/lib/teacher.server';
 import { INVITE_CODE_LENGTH, TEACHER_LIMITS, allowedStudentDomains, isStudentDomainAllowed } from '~/lib/teacher-config';
 
@@ -53,7 +59,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       .maybeSingle();
 
     if (profile) {
-      initialCredits = (profile as any).credits ?? 10;
+      initialCredits = (profile as any).credits ?? 0;
       initialNickname = (profile as any).nickname ?? "";
       initialPace = (profile as any).learning_pace ?? "normal";
       initialState = (profile as any).state ?? null;
@@ -129,18 +135,26 @@ export async function action({ request, context }: LoaderFunctionArgs) {
     }
 
     const supabaseAdmin = createAdminSupabaseClient(context);
+
+    // サブスクを先にすぐ解約する（アカウントが消えたあとも請求が続かないように）。解約できなければ、アカウントは消さない
+    const cancel = await cancelUserSubscriptions(supabaseAdmin, user.id, context);
+    if (!cancel.ok) {
+      return json({ error: cancel.error, success: false }, { status: 500 });
+    }
+
+    // 手書きの写真とライティングの提出記録を先に消す（アカウントを消しても写真のファイルが残らないように）
+    // 失敗しても削除は止めない。記録が消えれば、写真はデータベースの削除待ちリストから毎日の処理で消える（SQL 20）
+    await deleteHandwritingSubmissions(supabaseAdmin, user.id);
+
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
       return json({ error: "Failed to delete account: " + deleteError.message, success: false }, { status: 500 });
     }
 
-    return redirect("/", {
-      headers: {
-        ...Object.fromEntries(headers.entries()),
-        "Set-Cookie": "sb-access-token=; Max-Age=0; path=/",
-      },
-    });
+    // 🔐 サーバー用のログイン Cookie をすべて消す（以前は存在しない名前の Cookie を消していた）
+    appendClearAuthCookies(request, headers);
+    return redirect("/", { headers });
   }
 
   // 💡 生徒：参加コードでクラスへの参加を申請する（1人1クラス・先生が承認すると入れる）
@@ -289,6 +303,26 @@ export async function action({ request, context }: LoaderFunctionArgs) {
   return json({ error: "Invalid intent.", success: false }, { status: 400 });
 }
 
+/** アカウント削除の前に、その人の手書きの写真（非公開バケット）とライティングの提出記録を消す */
+async function deleteHandwritingSubmissions(admin: any, userId: string) {
+  try {
+    const { data: rows } = await admin
+      .from("edu_writing_submissions")
+      .select("image_path")
+      .eq("user_id", userId)
+      .not("image_path", "is", null);
+    const paths = (rows ?? []).map((r: any) => r.image_path as string).filter(Boolean);
+    if (paths.length > 0) {
+      const { error } = await admin.storage.from("writing-submissions").remove(paths);
+      if (error) console.error("delete-account: could not delete handwriting images:", error.message);
+    }
+    const { error: rowError } = await admin.from("edu_writing_submissions").delete().eq("user_id", userId);
+    if (rowError) console.error("delete-account: could not delete writing submissions:", rowError.message);
+  } catch (err) {
+    console.error("delete-account: handwriting cleanup failed:", err);
+  }
+}
+
 /**
  * 生徒の参加申請を消す。招待コードで出した申請なら、そのコードをもう一度使えるように戻す
  * （先生が断った申請のコードは戻さない。断られたときは先生の操作で申請ごと消える）
@@ -301,40 +335,81 @@ async function removeJoinRequest(admin: any, userId: string) {
   }
 }
 
-/** 生徒の宿題一覧（新しい締切順）と、それぞれのタスクが終わったかどうか */
+/**
+ * 生徒の宿題・課題一覧（新しい締切順）。自分が対象のものだけ（クラス全員 または 選ばれた生徒）。
+ * レッスンはタスクごとに終わったか、語彙クイズは最高点と回数（SQL 42）
+ */
 async function loadStudentHomework(admin: any, classId: string, userId: string): Promise<StudentHomeworkItem[]> {
-  const { data: rows } = await admin
-    .from("edu_homework")
-    .select("id, title, lesson_id, task_keys, due_at")
-    .eq("class_id", classId)
-    .order("due_at", { ascending: false })
-    .limit(30);
-  if (!rows || rows.length === 0) return [];
+  const rows = await loadStudentAssignments(admin, classId, userId);
+  if (rows.length === 0) return [];
 
-  const lessonIds = [...new Set(rows.map((r: any) => String(r.lesson_id)))];
-  const [{ data: lessons }, { data: progress }] = await Promise.all([
-    admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds),
-    admin
-      .from("edu_student_progress")
-      .select("lesson_id, task_key, is_completed")
-      .eq("user_id", userId)
-      .in("lesson_id", lessonIds),
+  const lessonIds = [...new Set(rows.map((r) => r.lessonId).filter((id): id is string => Boolean(id)))];
+  const quizIds = [...new Set(rows.map((r) => r.quizId).filter((id): id is string => Boolean(id)))];
+  // 今、学校時間のブロック中か（宿題で「授業中もしてよい」でないものに効く。SQL 47）
+  const lockedUntil = await getClassLockUntil(admin, classId, userId);
+  const lockOf = (r: { kind: string; allowDuringSchool: boolean }) =>
+    r.kind === "homework" && !r.allowDuringSchool ? lockedUntil : null;
+
+  // いつ終えたか（completed_at, SQL 48。その前は updated_at）
+  const readProgress = (columns: string) =>
+    admin.from("edu_student_progress").select(columns).eq("user_id", userId).in("lesson_id", lessonIds);
+  const loadProgress = async () => {
+    if (!lessonIds.length) return { data: [] };
+    const withCompletedAt = await readProgress("lesson_id, task_key, is_completed, updated_at, completed_at");
+    return withCompletedAt.error ? readProgress("lesson_id, task_key, is_completed, updated_at") : withCompletedAt;
+  };
+
+  const [{ data: lessons }, { data: progress }, { data: quizzes }, quizStats] = await Promise.all([
+    lessonIds.length ? admin.from("edu_lessons").select("id, slug, title_en").in("id", lessonIds) : { data: [] },
+    loadProgress(),
+    quizIds.length ? admin.from("edu_teacher_quizzes").select("id, title").in("id", quizIds) : { data: [] },
+    loadQuizStats(admin, rows.filter((r) => r.itemType === "vocab_quiz").map((r) => r.id), [userId]),
   ]);
 
   const lessonMap = new Map((lessons ?? []).map((l: any) => [String(l.id), l]));
-  const done = new Set(
-    (progress ?? []).filter((p: any) => p.is_completed).map((p: any) => `${p.lesson_id}:${p.task_key}`)
+  const quizMap = new Map((quizzes ?? []).map((q: any) => [String(q.id), String(q.title)]));
+  const statMap = new Map(quizStats.map((st) => [st.homeworkId, st]));
+  const completedAt = new Map<string, string>(
+    (progress ?? [])
+      .filter((p: any) => p.is_completed)
+      .map((p: any) => [`${p.lesson_id}:${p.task_key}`, String(p.completed_at ?? p.updated_at ?? "1970-01-01T00:00:00Z")])
   );
 
-  return rows.map((r: any) => {
-    const lesson: any = lessonMap.get(String(r.lesson_id));
+  return rows.map((r) => {
+    if (r.itemType === "vocab_quiz") {
+      const st = statMap.get(r.id);
+      return {
+        id: r.id,
+        title: r.title,
+        kind: r.kind,
+        dueAt: r.dueAt,
+        catchupUntil: r.catchupUntil,
+        status: homeworkStatus(r, st?.firstAt ?? null),
+        itemType: "vocab_quiz" as const,
+        lessonTitle: quizMap.get(r.quizId ?? "") ?? "Vocabulary quiz",
+        lessonUrl: `/class-quiz/${r.id}`,
+        tasks: [],
+        quiz: st ? { best: st.best, total: st.total, attempts: st.attempts } : { best: null, total: null, attempts: 0 },
+        lockedUntil: lockOf(r),
+      };
+    }
+    const lesson: any = lessonMap.get(String(r.lessonId));
+    const times = r.taskKeys.map((key) => completedAt.get(`${r.lessonId}:${key}`) ?? null);
+    const finishedAt = times.some((t) => !t) ? null : times.reduce((a, b) => (a! > b! ? a : b), times[0]);
     return {
       id: r.id,
       title: r.title,
-      dueAt: r.due_at,
+      kind: r.kind,
+      dueAt: r.dueAt,
+      catchupUntil: r.catchupUntil,
+      status: homeworkStatus(r, finishedAt),
+      itemType: "lesson" as const,
       lessonTitle: lesson?.title_en ?? "Lesson",
       lessonUrl: lesson?.slug ? `/lessons/${lesson.slug}` : "/lessons",
-      tasks: (r.task_keys as string[]).map((key) => ({ key, done: done.has(`${r.lesson_id}:${key}`) })),
+      // 宿題として数えるのは、閉じるまでに終えたタスクだけ
+      tasks: r.taskKeys.map((key) => ({ key, done: countsAsDone(r, completedAt.get(`${r.lessonId}:${key}`) ?? null) })),
+      quiz: null,
+      lockedUntil: lockOf(r),
     };
   });
 }
@@ -487,6 +562,18 @@ export default function AccountSettingsRoute() {
     }
   }, [rootData]);
 
+  // 💡 生徒のクラス・宿題・課題のセクション。クラスに入っている生徒は一番上、まだの生徒は今まで通りの位置に出す
+  const showStudentClass = !initialData.isTeacher && initialData.teacherStatus !== "pending" && Boolean(user?.id);
+  const inClass = Boolean(initialData.studentClass);
+  const studentClassSection = (
+    <StudentClassSection
+      studentClass={initialData.studentClass}
+      homework={initialData.homework}
+      verifiedSchoolEmails={initialData.verifiedSchoolEmails}
+      joinRequest={initialData.joinRequest}
+    />
+  );
+
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
       <div className="max-w-4xl mx-auto p-6 space-y-8 min-h-[70vh]">
@@ -496,6 +583,21 @@ export default function AccountSettingsRoute() {
             Manage your AI tutor preferences, registration details, subscription plan, and credit history.
           </p>
         </div>
+
+        {/* 学習の達成具合（レッスン・文化・テスト・ブラインドタッチ）は別ページにまとめている */}
+        <Link
+          to="/progress"
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-4 transition-colors"
+        >
+          <span>
+            <span className="block font-black text-indigo-900">📈 My Progress</span>
+            <span className="block text-sm text-indigo-800/80">Lessons, culture tasks, language tests and typing — all in one place.</span>
+          </span>
+          <span className="font-bold text-indigo-700">Open →</span>
+        </Link>
+
+        {/* 0. クラスに入っている生徒（学校の生徒）は、宿題・課題がいちばん大事なので一番上に出す */}
+        {showStudentClass && inClass && studentClassSection}
 
         {/* 1. AIチューター設定・プロフィールセクション（モジュール化） */}
         <TutorPreferencesSection
@@ -507,6 +609,10 @@ export default function AccountSettingsRoute() {
           initialSchoolRefId={initialData.schoolRefId}
           onSaved={() => revalidator.revalidate()}
         />
+
+        {/* 1-2. タイムゾーン（デイリークイズの切り替わり。変更は 30 日に 1 回まで） */}
+        <PlanSection userId={user?.id} />
+        <TimezoneSection userId={user?.id} />
 
         {/* 1a. 先生アカウントの審査中のお知らせ */}
         {initialData.teacherStatus === "pending" && (
@@ -522,15 +628,8 @@ export default function AccountSettingsRoute() {
           </div>
         )}
 
-        {/* 1b. クラス参加・宿題（生徒のみ） */}
-        {!initialData.isTeacher && initialData.teacherStatus !== "pending" && user?.id && (
-          <StudentClassSection
-            studentClass={initialData.studentClass}
-            homework={initialData.homework}
-            verifiedSchoolEmails={initialData.verifiedSchoolEmails}
-            joinRequest={initialData.joinRequest}
-          />
-        )}
+        {/* 1b. クラス参加・宿題（クラスにまだ入っていない生徒は、ここ＝今まで通りの位置） */}
+        {showStudentClass && !inClass && studentClassSection}
 
         {/* 2. 総合的なアカウント情報セクション（モジュール化） */}
         <RegistrationDetails
@@ -540,10 +639,11 @@ export default function AccountSettingsRoute() {
           createdAt={userCreatedAt}
         />
 
-        {/* 3. クレジット履歴セクション（モジュール化） */}
+        {/* 3. クレジット履歴セクション（モジュール化）。列が多いので、広い画面ではこのセクションだけ左右に広げる */}
         <CreditTransactionsSection
           transactions={transactions}
           isLoading={isLoadingTransactions}
+          className="lg:-mx-8 xl:-mx-24"
         />
 
         {/* 4. 危険なエリア（アカウント削除セクション ＆ モーダル・モジュール化） */}

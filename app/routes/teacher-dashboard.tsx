@@ -2,15 +2,18 @@
  * @file teacher-dashboard.tsx
  * @description 教師ダッシュボード（無料・機能限定）
  *  - クラスを作り、参加コードを生徒に配る
- *  - レッスンのタスク（vocabulary / listening / reading / speaking / writing）を宿題として出す
- *  - 宿題ごと・生徒ごとの進捗（edu_student_progress）と、期間内の宿題完了率（%）を見る
+ *  - 宿題（homework）・授業内の課題（classwork）を、クラス全員または選んだ生徒に出す（SQL 42）
+ *    出せるもの: レッスンのタスク（6 つから選ぶ）／先生が作った語彙クイズ（edu_teacher_quizzes）
+ *  - 宿題・課題ごと・生徒ごとの進捗（edu_student_progress / edu_quiz_attempts）と、期間内の完了率（%）を見る
  *  - 生徒の手書きライティング（edu_writing_submissions と非公開バケットの画像）を見る
+ *  - ゲームをクラス全体でロック／ロック解除、生徒 1 人ずつロック解除する（判定は lib/game-access.server.ts）
+ *  - 語彙ドリルで 1 つのモードに出す語の数を、全レッスン一括・レッスンごとに制限する（lib/lesson-settings.server.ts）
  *
  * edu_classes / edu_homework はブラウザから触れないため、すべてこのサーバー側で担任かどうかを確認してから管理者キーで読み書きする。
  */
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useRef } from 'react';
-import { useActionData, useLoaderData } from '@remix-run/react';
+import { useActionData, useLoaderData, type ShouldRevalidateFunction } from '@remix-run/react';
 import PageLayout, { type PageLayoutRef } from '~/components/layout/PageLayout';
 import {
   generateInviteCode,
@@ -28,20 +31,35 @@ import {
   INVITE_LABEL_MAX,
   LESSON_TASKS,
   TEACHER_LIMITS,
+  VOCAB_QUIZ_LIMITS,
   allowedStudentDomains,
+  assignmentKindLabel,
+  isAssignmentKind,
   isLessonTaskKey,
   isStudentDomainAllowed,
 } from '~/lib/teacher-config';
+import { parseVocabLimit } from '~/lib/lesson-settings.server';
+import { loadClassAssignments } from '~/lib/assignments.server';
 import {
   ClassBar,
   ClassSettingsCard,
+  LessonTaskSettingsCard,
+  GamesCard,
   JoinRequestsCard,
   InviteCodesCard,
   HandwritingCard,
-  HomeworkCard,
-  CompletionCard,
   type DashboardData,
 } from '~/components/teacher/TeacherDashboardSections';
+import {
+  AssignCard,
+  AssignmentListCard,
+  CompletionCard,
+  StudentProgressDialog,
+  StudentsCard,
+  VocabQuizCard,
+} from '~/components/teacher/AssignmentSections';
+import { BackToTopButton, DashboardJumpNav } from '~/components/teacher/DashboardJumpNav';
+import { SchoolHoursCard } from '~/components/teacher/SchoolHoursSections';
 
 const DAY_MS = 86_400_000;
 
@@ -51,6 +69,33 @@ function localDayStart(date: string, tzOffsetMinutes: number): Date | null {
   const utcMidnight = Date.parse(`${date}T00:00:00Z`);
   if (Number.isNaN(utcMidnight)) return null;
   return new Date(utcMidnight + tzOffsetMinutes * 60_000);
+}
+
+// 宿題の学校時間ブロックの初期値（edu_classes の列の初期値と同じ。SQL 47）
+const DEFAULT_SCHOOL_HOURS = { timezone: 'Australia/Melbourne', start: '08:45', end: '15:15', days: [1, 2, 3, 4, 5] };
+
+/** そのタイムゾーンでの今日 "YYYY-MM-DD" */
+function localDateIn(timeZone: string, date = new Date()) {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  } catch {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+function isValidTimeZone(tz: string) {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz });
+    return tz.length > 0 && tz.length <= 64;
+  } catch {
+    return false;
+  }
+}
+
+/** クラスのタイムゾーン（SQL 47 の前は初期値） */
+async function classTimeZone(admin: any, classId: string) {
+  const { data } = await admin.from('edu_classes').select('school_timezone').eq('id', classId).maybeSingle();
+  return String(data?.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
 }
 
 function parseTz(raw: unknown) {
@@ -87,7 +132,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { data: classes } = await admin
     .from('edu_classes')
-    .select('id, name, join_code, school_domain, created_at')
+    .select('id, name, join_code, school_domain, games_locked, created_at')
     .eq('teacher_id', user.id)
     .order('created_at', { ascending: true });
 
@@ -130,6 +175,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     joinRequests: [],
     invites: [],
     retention: 'none',
+    vocabLimits: { available: false, classDefault: null, lessons: [], students: [] },
+    assignmentsAvailable: false,
+    quizzes: [],
+    quizStats: [],
+    catchupAvailable: false,
+    schoolHours: { ...DEFAULT_SCHOOL_HOURS, available: false, offToday: false, today: localDateIn(DEFAULT_SCHOOL_HOURS.timezone) },
+    homeworkUnlocks: [],
   };
 
   if (!selected) return json(base);
@@ -200,37 +252,60 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     usedByName: i.used_by ? nicknameOf.get(i.used_by) ?? 'A student' : null,
   }));
 
-  // 宿題（新しい締切順）
-  const { data: homeworkRows } = await admin
-    .from('edu_homework')
-    .select('id, title, lesson_id, task_keys, due_at, created_at')
-    .eq('class_id', selected.id)
-    .order('due_at', { ascending: false })
-    .limit(100);
-  const homework = (homeworkRows ?? []).map((h: any) => ({
-    id: h.id as string,
-    title: h.title as string,
-    lessonId: String(h.lesson_id),
-    taskKeys: h.task_keys as string[],
-    dueAt: h.due_at as string,
-    inPeriod: new Date(h.due_at) >= periodStart && new Date(h.due_at) <= periodEnd,
+  // 宿題・課題（新しい締切順）。SQL 42 の前は新しい列が無いので、今までの形で読む（新しい機能は「まだ使えない」と表示）
+  const assignments = await loadClassAssignments(admin, selected.id, user.id);
+  // 宿題の学校時間ブロック（SQL 47）：クラスの学校時間と、生徒ごとの解除
+  let schoolHours = base.schoolHours;
+  let homeworkUnlocks: DashboardData['homeworkUnlocks'] = [];
+  if (assignments.schoolHoursAvailable) {
+    const { data: hours } = await admin
+      .from('edu_classes')
+      .select('school_timezone, school_start, school_end, school_days, homework_lock_off_date')
+      .eq('id', selected.id)
+      .maybeSingle();
+    if (hours) {
+      const timezone = String(hours.school_timezone || DEFAULT_SCHOOL_HOURS.timezone);
+      const today = localDateIn(timezone);
+      schoolHours = {
+        available: true,
+        timezone,
+        start: String(hours.school_start).slice(0, 5),
+        end: String(hours.school_end).slice(0, 5),
+        days: (hours.school_days as number[] | null) ?? DEFAULT_SCHOOL_HOURS.days,
+        offToday: hours.homework_lock_off_date === today,
+        today,
+      };
+      const { data: unlockRows } = await admin
+        .from('edu_class_homework_unlocks')
+        .select('user_id, until_date')
+        .eq('class_id', selected.id)
+        .gte('until_date', today);
+      homeworkUnlocks = (unlockRows ?? []).map((u: any) => ({ userId: String(u.user_id), untilDate: String(u.until_date) }));
+    }
+  }
+
+  const homework = assignments.items.map((h) => ({
+    ...h,
+    inPeriod: new Date(h.dueAt) >= periodStart && new Date(h.dueAt) <= periodEnd,
   }));
 
   // 進捗（このクラスの生徒 × 宿題に出したレッスン）
-  const lessonIds = [...new Set(homework.map((h) => h.lessonId))];
-  const { data: progressRows } = studentIds.length && lessonIds.length
-    ? await admin
-        .from('edu_student_progress')
-        .select('user_id, lesson_id, task_key, is_completed, updated_at')
-        .in('user_id', studentIds)
-        .in('lesson_id', lessonIds)
-        .eq('is_completed', true)
-    : { data: [] as any[] };
-  const progress = (progressRows ?? []).map((p: any) => ({
+  const lessonIds = [...new Set(homework.map((h) => h.lessonId).filter((id): id is string => Boolean(id)))];
+  // 最初に完了した時刻（completed_at, SQL 48）。その前は updated_at を使う
+  const readProgress = async (columns: string) =>
+    admin.from('edu_student_progress').select(columns).in('user_id', studentIds).in('lesson_id', lessonIds).eq('is_completed', true);
+  let progressRows: any[] = [];
+  if (studentIds.length && lessonIds.length) {
+    const withCompletedAt = await readProgress('user_id, lesson_id, task_key, updated_at, completed_at');
+    progressRows = withCompletedAt.error
+      ? ((await readProgress('user_id, lesson_id, task_key, updated_at')).data ?? [])
+      : (withCompletedAt.data ?? []);
+  }
+  const progress = progressRows.map((p: any) => ({
     userId: p.user_id as string,
     lessonId: String(p.lesson_id),
     taskKey: p.task_key as string,
-    completedAt: (p.updated_at as string | null) ?? null,
+    completedAt: (p.completed_at as string | null) ?? (p.updated_at as string | null) ?? null,
   }));
 
   // 手書きライティング（最新 50 件）
@@ -265,6 +340,34 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       ? String(settings.image_retention_days)
       : 'none';
 
+  // 語彙ドリルの語数の制限（56_class_vocab_limits.sql）。SQL の前は読めないので「まだ使えない」と表示する
+  const [vocabDefaultRes, vocabLessonRes, vocabStudentRes] = await Promise.all([
+    admin.from('edu_classes').select('vocab_words_per_mode').eq('id', selected.id).maybeSingle(),
+    admin.from('edu_class_lesson_settings').select('lesson_id, vocab_words_per_mode').eq('class_id', selected.id),
+    admin.from('edu_class_student_settings').select('user_id, vocab_words_per_mode').eq('class_id', selected.id),
+  ]);
+  const vocabLimits: DashboardData['vocabLimits'] =
+    vocabDefaultRes.error || vocabLessonRes.error || vocabStudentRes.error
+      ? { available: false, classDefault: null, lessons: [], students: [] }
+      : {
+          available: true,
+          classDefault: parseVocabLimit((vocabDefaultRes.data as any)?.vocab_words_per_mode),
+          lessons: (vocabLessonRes.data ?? [])
+            .map((r: any) => ({ lessonId: String(r.lesson_id), limit: parseVocabLimit(r.vocab_words_per_mode) }))
+            .filter((r) => r.limit !== null) as Array<{ lessonId: string; limit: number }>,
+          // クラスを抜けた生徒の行は出さない
+          students: (vocabStudentRes.data ?? [])
+            .map((r: any) => ({ userId: String(r.user_id), limit: parseVocabLimit(r.vocab_words_per_mode) }))
+            .filter((r) => r.limit !== null && studentIds.includes(r.userId)) as Array<{ userId: string; limit: number }>,
+        };
+
+  // ゲームのロック（クラス全体）と、ロック中に個別にロック解除した生徒（21_class_game_locks.sql）
+  const { data: unlockRows } = selected.games_locked
+    ? await admin.from('edu_class_game_unlocks').select('user_id').eq('class_id', selected.id)
+    : { data: [] as any[] };
+  const memberSet = new Set(studentIds);
+  const gameUnlockedIds = (unlockRows ?? []).map((u: any) => u.user_id as string).filter((id) => memberSet.has(id));
+
   return json({
     ...base,
     selectedClass: {
@@ -272,6 +375,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       name: selected.name,
       joinCode: selected.join_code,
       allowedDomains: allowedStudentDomains(selected.school_domain),
+      gamesLocked: Boolean(selected.games_locked),
+      gameUnlockedIds,
     },
     joinRequests,
     invites,
@@ -280,6 +385,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     progress,
     handwriting,
     retention,
+    vocabLimits,
+    assignmentsAvailable: assignments.available,
+    quizzes: assignments.quizzes,
+    quizStats: assignments.quizStats,
+    catchupAvailable: assignments.catchupAvailable,
+    schoolHours,
+    homeworkUnlocks,
   } satisfies DashboardData);
 }
 
@@ -480,6 +592,133 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (intent === 'remove-student') {
     const studentId = String(form.get('studentId') ?? '');
     await admin.from('edu_class_members').delete().eq('class_id', cls.id).eq('user_id', studentId).eq('role', 'student');
+    await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    // 生徒ごとの語彙ドリルの設定も消す（SQL 56 の前は表が無いが、エラーは無視してよい）
+    await admin.from('edu_class_student_settings').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    // このクラスで「選んだ生徒」に出していた宿題・課題の対象からも外す（SQL 42 の前は表が無いが、エラーは無視してよい）
+    const { data: classHw } = await admin.from('edu_homework').select('id').eq('class_id', cls.id);
+    const hwIds = (classHw ?? []).map((h: any) => h.id);
+    if (hwIds.length) await admin.from('edu_homework_students').delete().eq('user_id', studentId).in('homework_id', hwIds);
+    await admin.from('edu_class_homework_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    return backTo(cls.id);
+  }
+
+  // ゲームのロック（授業中に生徒がゲームに夢中にならないように）
+  //   クラス全体をロック／ロック解除すると、個別のロック解除はリセットする（次の授業はまた全員ロックから始める）
+  if (intent === 'lock-games' || intent === 'unlock-games') {
+    const locked = intent === 'lock-games';
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ games_locked: locked, games_locked_at: locked ? new Date().toISOString() : null })
+      .eq('id', cls.id);
+    if (error) {
+      console.error('[teacher-dashboard] game lock failed:', error.message);
+      return fail('Could not change the game lock. Please try again.', 500);
+    }
+    await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id);
+    return backTo(cls.id);
+  }
+
+  // ロック中のクラスで、生徒 1 人だけロック解除する（課題が早く終わった生徒など）／もう一度ロックする
+  if (intent === 'unlock-student-games' || intent === 'relock-student-games') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    const { error } = intent === 'unlock-student-games'
+      ? await admin
+          .from('edu_class_game_unlocks')
+          .upsert({ class_id: cls.id, user_id: studentId, unlocked_at: new Date().toISOString() }, { onConflict: 'class_id,user_id' })
+      : await admin.from('edu_class_game_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+    if (error) {
+      console.error('[teacher-dashboard] student game lock failed:', error.message);
+      return fail('Could not change the game lock for this student. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙ドリルの語数の制限：全レッスン一括（空 = 制限なし）
+  if (intent === 'update-vocab-default') {
+    const raw = String(form.get('limit') ?? '');
+    const limit = raw === '' ? null : parseVocabLimit(raw);
+    if (raw !== '' && limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_classes').update({ vocab_words_per_mode: limit }).eq('id', cls.id);
+    if (error) {
+      console.error('[teacher-dashboard] vocab default failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙ドリルの語数の制限：レッスンごと（全レッスン一括の設定より優先）／レッスンごとの設定を消す
+  if (intent === 'set-lesson-vocab' || intent === 'clear-lesson-vocab') {
+    const lessonId = String(form.get('lessonId') ?? '');
+    const { data: lesson } = await admin.from('edu_lessons').select('id').eq('id', lessonId).maybeSingle();
+    if (!lesson) return fail('Lesson not found.');
+
+    if (intent === 'clear-lesson-vocab') {
+      await admin.from('edu_class_lesson_settings').delete().eq('class_id', cls.id).eq('lesson_id', String(lesson.id));
+      return backTo(cls.id);
+    }
+
+    const limit = parseVocabLimit(form.get('limit'));
+    if (limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_class_lesson_settings').upsert(
+      {
+        class_id: cls.id,
+        lesson_id: String(lesson.id),
+        vocab_words_per_mode: limit,
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      },
+      { onConflict: 'class_id,lesson_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] lesson vocab failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙ドリルの語数の制限：生徒ごと（いちばん優先。全レッスンに効く）／生徒ごとの設定を消す
+  if (intent === 'set-student-vocab' || intent === 'clear-student-vocab') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    if (intent === 'clear-student-vocab') {
+      await admin.from('edu_class_student_settings').delete().eq('class_id', cls.id).eq('user_id', studentId);
+      return backTo(cls.id);
+    }
+
+    const limit = parseVocabLimit(form.get('limit'));
+    if (limit === null) return fail('Choose a number of words between 1 and 50.');
+    const { error } = await admin.from('edu_class_student_settings').upsert(
+      {
+        class_id: cls.id,
+        user_id: studentId,
+        vocab_words_per_mode: limit,
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      },
+      { onConflict: 'class_id,user_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] student vocab failed:', error.message);
+      return fail('Could not save the vocabulary setting. Please try again.', 500);
+    }
     return backTo(cls.id);
   }
 
@@ -504,49 +743,323 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return backTo(cls.id);
   }
 
+  // 宿題・課題を出す（レッスンのタスク または 語彙クイズ。クラス全員 または 選んだ生徒）
   if (intent === 'assign-homework') {
-    const lessonId = String(form.get('lessonId') ?? '');
-    const taskKeys = [...new Set(form.getAll('taskKeys').map(String))].filter(isLessonTaskKey);
+    const kind = isAssignmentKind(form.get('kind')) ? (form.get('kind') as string) : 'homework';
+    const itemType = form.get('itemType') === 'vocab_quiz' ? 'vocab_quiz' : 'lesson';
+    const assignTo = form.get('assignTo') === 'students' ? 'students' : 'class';
     const title = String(form.get('title') ?? '').trim().replace(/\s+/g, ' ');
     const due = localDayStart(String(form.get('dueDate') ?? ''), parseTz(form.get('tz')));
-
-    if (!lessonId) return fail('Choose a lesson.');
-    if (taskKeys.length === 0) return fail('Choose at least one task.');
     if (!due) return fail('Choose a due date.');
 
-    const { data: lesson } = await admin.from('edu_lessons').select('id, title_en').eq('id', lessonId).maybeSingle();
-    if (!lesson) return fail('Lesson not found.');
+    // 新しい形（課題・語彙クイズ・選んだ生徒）は SQL 42 が必要。今までの形（クラス全員の宿題でレッスン）だけは前と同じに出せる
+    const isNewShape = kind !== 'homework' || itemType !== 'lesson' || assignTo !== 'class';
 
-    const finalTitle = (title || `${lesson.title_en} homework`).slice(0, 100);
+    let studentIds: string[] = [];
+    if (assignTo === 'students') {
+      const picked = [...new Set(form.getAll('studentIds').map(String))];
+      if (picked.length === 0) return fail('Choose at least one student, or assign it to the whole class.');
+      const { data: members } = await admin
+        .from('edu_class_members')
+        .select('user_id')
+        .eq('class_id', cls.id)
+        .eq('role', 'student')
+        .in('user_id', picked);
+      studentIds = (members ?? []).map((m: any) => String(m.user_id));
+      if (studentIds.length === 0) return fail('Those students are not in this class.');
+    }
+
+    const row: Record<string, unknown> = { class_id: cls.id, teacher_id: user.id };
+    let defaultTitle = '';
+    if (itemType === 'lesson') {
+      const lessonId = String(form.get('lessonId') ?? '');
+      const taskKeys = [...new Set(form.getAll('taskKeys').map(String))].filter(isLessonTaskKey);
+      if (!lessonId) return fail('Choose a lesson.');
+      if (taskKeys.length === 0) return fail('Choose at least one task.');
+      const { data: lesson } = await admin.from('edu_lessons').select('id, title_en').eq('id', lessonId).maybeSingle();
+      if (!lesson) return fail('Lesson not found.');
+      row.lesson_id = String(lesson.id);
+      row.task_keys = LESSON_TASKS.map((t) => t.key).filter((k) => taskKeys.includes(k));
+      defaultTitle = String(lesson.title_en);
+    } else {
+      const { data: quiz } = await admin
+        .from('edu_teacher_quizzes')
+        .select('id, title')
+        .eq('id', String(form.get('quizId') ?? ''))
+        .eq('teacher_id', user.id)
+        .maybeSingle();
+      if (!quiz) return fail('Choose one of your vocabulary quizzes.');
+      row.quiz_id = quiz.id;
+      row.lesson_id = null;
+      row.task_keys = null;
+      defaultTitle = String(quiz.title);
+    }
+
     const { count } = await admin
       .from('edu_homework')
       .select('id', { count: 'exact', head: true })
       .eq('class_id', cls.id)
       .gte('due_at', new Date().toISOString());
     if ((count ?? 0) >= TEACHER_LIMITS.maxActiveHomeworkPerClass) {
-      return fail(`Free teacher accounts can have up to ${TEACHER_LIMITS.maxActiveHomeworkPerClass} upcoming homework per class.`);
+      return fail(`Free teacher accounts can have up to ${TEACHER_LIMITS.maxActiveHomeworkPerClass} upcoming homework and classwork per class.`);
     }
 
-    // 締切日の終わり（先生の時間で 23:59:59）
-    const dueAt = new Date(due.getTime() + DAY_MS - 1000).toISOString();
-    const orderedKeys = LESSON_TASKS.map((t) => t.key).filter((k) => taskKeys.includes(k));
-    const { error } = await admin.from('edu_homework').insert({
-      class_id: cls.id,
-      teacher_id: user.id,
-      lesson_id: String(lesson.id),
-      task_keys: orderedKeys,
-      title: finalTitle,
-      due_at: dueAt,
-    });
+    row.title = (title || `${defaultTitle} ${assignmentKindLabel(kind).toLowerCase()}`).slice(0, 100);
+    // 締切の日時（先生の時間）。時刻がなければ、その日の終わり（23:59:59）
+    const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get('dueTime') ?? ''));
+    row.due_at = timeMatch
+      ? new Date(due.getTime() + Number(timeMatch[1]) * 3_600_000 + Number(timeMatch[2]) * 60_000).toISOString()
+      : new Date(due.getTime() + DAY_MS - 1000).toISOString();
+    row.kind = kind;
+    row.item_type = itemType;
+    row.assign_to = assignTo;
+    // 宿題を学校時間中にもしてよいか（初期値: してはいけない）。課題は授業中にやるもの
+    const allowDuringSchool = kind === 'homework' && form.get('allowDuringSchool') === 'on';
+    if (allowDuringSchool) row.allow_during_school = true;
+    // 締切の後の追加期間（終えていない生徒が終えられる）。0 = なし
+    const catchupDays = Number(form.get('catchupDays') ?? 0);
+    if ([3, 7, 14].includes(catchupDays)) {
+      row.catchup_until = new Date(new Date(String(row.due_at)).getTime() + catchupDays * DAY_MS).toISOString();
+    }
+
+    let { data: created, error } = await admin.from('edu_homework').insert(row).select('id').single();
+    if (error && /catchup_until/.test(error.message)) {
+      // SQL 48 の前：追加期間はまだ無いので、その列を外して出す
+      delete row.catchup_until;
+      ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
+    }
+    if (error && /allow_during_school/.test(error.message)) {
+      // SQL 47 の前：学校時間のブロックはまだ無いので、その列を外して出す
+      delete row.allow_during_school;
+      ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
+    }
+    if (error && !isNewShape && /kind|item_type|assign_to/.test(error.message)) {
+      // SQL 42 の前：今までの列だけで出す
+      delete row.kind; delete row.item_type; delete row.assign_to;
+      ({ data: created, error } = await admin.from('edu_homework').insert(row).select('id').single());
+    }
+    if (error || !created) {
+      console.error('[teacher-dashboard] assign-homework failed:', error?.message);
+      return fail(
+        isNewShape
+          ? 'Could not set this. Classwork, vocabulary quizzes and assigning to selected students need a database update (SQL 42).'
+          : 'Could not set the homework. Please try again.',
+        500
+      );
+    }
+
+    if (studentIds.length) {
+      const { error: targetError } = await admin
+        .from('edu_homework_students')
+        .insert(studentIds.map((id) => ({ homework_id: created!.id, user_id: id })));
+      if (targetError) {
+        console.error('[teacher-dashboard] homework targets failed:', targetError.message);
+        await admin.from('edu_homework').delete().eq('id', created.id);
+        return fail('Could not save the students for this. Please try again.', 500);
+      }
+    }
+    return backTo(cls.id);
+  }
+
+  // 出したあとで、対象（クラス全員 / 選んだ生徒）を変える
+  if (intent === 'update-homework-targets') {
+    const { data: hw } = await admin
+      .from('edu_homework')
+      .select('id')
+      .eq('id', String(form.get('homeworkId') ?? ''))
+      .eq('class_id', cls.id)
+      .maybeSingle();
+    if (!hw) return fail('Not found.', 404);
+
+    const assignTo = form.get('assignTo') === 'students' ? 'students' : 'class';
+    let studentIds: string[] = [];
+    if (assignTo === 'students') {
+      const picked = [...new Set(form.getAll('studentIds').map(String))];
+      const { data: members } = picked.length
+        ? await admin.from('edu_class_members').select('user_id').eq('class_id', cls.id).eq('role', 'student').in('user_id', picked)
+        : { data: [] as any[] };
+      studentIds = (members ?? []).map((m: any) => String(m.user_id));
+      if (studentIds.length === 0) return fail('Choose at least one student, or assign it to the whole class.');
+    }
+
+    await admin.from('edu_homework_students').delete().eq('homework_id', hw.id);
+    if (studentIds.length) {
+      const { error } = await admin.from('edu_homework_students').insert(studentIds.map((id) => ({ homework_id: hw.id, user_id: id })));
+      if (error) return fail('Could not save the students. Please try again.', 500);
+    }
+    const { error } = await admin.from('edu_homework').update({ assign_to: assignTo }).eq('id', hw.id);
+    if (error) return fail('Could not save the students. Please try again.', 500);
+    return backTo(cls.id);
+  }
+
+  // 宿題の学校時間（クラスごと）: タイムゾーン・始まり・終わり・曜日
+  if (intent === 'update-school-hours') {
+    const timezone = String(form.get('timezone') ?? '');
+    const start = String(form.get('start') ?? '');
+    const end = String(form.get('end') ?? '');
+    const days = [...new Set(form.getAll('days').map(Number))].filter((d) => Number.isInteger(d) && d >= 1 && d <= 7).sort();
+    const timeOk = (t: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+    if (!isValidTimeZone(timezone)) return fail('Choose a time zone.');
+    if (!timeOk(start) || !timeOk(end) || start >= end) return fail('School hours must start before they end.');
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ school_timezone: timezone, school_start: start, school_end: end, school_days: days })
+      .eq('id', cls.id);
     if (error) {
-      console.error('[teacher-dashboard] assign-homework failed:', error.message);
-      return fail('Could not set the homework. Please try again.', 500);
+      console.error('[teacher-dashboard] school hours failed:', error.message);
+      return fail('Could not save school hours. This needs a database update (SQL 47).', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // クラス全体で「今日はブロックしない」（研修日・遠足など）／元に戻す
+  if (intent === 'school-day-off-today' || intent === 'school-day-on') {
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const { error } = await admin
+      .from('edu_classes')
+      .update({ homework_lock_off_date: intent === 'school-day-off-today' ? today : null })
+      .eq('id', cls.id);
+    if (error) return fail('Could not change this. This needs a database update (SQL 47).', 500);
+    return backTo(cls.id);
+  }
+
+  // 生徒ごとに、学校時間でも宿題をしてよくする（休んだ生徒など）。「今日だけ」または「〇日まで」／元に戻す
+  if (intent === 'unlock-student-homework' || intent === 'relock-student-homework') {
+    const studentId = String(form.get('studentId') ?? '');
+    const { data: member } = await admin
+      .from('edu_class_members')
+      .select('user_id')
+      .eq('class_id', cls.id)
+      .eq('user_id', studentId)
+      .eq('role', 'student')
+      .maybeSingle();
+    if (!member) return fail('Student not found.', 404);
+
+    if (intent === 'relock-student-homework') {
+      await admin.from('edu_class_homework_unlocks').delete().eq('class_id', cls.id).eq('user_id', studentId);
+      return backTo(cls.id);
+    }
+
+    const today = localDateIn(await classTimeZone(admin, cls.id));
+    const raw = String(form.get('until') ?? '');
+    const until = raw === 'today' || raw === '' ? today : raw;
+    const maxDate = localDateIn('UTC', new Date(Date.now() + 90 * DAY_MS));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(until) || until < today || until > maxDate) {
+      return fail('Choose a date from today up to 90 days ahead.');
+    }
+    const { error } = await admin.from('edu_class_homework_unlocks').upsert(
+      { class_id: cls.id, user_id: studentId, until_date: until, created_at: new Date().toISOString(), created_by: user.id },
+      { onConflict: 'class_id,user_id' }
+    );
+    if (error) {
+      console.error('[teacher-dashboard] unlock homework failed:', error.message);
+      return fail('Could not change this. This needs a database update (SQL 47).', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 追加期間を変える・延ばす・なくす（終えていない生徒が終えられる期限）
+  if (intent === 'update-catchup') {
+    const { data: hw } = await admin
+      .from('edu_homework')
+      .select('id, due_at')
+      .eq('id', String(form.get('homeworkId') ?? ''))
+      .eq('class_id', cls.id)
+      .maybeSingle();
+    if (!hw) return fail('Not found.', 404);
+
+    let catchupUntil: string | null = null;
+    if (form.get('none') !== 'on') {
+      const day = localDayStart(String(form.get('catchupDate') ?? ''), parseTz(form.get('tz')));
+      const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(form.get('catchupTime') ?? ''));
+      if (!day || !timeMatch) return fail('Choose a date and time for the catch-up period.');
+      const at = new Date(day.getTime() + Number(timeMatch[1]) * 3_600_000 + Number(timeMatch[2]) * 60_000);
+      if (at.getTime() <= new Date(hw.due_at).getTime()) return fail('The catch-up period must end after the due time.');
+      catchupUntil = at.toISOString();
+    }
+    const { error } = await admin.from('edu_homework').update({ catchup_until: catchupUntil }).eq('id', hw.id);
+    if (error) {
+      console.error('[teacher-dashboard] update-catchup failed:', error.message);
+      return fail('Could not save this. The catch-up period needs a database update (SQL 48).', 500);
     }
     return backTo(cls.id);
   }
 
   if (intent === 'delete-homework') {
     await admin.from('edu_homework').delete().eq('id', String(form.get('homeworkId') ?? '')).eq('class_id', cls.id);
+    return backTo(cls.id);
+  }
+
+  // 語彙クイズを作る（サイトの単語帳から選んだ語は、サーバーで単語帳から読み直して写す）
+  if (intent === 'create-quiz') {
+    const title = String(form.get('title') ?? '').trim().replace(/\s+/g, ' ');
+    if (!title || title.length > VOCAB_QUIZ_LIMITS.titleMax) return fail(`Quiz name must be 1 to ${VOCAB_QUIZ_LIMITS.titleMax} characters.`);
+
+    let raw: unknown;
+    try { raw = JSON.parse(String(form.get('items') ?? '[]')); } catch { raw = []; }
+    const list = Array.isArray(raw) ? raw.slice(0, VOCAB_QUIZ_LIMITS.maxWords + 1) : [];
+    if (list.length < VOCAB_QUIZ_LIMITS.minWords || list.length > VOCAB_QUIZ_LIMITS.maxWords) {
+      return fail(`A quiz needs ${VOCAB_QUIZ_LIMITS.minWords} to ${VOCAB_QUIZ_LIMITS.maxWords} words.`);
+    }
+
+    const { count: quizCount } = await admin
+      .from('edu_teacher_quizzes')
+      .select('id', { count: 'exact', head: true })
+      .eq('teacher_id', user.id);
+    if ((quizCount ?? 0) >= VOCAB_QUIZ_LIMITS.maxQuizzesPerTeacher) {
+      return fail(`You can keep up to ${VOCAB_QUIZ_LIMITS.maxQuizzesPerTeacher} quizzes. Delete an old quiz first.`);
+    }
+
+    const vocabIds = list.map((it: any) => (typeof it?.vocabularyId === 'string' ? it.vocabularyId : '')).filter(Boolean);
+    const { data: vocabRows } = vocabIds.length
+      ? await admin.from('kl_vocabulary').select('id, jp_text, jp_kana, english_text, audio_url').in('id', vocabIds)
+      : { data: [] as any[] };
+    const vocabOf = new Map((vocabRows ?? []).map((v: any) => [String(v.id), v]));
+
+    const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
+    const items: Array<{ vocabulary_id: string | null; jp_text: string; jp_kana: string | null; english_text: string; audio_url: string | null }> = [];
+    for (const it of list as any[]) {
+      const site = typeof it?.vocabularyId === 'string' ? vocabOf.get(it.vocabularyId) : null;
+      const jp = site ? clean(site.jp_text, VOCAB_QUIZ_LIMITS.jpMax) : clean(it?.jp, VOCAB_QUIZ_LIMITS.jpMax);
+      const kana = site ? clean(site.jp_kana, VOCAB_QUIZ_LIMITS.jpMax) : clean(it?.kana, VOCAB_QUIZ_LIMITS.jpMax);
+      const english = site ? clean(site.english_text, VOCAB_QUIZ_LIMITS.englishMax) : clean(it?.english, VOCAB_QUIZ_LIMITS.englishMax);
+      if (!jp || !english) return fail('Every word needs Japanese and English.');
+      items.push({
+        vocabulary_id: site ? String(site.id) : null,
+        jp_text: jp,
+        jp_kana: kana && kana !== jp ? kana : null,
+        english_text: english,
+        audio_url: site?.audio_url ? String(site.audio_url) : null,
+      });
+    }
+    // 4 択の選択肢が重ならないよう、英語の意味は全部違うものにする
+    if (new Set(items.map((i) => i.english_text.toLowerCase())).size !== items.length) {
+      return fail('Two words have the same English meaning. Each word needs a different English meaning for the multiple-choice quiz.');
+    }
+
+    const { data: quiz, error } = await admin
+      .from('edu_teacher_quizzes')
+      .insert({ teacher_id: user.id, title })
+      .select('id')
+      .single();
+    if (error || !quiz) {
+      console.error('[teacher-dashboard] create-quiz failed:', error?.message);
+      return fail('Could not save the quiz. Vocabulary quizzes need a database update (SQL 42).', 500);
+    }
+    const { error: itemsError } = await admin
+      .from('edu_teacher_quiz_items')
+      .insert(items.map((it, i) => ({ ...it, quiz_id: quiz.id, position: i })));
+    if (itemsError) {
+      console.error('[teacher-dashboard] create-quiz items failed:', itemsError.message);
+      await admin.from('edu_teacher_quizzes').delete().eq('id', quiz.id);
+      return fail('Could not save the quiz words. Please try again.', 500);
+    }
+    return backTo(cls.id);
+  }
+
+  // 語彙クイズを消す（そのクイズを使った宿題・課題と、生徒の結果も消える）
+  if (intent === 'delete-quiz') {
+    await admin.from('edu_teacher_quizzes').delete().eq('id', String(form.get('quizId') ?? '')).eq('teacher_id', user.id);
     return backTo(cls.id);
   }
 
@@ -615,18 +1128,56 @@ export default function TeacherDashboardPage() {
 
         {data.selectedClass && (
           <>
+            {/* 💡 ページ内のジャンプボタン。よく使うもの（上）と、たまに使う設定（下）に分けて並べる */}
+            <DashboardJumpNav data={data} />
+
+            {/* 参加申請は、来ているときだけ一番上に出す（承認しないと生徒が使えないため） */}
             <JoinRequestsCard data={data} />
-            <ClassSettingsCard data={data} />
-            <InviteCodesCard data={data} />
-            <HomeworkCard data={data} />
-            <CompletionCard data={data} />
-            <HandwritingCard data={data} />
+
+            {/* ---------- 日々よく使うもの ---------- */}
+            <div id="td-assign" className="scroll-mt-20"><AssignCard data={data} /></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div id="td-homework" className="scroll-mt-20 min-w-0"><AssignmentListCard data={data} kind="homework" /></div>
+              <div id="td-classwork" className="scroll-mt-20 min-w-0"><AssignmentListCard data={data} kind="classwork" /></div>
+            </div>
+            <div id="td-completion" className="scroll-mt-20"><CompletionCard data={data} /></div>
+            <div id="td-quizzes" className="scroll-mt-20"><VocabQuizCard data={data} /></div>
+            <div id="td-handwriting" className="scroll-mt-20"><HandwritingCard data={data} /></div>
+            <div id="td-students" className="scroll-mt-20"><StudentsCard data={data} /></div>
+
+            {/* ---------- たまに使う設定 ---------- */}
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 pt-4 border-t border-slate-200">Class settings</h2>
+            {/* Class Code は 1 列（全幅）。その下に 2 列：左 Personal Invite Codes、右 Games */}
+            <div id="td-class-code" className="scroll-mt-20"><ClassSettingsCard data={data} /></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <div id="td-invites" className="scroll-mt-20 min-w-0"><InviteCodesCard data={data} /></div>
+              <div id="td-games" className="scroll-mt-20 min-w-0"><GamesCard data={data} /></div>
+            </div>
+            <div id="td-school-hours" className="scroll-mt-20"><SchoolHoursCard data={data} /></div>
+            <div id="td-vocab-length" className="scroll-mt-20"><LessonTaskSettingsCard data={data} /></div>
+
+            {/* 生徒の名前を押すと開く、その生徒の宿題・課題すべての進捗（?student=ID） */}
+            <StudentProgressDialog data={data} />
           </>
         )}
+        <BackToTopButton />
       </div>
     </PageLayout>
   );
 }
+
+/** 生徒の進捗を開く・閉じる（?student= だけが変わる）ときは、データを読み直さない（表示だけ切り替える） */
+export const shouldRevalidate: ShouldRevalidateFunction = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalidate }) => {
+  if (formMethod && formMethod.toUpperCase() !== 'GET') return defaultShouldRevalidate;
+  if (currentUrl.pathname !== nextUrl.pathname) return defaultShouldRevalidate;
+  const strip = (u: URL) => {
+    const p = new URLSearchParams(u.search);
+    p.delete('student');
+    p.sort();
+    return p.toString();
+  };
+  return strip(currentUrl) === strip(nextUrl) ? false : defaultShouldRevalidate;
+};
 
 export const meta: MetaFunction = () => [
   { title: 'Teacher Dashboard | AI Yamato Japanese Hub' },

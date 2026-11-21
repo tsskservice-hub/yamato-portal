@@ -620,7 +620,7 @@ export const EduCultureTaskModal: React.FC<EduCultureTaskModalProps> = ({
                 ))}
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Take a moment to think, or ask someone in your family!
+                Take a moment to think, or ask someone near you!
               </p>
               <button
                 type="button"

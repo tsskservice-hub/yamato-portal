@@ -4,18 +4,43 @@
  */
 import React, { useState } from "react";
 import { useFetcher } from "@remix-run/react";
-import { Users, ClipboardList, CheckCircle2, Circle } from "lucide-react";
+import { Users, ClipboardList, CheckCircle2, Circle, PencilLine, Languages } from "lucide-react";
 import { INVITE_CODE_LENGTH, LESSON_TASKS } from "~/lib/teacher-config";
 import { SchoolAccountLink } from "~/components/SchoolAccountLink";
+import { STATUS_STYLE, type HomeworkStatus } from "~/lib/homework-status";
 
+/**
+ * 宿題・課題 1 件。kind: homework（宿題）/ classwork（授業内の課題）
+ * itemType = lesson: tasks にレッスンのタスク / vocab_quiz: quiz に最高点と回数（lessonTitle はクイズ名、lessonUrl はクイズのページ）
+ */
 export type StudentHomeworkItem = {
   id: string;
   title: string;
+  kind: "homework" | "classwork";
   dueAt: string;
+  itemType: "lesson" | "vocab_quiz";
   lessonTitle: string;
   lessonUrl: string;
   tasks: Array<{ key: string; done: boolean }>;
+  quiz: { best: number | null; total: number | null; attempts: number } | null;
+  /** 宿題で、今は学校時間のためできないとき、できるようになる時刻（ISO） */
+  lockedUntil?: string | null;
+  /** 締切の後、終えていない生徒が終えられる期限（null = 締切で閉じる） */
+  catchupUntil?: string | null;
+  /** 期限内に完了・遅れて完了・まだ・追加期間中・未完了で終了 */
+  status?: HomeworkStatus;
 };
+
+/** 生徒に見せる状態の言葉 */
+function studentStatusText(hw: StudentHomeworkItem) {
+  switch (hw.status) {
+    case "ontime": return "Done on time";
+    case "late": return "Done late";
+    case "catchup": return hw.catchupUntil ? `Overdue – please finish by ${formatDue(hw.catchupUntil)}` : "Overdue";
+    case "missed": return "Closed – not finished";
+    default: return null;
+  }
+}
 
 type Props = {
   studentClass: { id: string; name: string; teacherName: string | null; schoolName: string | null } | null;
@@ -31,7 +56,8 @@ type ActionResult = { intent?: string; success?: boolean; error?: string; messag
 const taskLabel = (key: string) => LESSON_TASKS.find((t) => t.key === key)?.label ?? key;
 
 function formatDue(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}, ${d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
 }
 
 export function StudentClassSection({ studentClass, homework, verifiedSchoolEmails, joinRequest }: Props) {
@@ -44,7 +70,7 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-5">
       <h2 className="text-lg font-semibold text-gray-900 border-b pb-3 flex items-center gap-2">
-        <Users className="w-5 h-5 text-blue-600" /> My Class & Homework
+        <Users className="w-5 h-5 text-blue-600" /> My Class, Homework & Classwork
       </h2>
 
       {result?.error && <p className="text-xs text-red-600 font-medium">{result.error}</p>}
@@ -142,7 +168,7 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
 
           <p className="text-xs text-gray-500">
             Your teacher approves your request. After that, your teacher can see your nickname, your school email address (or the name your teacher
-            wrote for your invite code), your progress on AI Yamato lesson tasks and homework, and your writing submissions (including handwriting
+            wrote for your invite code), your progress on AI Yamato lesson tasks, homework and classwork (including your scores on your teacher's vocabulary quizzes), and your writing submissions (including handwriting
             photos if your class keeps them). You can leave the class at any time.{' '}
             <a href="/legal/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
           </p>
@@ -175,52 +201,94 @@ export function StudentClassSection({ studentClass, homework, verifiedSchoolEmai
             </fetcher.Form>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5 mb-2">
-              <ClipboardList className="w-4 h-4 text-blue-600" /> Homework
-            </h3>
-            {homework.length === 0 ? (
-              <p className="text-xs text-gray-500">No homework yet.</p>
-            ) : (
-              <ul className="divide-y divide-gray-100 border border-gray-100 rounded-lg">
-                {homework.map((hw) => {
-                  const doneCount = hw.tasks.filter((t) => t.done).length;
-                  const allDone = doneCount === hw.tasks.length;
-                  const overdue = !allDone && new Date(hw.dueAt).getTime() < Date.now();
-                  return (
-                    <li key={hw.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <a href={hw.lessonUrl} className="text-sm font-semibold text-blue-700 hover:underline">
-                          {hw.title}
-                        </a>
-                        <p className="text-xs text-gray-500">
-                          {hw.lessonTitle} · Due {formatDue(hw.dueAt)}
-                          {overdue && <span className="ml-1 font-semibold text-red-600">(overdue)</span>}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          {hw.tasks.map((t) => (
-                            <span
-                              key={t.key}
-                              className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${
-                                t.done ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-600"
-                              }`}
-                            >
-                              {t.done ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                              {taskLabel(t.key)}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <span className={`text-xs font-bold shrink-0 ${allDone ? "text-emerald-600" : "text-gray-600"}`}>
-                        {doneCount}/{hw.tasks.length} done
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+          <AssignmentList
+            title="Homework"
+            icon={<ClipboardList className="w-4 h-4 text-blue-600" />}
+            items={homework.filter((hw) => hw.kind !== "classwork")}
+          />
+          {homework.some((hw) => hw.kind === "classwork") && (
+            <AssignmentList
+              title="Classwork"
+              icon={<PencilLine className="w-4 h-4 text-teal-600" />}
+              items={homework.filter((hw) => hw.kind === "classwork")}
+            />
+          )}
         </div>
+      )}
+    </div>
+  );
+}
+
+/** 宿題または課題の一覧（レッスンのタスク・語彙クイズ） */
+function AssignmentList({ title, icon, items }: { title: string; icon: React.ReactNode; items: StudentHomeworkItem[] }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5 mb-2">
+        {icon} {title}
+      </h3>
+      {items.length === 0 ? (
+        <p className="text-xs text-gray-500">No {title.toLowerCase()} yet.</p>
+      ) : (
+        <ul className="divide-y divide-gray-100 border border-gray-100 rounded-lg">
+          {items.map((hw) => {
+            const isQuiz = hw.itemType === "vocab_quiz";
+            const doneCount = isQuiz ? (hw.quiz && hw.quiz.attempts > 0 ? 1 : 0) : hw.tasks.filter((t) => t.done).length;
+            const totalCount = isQuiz ? 1 : hw.tasks.length;
+            const allDone = doneCount === totalCount;
+            const statusText = studentStatusText(hw);
+            const closed = hw.status === "missed";
+            return (
+              <li key={hw.id} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <a href={hw.lessonUrl} className="text-sm font-semibold text-blue-700 hover:underline">
+                    {hw.title}
+                  </a>
+                  <p className="text-xs text-gray-500" suppressHydrationWarning>
+                    {isQuiz && <Languages className="w-3 h-3 inline -mt-0.5 mr-0.5" />}
+                    {isQuiz ? `Vocabulary quiz: ${hw.lessonTitle}` : hw.lessonTitle} · Due {formatDue(hw.dueAt)}
+                  </p>
+                  {statusText && hw.status && (
+                    <span className={`inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_STYLE[hw.status]}`} suppressHydrationWarning>
+                      {statusText}
+                    </span>
+                  )}
+                  {hw.lockedUntil && !allDone && !closed && (
+                    <p className="text-[11px] font-semibold text-amber-700 mt-1" suppressHydrationWarning>
+                      🔒 Homework can&apos;t be done during school hours. Available after{" "}
+                      {new Date(hw.lockedUntil).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}.
+                    </p>
+                  )}
+                  {isQuiz ? (
+                    <p className="text-[11px] text-gray-600 mt-1.5">
+                      {hw.quiz && hw.quiz.attempts > 0 && hw.quiz.best !== null && hw.quiz.total !== null
+                        ? <>Best score: <strong>{hw.quiz.best}/{hw.quiz.total}</strong> · Tried {hw.quiz.attempts} time{hw.quiz.attempts === 1 ? "" : "s"} · You can try again</>
+                        : closed
+                          ? <span className="text-gray-500">This quiz is closed.</span>
+                          : <a href={hw.lessonUrl} className="text-blue-700 font-semibold hover:underline">Start the quiz →</a>}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {hw.tasks.map((t) => (
+                        <span
+                          key={t.key}
+                          className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border ${
+                            t.done ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-gray-50 border-gray-200 text-gray-600"
+                          }`}
+                        >
+                          {t.done ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                          {taskLabel(t.key)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <span className={`text-xs font-bold shrink-0 ${allDone ? "text-emerald-600" : "text-gray-600"}`}>
+                  {isQuiz ? (allDone ? "Done" : "Not started") : `${doneCount}/${totalCount} done`}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );

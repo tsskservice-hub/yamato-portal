@@ -3,7 +3,7 @@
  * @description Supabase の各 content モジュール（General, Speaking, Writing, Reference, Lessons, Junior）および Games を統合して描画するグリッドコンポーネント
  */
 import React from 'react';
-import { ArrowRight, BookOpen, FileText, Gamepad2, Grid, Mic, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, ClipboardCheck, FileText, Gamepad2, Grid, Landmark, MessagesSquare, Mic, Sparkles } from 'lucide-react';
 import type { PortalModule } from '~/data/content-other';
 
 interface PortalModulesGridProps {
@@ -38,6 +38,9 @@ export function PortalModulesGrid({
       case "FileText": return <FileText className={className} />;
       case "Gamepad2": return <Gamepad2 className={className} />;
       case "BookOpen": return <BookOpen className={className} />;
+      case "Landmark": return <Landmark className={className} />;
+      case "ClipboardCheck": return <ClipboardCheck className={className} />;
+      case "MessagesSquare": return <MessagesSquare className={className} />;
       default: return <FileText className={className} />;
     }
   };
@@ -147,7 +150,7 @@ export function PortalModulesGrid({
           <div id="section-references" className="space-y-4 pt-4 scroll-mt-20">
             <div className="flex items-center space-x-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
               <span>📚</span>
-              <h4>VCE Writing References & Guides</h4>
+              <h4>VCE References & Guides</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {referenceModules.map((mod) => renderCard(mod, 'emerald'))}
@@ -159,14 +162,14 @@ export function PortalModulesGrid({
         <div id="section-junior" className="space-y-4 pt-4 scroll-mt-20">
           <div className="flex items-center space-x-2 text-sm font-bold text-orange-600 dark:text-orange-400">
             <span>🍱</span>
-            <h4>Japanese Lessons & Textbook Hub</h4>
+            <h4>Lessons & Tasks</h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {renderCard(
               {
                 id: 'lessons-hub',
                 name: 'Textbook Lessons & Units',
-                description: 'Explore interactive lessons such as Obento Deluxe Unit 4 (Family & Pets), vocabulary lists, and AI Yamato sensei guidance.',
+                description: 'Explore interactive lessons on everyday topics such as family and pets, with vocabulary, AI Yamato guidance and six self-study tasks.',
                 path: '/lessons',
                 category: 'Curriculum Hub',
                 iconName: 'BookOpen',
@@ -177,52 +180,106 @@ export function PortalModulesGrid({
               },
               'orange'
             )}
-          </div>
-        </div>
-
-        {/* 6. 🎮 ゲームズ・アーケード総合ポータル誘導カード */}
-        <div id="section-games" className="space-y-4 pt-6 scroll-mt-20">
-          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <span className="text-xl">🎮</span>
-            <h4 className="font-extrabold text-base text-red-600 dark:text-red-400">
-              Interactive Learning Arcade & Games
-            </h4>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* テストのハブ（/test）：ブラインドタッチ、文字・語彙・文のスピードテスト */}
             {renderCard(
               {
-                id: 'games-arcade',
-                name: gamesData?.subtitle || 'Japanese Learning Arcade',
-                description: 'Have fun mastering Hiragana, Katakana, and Romaji through interactive games like the Shawshank Tunnel Escape and Typing Defense battles!',
-                path: '/games',
-                category: 'Arcade Portal',
-                iconName: 'Gamepad2',
-                actionLabel: 'View Arcade',
+                id: 'tests-hub',
+                name: 'Tests & Touch Typing',
+                description: 'How quickly and accurately can you answer in Japanese? Language tests for kana, kanji and words, plus a step-by-step touch typing course.',
+                path: '/test',
+                category: 'Tests',
+                iconName: 'ClipboardCheck',
+                actionLabel: 'Take a Test',
                 isComingSoon: false,
                 creditRequirement: null,
-                accentColor: 'red',
+                accentColor: 'orange',
               },
-              'red'
+              'orange'
+            )}
+            {/* Speaking Tasks（/speaking）：AI との会話・レッスンのスピーキング・VCE の口頭試験を 1 か所に */}
+            {renderCard(
+              {
+                id: 'speaking-tasks',
+                name: 'Speaking Tasks',
+                description: 'All speaking tasks in one place: order food from an AI clerk, lesson speaking tasks and VCE oral exam practice.',
+                path: '/speaking',
+                category: 'Speaking',
+                iconName: 'Mic',
+                actionLabel: 'Start Speaking',
+                isComingSoon: false,
+                creditRequirement: null,
+                accentColor: 'orange',
+              },
+              'orange'
+            )}
+            {/* 文化ページ（/culture）：日本語の力に関係なく、ログインなしで学べる */}
+            {renderCard(
+              {
+                id: 'culture-hub',
+                name: 'Japanese Culture',
+                description: 'Picture stories about life in Japan, with narration and English subtitles. No Japanese needed.',
+                path: '/culture',
+                category: 'Culture',
+                iconName: 'Landmark',
+                actionLabel: 'Explore Culture',
+                isComingSoon: false,
+                creditRequirement: null,
+                accentColor: 'orange',
+              },
+              'orange'
             )}
           </div>
         </div>
 
       </div>
 
-      {/* 1. 一般セクション (CONTENT_GENERAL) - ゲームズ・アーケードの下に移動 */}
-      {generalModules.length > 0 && (
-        <div id="section-general" className="space-y-4 pt-6 scroll-mt-20">
-          <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <span className="text-xl">🌍</span>
-            <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
-              Global & General Japanese Learners
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {generalModules.map((mod) => renderCard(mod, 'blue'))}
-          </div>
+      {/* 一般セクション：1. ゲーム 2. Yamato Town 3. Supabase の CONTENT_GENERAL（原稿用紙エディタなど） */}
+      <div id="section-general" className="space-y-4 pt-6 scroll-mt-20">
+        <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+          <span className="text-xl">🌍</span>
+          <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+            Global & General Japanese Learners
+          </h3>
         </div>
-      )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* ヘッダーの 🎮 ボタンのジャンプ先 */}
+          <div id="section-games" className="scroll-mt-24 flex">
+            <div className="flex-1 flex flex-col [&>div]:flex-1">
+              {renderCard(
+                {
+                  id: 'games-arcade',
+                  name: gamesData?.subtitle || 'Japanese Learning Arcade',
+                  description: 'Have fun mastering Hiragana, Katakana, and Romaji through interactive games like the Shawshank Tunnel Escape and Typing Defense battles!',
+                  path: '/games',
+                  category: 'Arcade Portal',
+                  iconName: 'Gamepad2',
+                  actionLabel: 'View Arcade',
+                  isComingSoon: false,
+                  creditRequirement: null,
+                  accentColor: 'blue',
+                },
+                'blue'
+              )}
+            </div>
+          </div>
+          {renderCard(
+            {
+              id: 'yamato-town',
+              name: 'Yamato Town',
+              description: 'Meet other Japanese learners in a little Japanese town and greet them with set phrases and stamps. Talk to an AI character in every place. Personal accounts only.',
+              path: '/world',
+              category: 'Meet Learners · BETA',
+              iconName: 'MessagesSquare',
+              actionLabel: 'Enter Town',
+              isComingSoon: false,
+              creditRequirement: null,
+              accentColor: 'blue',
+            },
+            'blue'
+          )}
+          {generalModules.map((mod) => renderCard(mod, 'blue'))}
+        </div>
+      </div>
     </section>
   );
 }

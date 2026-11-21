@@ -12,6 +12,9 @@ import { addAiGeneratedLabel } from "~/utils/aiImageLabel";
 import { CreditCostFooter } from "../CreditCostFooter";
 import { useChatResize } from "../../hooks/useChatResize";
 import { useYamatoAccount, getSafeString } from "../../hooks/useYamatoAccount";
+import { useBroadcastChatColor } from "~/utils/chatThemeColor";
+import { requestAuthModal } from "~/utils/openAuthModal";
+import { creditErrorChatHtml } from '~/lib/credit-errors';
 import { personaliseGreeting, resolveDisplayName } from "../../utils/nickname"; // 💡 ニックネームモジュールのインポート
 
 export interface YamatoChatCommonMetaType {
@@ -179,7 +182,7 @@ export function YamatoChatCommon({
     if (onOpenAuth) {
       onOpenAuth(mode);
     } else {
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
+      requestAuthModal(mode);
     }
   };
 
@@ -190,6 +193,8 @@ export function YamatoChatCommon({
   const activeImagePreview = selectedImagePreview || externalImagePreview || null;
 
   const isHexColor = themeColor.startsWith("#");
+  // このページのヤマトチャットの色を、🔍 Kanji ボタンなどに知らせる（同じ色にそろえるため）
+  useBroadcastChatColor(themeColor);
   const currentTheme =
     !isHexColor && themeStyles[themeColor as ThemeColorKey]
       ? themeStyles[themeColor as ThemeColorKey]
@@ -326,7 +331,7 @@ export function YamatoChatCommon({
         { role: "user", content: tutorInput.trim() },
         {
           role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our learning journey together, please top up your credits or choose an upgrade plan! 📚✨`,
+          content: creditErrorChatHtml(),
         },
       ]);
       setTutorInput("");
@@ -422,12 +427,17 @@ export function YamatoChatCommon({
         if (response.status === 402) {
           setIsTutorLoading(false);
           const errorCode = data?.error;
+          if (errorCode === "AI_TRIAL_REQUIRED") {
+            setTutorMessages([...newMessages, { role: "assistant", content: creditErrorChatHtml(errorCode) }]);
+            await refreshUserCredits();
+            return;
+          }
           if (errorCode === "ZERO_CREDITS") {
             setTutorMessages([
               ...newMessages,
               {
                 role: "assistant",
-                content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! Please top up your credits to continue!`,
+                content: creditErrorChatHtml(errorCode),
               },
             ]);
             await refreshUserCredits();
@@ -514,10 +524,13 @@ export function YamatoChatCommon({
             type="button"
             onClick={() => setIsAiTutorOpen(true)}
             style={floatingInlineStyle}
-            className={`${finalFloatingButtonClass} border-4 font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
+            aria-label={`Open ${characterName}`}
+            title={characterName}
+            className={`${finalFloatingButtonClass} border-4 font-bold px-3 sm:px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all cursor-pointer text-sm relative`}
           >
-            <span>🤖</span>
-            <span>{characterName}</span>
+            <span className="text-lg sm:text-sm leading-none">🤖</span>
+            {/* スマホ（sm 未満）ではロボットのアイコンだけにする（名前まで出すと幅をとりすぎる） */}
+            <span className="hidden sm:inline">{characterName}</span>
             {activeImagePreview && (
               <span className="w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse"></span>
             )}
@@ -701,7 +714,7 @@ export function YamatoChatCommon({
                   <div className="text-3xl">🔒</div>
                   <h4 className="font-bold text-sm text-slate-800">Sign Up Required to Chat</h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Please sign up or log in to chat with {characterName} and receive welcome credits!
+                    Please sign up or log in to chat with {characterName}.
                   </p>
                   <button
                     type="button"

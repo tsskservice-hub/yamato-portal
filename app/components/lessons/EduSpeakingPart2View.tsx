@@ -21,6 +21,10 @@ interface EduSpeakingPart2ViewProps {
   onReplyAgain: () => void;
   onTypedAnswerChange: (val: string) => void;
   onSubmitTypedAnswer: () => void;
+  /** タイピング欄の指示・例・数字入力か（useEduSpeakingDrill が答えの種類から決める） */
+  typingPrompt?: string;
+  typingPlaceholder?: string;
+  typingNumeric?: boolean;
 }
 
 export const EduSpeakingPart2View: React.FC<EduSpeakingPart2ViewProps> = ({
@@ -39,6 +43,9 @@ export const EduSpeakingPart2View: React.FC<EduSpeakingPart2ViewProps> = ({
   onReplyAgain,
   onTypedAnswerChange,
   onSubmitTypedAnswer,
+  typingPrompt = "What did AI Yamato say? Type the answer.",
+  typingPlaceholder = "",
+  typingNumeric = false,
 }) => {
   const inTypingStep = askStep === "typing";
 
@@ -126,13 +133,13 @@ export const EduSpeakingPart2View: React.FC<EduSpeakingPart2ViewProps> = ({
             </button>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            How many people are in AI Yamato's family? Type the number.
+            {typingPrompt}
           </p>
           <div className="flex items-center gap-2">
             <input
               ref={inputRef}
               type="text"
-              inputMode="numeric"
+              inputMode={typingNumeric ? "numeric" : "text"}
               value={typedAnswer}
               onChange={(e) => onTypedAnswerChange(e.target.value)}
               onKeyDown={(e) => {
@@ -142,7 +149,7 @@ export const EduSpeakingPart2View: React.FC<EduSpeakingPart2ViewProps> = ({
                 }
               }}
               disabled={isAIPlaying || !!result}
-              placeholder="e.g. 3"
+              placeholder={typingPlaceholder}
               className="flex-1 px-4 py-3 text-2xl font-black text-center rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
             <button

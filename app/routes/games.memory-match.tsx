@@ -2,7 +2,7 @@
  * @file games.memory-match.tsx
  * @description Memory Match — three concentration games (Hiragana,
  * Katakana and Kanji) whose cards are loaded live from the Supabase
- * table `kl_character`, featuring passcode/unlock protection matching character-maze.tsx.
+ * table `kl_character`. Login and the teacher's class lock are checked by GameAccessGate.
  */
 import { DataErrorState } from '~/components/DataErrorState';
 import {
@@ -23,6 +23,9 @@ import {
 } from "~/utils/characterChartUtils";
 import { ReferenceChartKana } from "~/components/ReferenceChartKana";
 import { ReferenceChartKanji } from "~/components/ReferenceChartKanji";
+import { GameAccessGate } from "~/components/games/GameAccessGate";
+import { shuffle } from "~/utils/shuffle";
+import { fetchAllPages } from "~/lib/fetchAllPages";
 
 type GameMode = "hiragana" | "katakana" | "kanji";
 type KanjiPairMode = "reading" | "meaning";
@@ -111,6 +114,8 @@ function buildPools(rows: KlRow[]) {
         front: ch,
         back: romaji,
         sortOrder: r.sort_order,
+        // 清音 / 濁音 / 半濁音 / 拗音 (used for the character set choice, see KANA_SET_OF)
+        category: clean(r.category) || undefined,
       };
       if (r.char_type === "hiragana") hiragana.push(item);
       else katakana.push(item);
@@ -179,14 +184,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let kanjiReadingAvailable = false;
 
   try {
-    const { data, error } = await supabase
-      .from("kl_character")
-      .select(KL_COLUMNS)
-      .order("sort_order", { ascending: true, nullsFirst: false })
-      .order("character", { ascending: true })
-      .limit(1000);
-    if (error) throw error;
-    const rows = (data ?? []) as unknown as KlRow[];
+    // 全件を 1000 行ずつ読む（.limit(1000) だと漢字が増えたときに黙って切り捨てられる）
+    const rows = await fetchAllPages<KlRow>((from, to) =>
+      supabase
+        .from("kl_character")
+        .select(KL_COLUMNS)
+        .order("sort_order", { ascending: true, nullsFirst: false })
+        .order("character", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to) as unknown as PromiseLike<{ data: KlRow[] | null; error: { message: string } | null }>
+    );
     const built = buildPools(rows);
     pools = {
       hiragana: built.hiragana,
@@ -237,14 +244,27 @@ const DIFFICULTIES: Record<
   hard: { label: "Hard", pairs: 18, cols: 6 },
 };
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+/**
+ * Hiragana / Katakana character sets, from the `category` column of kl_character.
+ * Beginners start with the basic sounds, so きゃ or ぴょ don't appear before they have learnt them.
+ */
+type KanaSet = "basic" | "dakuten" | "combo" | "all";
+const KANA_SET_OF: Record<string, Exclude<KanaSet, "all">> = {
+  清音: "basic",
+  濁音: "dakuten",
+  半濁音: "dakuten",
+  拗音: "combo",
+};
+const KANA_SETS: Array<{ key: KanaSet; label: string; example: Record<"hiragana" | "katakana", string> }> = [
+  { key: "basic", label: "Basic", example: { hiragana: "あ い う", katakana: "ア イ ウ" } },
+  { key: "dakuten", label: "Dakuten", example: { hiragana: "が ぱ", katakana: "ガ パ" } },
+  { key: "combo", label: "Combinations", example: { hiragana: "きゃ", katakana: "キャ" } },
+  { key: "all", label: "All", example: { hiragana: "", katakana: "" } },
+];
+const kanaSetOf = (p: PairSource) => KANA_SET_OF[(p.category ?? "").trim()] ?? "basic";
+
+/** Moves per pair for 3 stars / 2 stars (fewer is better). 8 pairs: 3★ ≤ 14 moves, 2★ ≤ 20 moves */
+const STAR_MOVES_PER_PAIR = { 3: 1.75, 2: 2.5 } as const;
 
 function uniqueByAnswer(items: PairSource[]): PairSource[] {
   const seen = new Set<string>();
@@ -294,29 +314,12 @@ function formatTime(totalSeconds: number): string {
 }
 
 // ------------------------------------------------------------------
-// Page Component with Passcode Protection Structure
+// Page Component (login + teacher's class lock via GameAccessGate)
 // ------------------------------------------------------------------
 
 export default function MemoryMatchPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
   const data = useLoaderData<typeof loader>() as unknown as LoaderDataShape;
-
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
-  const [inputPasscode, setInputPasscode] = useState('');
-
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === '1111') {
-      setIsCodeUnlocked(true);
-      alert('✨ 認証に成功しました！ゲームが一時的にロック解除されました。');
-    } else {
-      alert('❌ パスコードが違います。');
-    }
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Memory Match">
@@ -333,52 +336,25 @@ export default function MemoryMatchPage() {
           </p>
         </header>
 
-        {isAccessible ? (
-          data.loadError &&
-          data.pools.hiragana.length === 0 &&
-          data.pools.katakana.length === 0 &&
-          data.pools.kanji.length === 0 &&
-          data.pools.kanjiMeaning.length === 0 ? (
-            <DataErrorState
-              title="Unable to Load Data"
-              errorMessage={`Failed to load characters (kl_character): ${data.loadError}`}
-            />
-          ) : (
-            <MemoryMatchGame
-              pools={data.pools}
-              kanjiReadingAvailable={data.kanjiReadingAvailable}
-            />
-          )
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm dark:bg-slate-900 dark:border-slate-800">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner dark:bg-slate-800 dark:border-slate-700">
-              🔒
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">このエリアは現在ロックされています</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                課題を完了するか、先生から提供されたパスコードを入力してください。
-              </p>
-            </div>
-
-            <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="4桁のコード"
-                value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:border-indigo-500"
+        <GameAccessGate layoutRef={layoutRef}>
+          {() =>
+            data.loadError &&
+            data.pools.hiragana.length === 0 &&
+            data.pools.katakana.length === 0 &&
+            data.pools.kanji.length === 0 &&
+            data.pools.kanjiMeaning.length === 0 ? (
+              <DataErrorState
+                title="Unable to Load Data"
+                errorMessage={`Failed to load characters (kl_character): ${data.loadError}`}
               />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-              >
-                解除
-              </button>
-            </form>
-          </div>
-        )}
+            ) : (
+              <MemoryMatchGame
+                pools={data.pools}
+                kanjiReadingAvailable={data.kanjiReadingAvailable}
+              />
+            )
+          }
+        </GameAccessGate>
       </div>
     </ToolPageWrapper>
   );
@@ -400,6 +376,7 @@ function MemoryMatchGame({
     useState<KanjiPairMode>("reading");
   const [difficulty, setDifficulty] =
     useState<Difficulty>("easy");
+  const [kanaSet, setKanaSet] = useState<KanaSet>("basic");
   const [showHelp, setShowHelp] = useState(false);
   const [round, setRound] = useState(0);
 
@@ -413,7 +390,9 @@ function MemoryMatchGame({
       ? activeKanjiPair === "reading"
         ? pools.kanji
         : pools.kanjiMeaning
-      : pools[mode];
+      : kanaSet === "all"
+        ? pools[mode]
+        : pools[mode].filter((p) => kanaSetOf(p) === kanaSet);
 
   const pairTarget = Math.min(
     DIFFICULTIES[difficulty].pairs,
@@ -436,7 +415,16 @@ function MemoryMatchGame({
   const won = pairTarget > 0 && matchedIds.size >= pairTarget;
   const accuracy =
     moves === 0 ? 100 : Math.round((matchedIds.size / moves) * 100);
-  const stars = won ? (accuracy >= 85 ? 3 : accuracy >= 65 ? 2 : 1) : 0;
+  // Stars from moves per pair. The first flips are always guesses, so even a perfect memory needs
+  // about 1.5–1.7 moves per pair; the old "85% accuracy" rule was almost impossible to reach.
+  const threeStarMoves = Math.floor(pairTarget * STAR_MOVES_PER_PAIR[3]);
+  const twoStarMoves = Math.floor(pairTarget * STAR_MOVES_PER_PAIR[2]);
+  const stars = won ? (moves <= threeStarMoves ? 3 : moves <= twoStarMoves ? 2 : 1) : 0;
+
+  // Don't leave the "flip back" timer running after leaving the page
+  useEffect(() => () => {
+    if (lockTimer.current) clearTimeout(lockTimer.current);
+  }, []);
 
   const startGame = React.useCallback(() => {
     if (lockTimer.current) clearTimeout(lockTimer.current);
@@ -456,10 +444,10 @@ function MemoryMatchGame({
 
   useEffect(() => {
     if (!started || won) return;
-    const t = setInterval(
-      () => setElapsed((e) => e + 1),
-      1000,
-    );
+    // The clock stops while the tab is hidden (you are not playing then).
+    const t = setInterval(() => {
+      if (!document.hidden) setElapsed((e) => e + 1);
+    }, 1000);
     return () => clearInterval(t);
   }, [started, won]);
 
@@ -468,11 +456,13 @@ function MemoryMatchGame({
       mode: GameMode;
       kanjiPair: KanjiPairMode;
       difficulty: Difficulty;
+      kanaSet: KanaSet;
     }>,
   ) => {
     if (next?.mode) setMode(next.mode);
     if (next?.kanjiPair) setKanjiPair(next.kanjiPair);
     if (next?.difficulty) setDifficulty(next.difficulty);
+    if (next?.kanaSet) setKanaSet(next.kanaSet);
     setRound((r) => r + 1);
   };
 
@@ -604,6 +594,33 @@ function MemoryMatchGame({
             </button>
           ))}
         </div>
+
+        {mode !== "kanji" && (
+          <div
+            className="flex flex-wrap items-center justify-center gap-1 rounded-2xl sm:rounded-full bg-slate-100 p-1 dark:bg-white/5"
+            role="group"
+            aria-label="Character set"
+          >
+            {KANA_SETS.map((s) => {
+              const count = s.key === "all"
+                ? uniqueByAnswer(pools[mode]).length
+                : uniqueByAnswer(pools[mode].filter((p) => kanaSetOf(p) === s.key)).length;
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  aria-pressed={kanaSet === s.key}
+                  onClick={() => newGame({ kanaSet: s.key })}
+                  className={segBtn(kanaSet === s.key)}
+                  title={`${count} characters`}
+                >
+                  {s.label}
+                  {s.example[mode] && <span className="ml-1 font-normal opacity-70">{s.example[mode]}</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {mode === "kanji" && (
           <div
@@ -761,6 +778,9 @@ function MemoryMatchGame({
             {modeLabel} · matched with {partnerLabel} · {moves}{" "}
             moves in {formatTime(elapsed)} · {accuracy}% accuracy
           </p>
+          <p className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+            ★★★ in {threeStarMoves} moves or fewer · ★★ in {twoStarMoves} or fewer
+          </p>
           <button
             type="button"
             onClick={() => newGame()}
@@ -772,8 +792,9 @@ function MemoryMatchGame({
       )}
 
       {/* Reference charts */}
-      {pool.length > 0 && mode !== "kanji" && (
-        <ReferenceChartKana pool={pool} modeLabel={modeLabel} />
+      {/* The chart always shows every kana of the script, whatever set is being played */}
+      {mode !== "kanji" && pools[mode].length > 0 && (
+        <ReferenceChartKana pool={pools[mode]} modeLabel={modeLabel} />
       )}
 
       {mode === "kanji" && (
@@ -803,6 +824,10 @@ function MemoryMatchGame({
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               <li>Pick a game: Hiragana, Katakana or Kanji.</li>
               <li>
+                For Hiragana and Katakana, choose a set: Basic (あ〜ん),
+                Dakuten (が, ぱ…), Combinations (きゃ…) or All.
+              </li>
+              <li>
                 For Kanji, choose whether the kanji match with their
                 Reading or their Meaning.
               </li>
@@ -816,6 +841,11 @@ function MemoryMatchGame({
               <li>
                 Find every pair in as few moves and as little time
                 as you can.
+              </li>
+              <li>
+                Stars are based on moves (one move = two cards flipped):
+                ★★★ for up to {STAR_MOVES_PER_PAIR[3]} moves per pair,
+                ★★ for up to {STAR_MOVES_PER_PAIR[2]}.
               </li>
             </ul>
             <button

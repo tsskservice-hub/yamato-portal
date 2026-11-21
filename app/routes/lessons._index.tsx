@@ -42,10 +42,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       fetchError = error.message;
     } else {
       // 各トピック内のレッスンを lesson_order 順に並べる
-      topicsData = (topics || []).map((topic: any) => ({
-        ...topic,
-        edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
-      }));
+      // レッスンがまだ1つも無いトピック（先に登録だけしてあるユニット）は一覧に出さない
+      topicsData = (topics || [])
+        .map((topic: any) => ({
+          ...topic,
+          edu_lessons: (topic.edu_lessons || []).sort((a: any, b: any) => (a.lesson_order ?? 0) - (b.lesson_order ?? 0))
+        }))
+        .filter((topic: any) => topic.edu_lessons.length > 0);
     }
   } catch (err: any) {
     console.error("❌ [Loader Exception]:", err);
@@ -94,6 +97,20 @@ export default function LessonsHubIndex() {
               Explore interactive lessons, vocabulary builders, and AI-guided conversational practice designed for learners worldwide.
             </p>
           </div>
+
+          {/* 文化ページへの案内（日本語の力に関係なく学べる） */}
+          <Link
+            to="/culture"
+            className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-orange-400 dark:border-orange-500/70 shadow-sm hover:shadow-md transition"
+          >
+            <div>
+              <p className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-50">🎎 Japanese Culture</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Picture stories about life in Japan, with narration and English subtitles. No Japanese needed.
+              </p>
+            </div>
+            <span className="shrink-0 font-black text-sm text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-xl transition">Explore culture →</span>
+          </Link>
 
           {errorMessage && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 rounded-2xl text-xs">

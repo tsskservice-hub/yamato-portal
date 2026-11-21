@@ -6,6 +6,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "~/lib/supabaseClient";
 
+/** 宿題で、学校時間中のためブロック中のタスク（until = ブロックが終わる時刻） */
+type TaskLocks = Partial<Record<LessonTaskKey, { locked: boolean; until: string | null }>>;
+
+function formatTime(iso: string | null) {
+  if (!iso) return "after school";
+  return `after ${new Date(iso).toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" })}`;
+}
+
 // 全レッスン共通の6タスク（edu_student_progress.task_key と同じ値）。表示順もこの順
 const TASK_KEYS = ["vocabulary", "listening", "reading", "speaking", "writing", "culture"] as const;
 
@@ -56,6 +64,20 @@ export function EduLessonTaskManager({
     culture: false,
   });
 
+  // 💡 宿題の学校時間ブロック（サーバーが判定する。SQL 47 / api.lesson-progress.ts）
+  const [locks, setLocks] = useState<TaskLocks>({});
+  const isLocked = (k: LessonTaskKey) => Boolean(locks[k]?.locked) && !taskProgress[k];
+
+  useEffect(() => {
+    if (!userId || !lessonId) return;
+    let cancelled = false;
+    fetch(`/api/lesson-progress?lessonId=${encodeURIComponent(lessonId)}`, { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : { locks: {} }))
+      .then((d: any) => { if (!cancelled) setLocks(d?.locks ?? {}); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [lessonId, userId]);
+
   const onProgressChangeRef = useRef(onProgressChange);
   onProgressChangeRef.current = onProgressChange;
   const onAllCompletedChangeRef = useRef(onAllCompletedChange);
@@ -94,14 +116,33 @@ export function EduLessonTaskManager({
 
         // このページで新しく完了したタスクを保存する（次に開いたときに完了済みとして扱うため）
         // ライティングはサーバー（api）が保存するので、ここでは保存しない
+        //    完了の記録はサーバー（/api/lesson-progress）だけが行う。宿題で学校時間中のタスクは記録されない
         const newlyCompleted = TASK_KEYS.filter((k) => k !== "writing" && externalTaskStatus[k] && !saved[k]);
         if (newlyCompleted.length > 0) {
-          const now = new Date().toISOString();
-          const { error: upsertError } = await supabase.from("edu_student_progress").upsert(
-            newlyCompleted.map((k) => ({ user_id: userId, lesson_id: lessonId, task_key: k, is_completed: true, updated_at: now })),
-            { onConflict: "user_id,lesson_id,task_key" }
-          );
-          if (upsertError) console.error("Failed to save task completion:", upsertError);
+          try {
+            const res = await fetch("/api/lesson-progress", {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lessonId, taskKeys: newlyCompleted }),
+            });
+            const result: any = await res.json().catch(() => ({}));
+            const refused: Array<{ taskKey: string; until: string | null }> = Array.isArray(result?.locked) ? result.locked : [];
+            if (refused.length) {
+              // 記録されなかったタスクは「完了」にしない
+              refused.forEach((r) => { if (r.taskKey in merged) merged[r.taskKey as LessonTaskKey] = false; });
+              if (!cancelled) {
+                setLocks((prev) => {
+                  const next = { ...prev };
+                  refused.forEach((r) => { next[r.taskKey as LessonTaskKey] = { locked: true, until: r.until }; });
+                  return next;
+                });
+              }
+            }
+            if (!res.ok) console.error("Failed to save task completion:", result?.error);
+          } catch (saveErr) {
+            console.error("Failed to save task completion:", saveErr);
+          }
         }
 
         if (cancelled) return;
@@ -132,10 +173,10 @@ export function EduLessonTaskManager({
           <div>
             <h3 className="text-xl font-black text-emerald-100 flex items-center gap-2">
               <span>🏫</span>
-              <span>Lesson Tasks & Practice Drills (学習タスク管理)</span>
+              <span>Lesson Tasks & Practice Drills</span>
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100/90 mt-1">
-              各ドリルへの挑戦、クイズの合格、および Yamato Sensei との添削完了時に自動で進捗が記録されます。
+              Complete all six tasks to finish this lesson. Your progress is saved automatically each time you complete a task.
             </p>
           </div>
           <div className="text-right flex items-center gap-3">
@@ -144,10 +185,18 @@ export function EduLessonTaskManager({
                 ? "bg-emerald-300 text-slate-950 border-emerald-200" 
                 : "bg-amber-400 text-slate-950 border-amber-300"
             }`}>
-              {allTasksCompleted ? "🎉 All Tasks Completed!" : "⏳ 学習進行中"}
+              {allTasksCompleted ? "🎉 All Tasks Completed!" : "⏳ In Progress"}
             </span>
           </div>
         </div>
+
+        {/* 💡 宿題で、学校時間中はできないタスクがあるときの案内 */}
+        {TASK_KEYS.some((k) => isLocked(k)) && (
+          <div className="relative z-10 bg-amber-100 text-amber-900 border border-amber-300 rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold">
+            🔒 Some tasks here are homework. Homework can&apos;t be done during school hours. Please come back{" "}
+            {formatTime(TASK_KEYS.map((k) => locks[k]).find((l) => l?.locked)?.until ?? null)}.
+          </div>
+        )}
 
         {/* タスクカード群 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
@@ -159,25 +208,25 @@ export function EduLessonTaskManager({
                 Task 1
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.vocabulary ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.vocabulary ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.vocabulary ? '✅ Completed' : isLocked('vocabulary') ? `🔒 Homework – ${formatTime(locks.vocabulary?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              📖 Vocabulary Drill (語彙確認)
+              📖 Vocabulary Drill
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              4つのモード（日→英、音声→英、英→日、発声練習）の語彙ドリルをクリアすると自動で完了になります。
+              Clear all four modes (Japanese → English, Audio → English, English → Japanese, and Speaking practice) to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartVocabularyDrill && (
+              {onStartVocabularyDrill && !isLocked('vocabulary') && (
                 <button
                   type="button"
                   onClick={onStartVocabularyDrill}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Vocab Drill (ドリル開始)</span>
+                  <span>Start Vocab Drill</span>
                 </button>
               )}
             </div>
@@ -190,25 +239,25 @@ export function EduLessonTaskManager({
                 Task 2
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.listening ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.listening ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.listening ? '✅ Completed' : isLocked('listening') ? `🔒 Homework – ${formatTime(locks.listening?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎧 Listening Task (リスニング確認)
+              🎧 Listening Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              「何人家族ですか」の会話を聞いて、人数をタイピングで答える問題を5問クリアすると完了になります。
+              Listen to short conversations and type your answers. Answer 5 questions correctly to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartListeningDrill && (
+              {onStartListeningDrill && !isLocked('listening') && (
                 <button
                   type="button"
                   onClick={onStartListeningDrill}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Listening Task (リスニング開始)</span>
+                  <span>Start Listening Task</span>
                 </button>
               )}
             </div>
@@ -221,25 +270,25 @@ export function EduLessonTaskManager({
                 Task 3
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.reading ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.reading ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.reading ? '✅ Completed' : isLocked('reading') ? `🔒 Homework – ${formatTime(locks.reading?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              📚 Reading Task (リーディング読解・発話確認)
+              📚 Reading Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              画面の日本語をマイクに向かって発声し、意味を英語でタイピング入力するデュアルチェックドリルをクリアすると完了になります。
+              Read the Japanese on the screen aloud into your microphone, then type its meaning in English. Clear the drill to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartReadingDrill && (
+              {onStartReadingDrill && !isLocked('reading') && (
                 <button
                   type="button"
                   onClick={onStartReadingDrill}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Reading Drill (リーディング開始)</span>
+                  <span>Start Reading Drill</span>
                 </button>
               )}
             </div>
@@ -252,25 +301,25 @@ export function EduLessonTaskManager({
                 Task 4
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.speaking ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.speaking ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.speaking ? '✅ Completed' : isLocked('speaking') ? `🔒 Homework – ${formatTime(locks.speaking?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎤 Speaking Task (AI音声会話)
+              🎤 Speaking Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              AI Yamato との一問一答音声会話セッション（モーダル）を完了すると自動で記録されます。
+              Have a question-and-answer voice conversation with AI Yamato. Finish the session to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartSpeakingDrill && (
+              {onStartSpeakingDrill && !isLocked('speaking') && (
                 <button
                   type="button"
                   onClick={onStartSpeakingDrill}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Speaking Task (スピーキング開始)</span>
+                  <span>Start Speaking Task</span>
                 </button>
               )}
             </div>
@@ -283,25 +332,25 @@ export function EduLessonTaskManager({
                 Task 5
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.writing ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.writing ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.writing ? '✅ Completed' : isLocked('writing') ? `🔒 Homework – ${formatTime(locks.writing?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              ✍️ Writing Task & AI Feedback (作文・添削)
+              ✍️ Writing Task & AI Feedback
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              相手に伝えるためのメッセージを日本語で手書き（紙＋写真、またはデジタル原稿用紙）して提出します。読み手からの返事とフィードバックを受け取ると達成になります。
+              Write a message in Japanese for a reader (on paper and upload a photo, or on the digital genkō yōshi) and submit it. You complete this task when you receive a reply and feedback.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartWritingTask && (
+              {onStartWritingTask && !isLocked('writing') && (
                 <button
                   type="button"
                   onClick={onStartWritingTask}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Writing Task (ライティング開始)</span>
+                  <span>Start Writing Task</span>
                 </button>
               )}
             </div>
@@ -314,25 +363,25 @@ export function EduLessonTaskManager({
                 Task 6
               </span>
               <span className={`text-xs font-bold px-3 py-1 rounded-full ${taskProgress.culture ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {taskProgress.culture ? '✅ 達成済み (Completed)' : '🔒 未達成'}
+                {taskProgress.culture ? '✅ Completed' : isLocked('culture') ? `🔒 Homework – ${formatTime(locks.culture?.until ?? null)}` : '🔒 Not completed'}
               </span>
             </div>
             <h4 className="font-black text-slate-900 dark:text-slate-100 text-base mb-1">
-              🎎 Culture Task (日本の文化)
+              🎎 Culture Task
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-              ナレーションと字幕つきの紙芝居で日本の文化を学び、Quick Check（選択式クイズ）に全問正解すると完了になります。
+              Learn about Japanese culture through a picture story with narration and subtitles. Answer every Quick Check question correctly to complete this task.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              {onStartCultureTask && (
+              {onStartCultureTask && !isLocked('culture') && (
                 <button
                   type="button"
                   onClick={onStartCultureTask}
                   className="py-2.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>🚀</span>
-                  <span>Start Culture Task (文化タスク開始)</span>
+                  <span>Start Culture Task</span>
                 </button>
               )}
             </div>
@@ -345,8 +394,8 @@ export function EduLessonTaskManager({
             <div className="flex items-center gap-3">
               <span className="text-2xl">🏆</span>
               <div>
-                <h5 className="font-black text-sm">おめでとうございます！ユニット修了バッジ獲得！</h5>
-                <p className="text-xs text-slate-900 font-medium">すべての学習タスクをシステム判定によりクリアしました。</p>
+                <h5 className="font-black text-sm">Congratulations! You have earned the lesson completion badge!</h5>
+                <p className="text-xs text-slate-900 font-medium">You have completed all the tasks in this lesson.</p>
               </div>
             </div>
           </div>

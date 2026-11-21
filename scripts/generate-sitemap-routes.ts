@@ -34,9 +34,13 @@ function getRoutes(dir: string, base = ""): string[] {
         name === "vocab-drill.$listId" ||
         name === "lessons.$slug" ||
         name === "api.teacher-register" ||
+        name === "api.game-access" ||
+        name === "game-frame.$name" ||
         name === "teacher-dashboard" ||
         name === "teacher-handwriting.$submissionId" ||
-        name === "print-report"
+        name === "print-report" ||
+        name === "class-game" ||
+        name === "vce.speaking.eoy-oral-accelerated"
       ) {
         continue;
       }

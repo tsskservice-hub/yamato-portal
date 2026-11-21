@@ -6,6 +6,7 @@
 import React from 'react';
 import { X, Check } from 'lucide-react';
 import { QuizItem } from '../data/quizzes';
+import { NextQuizCountdown } from './NextQuizCountdown';
 
 export interface DailyQuizModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ export interface DailyQuizModalProps {
   selectedOption: number | null;
   isAnswerSubmitted: boolean;
   hasCompletedTodayQuiz: boolean;
+  nextQuizAt?: number | null; // 次のクイズを解ける時刻（ミリ秒）。解答済みのときだけ入る
+  onNextQuizReached?: () => void;
   isQuizCorrect: boolean;
   onAnswer: (selectedIndex: number) => void;
   portalContent?: any; // Supabase または親から渡される動的マスターデータ
@@ -28,6 +31,8 @@ export function DailyQuizModal({
   selectedOption,
   isAnswerSubmitted,
   hasCompletedTodayQuiz,
+  nextQuizAt,
+  onNextQuizReached,
   isQuizCorrect,
   onAnswer,
   portalContent,
@@ -133,6 +138,11 @@ export function DailyQuizModal({
                 <p className="leading-relaxed text-slate-600 dark:text-slate-300">
                   {currentQuiz.explanation}
                 </p>
+                {hasCompletedTodayQuiz && nextQuizAt && (
+                  <p className="pt-1 font-semibold">
+                    <NextQuizCountdown nextAt={nextQuizAt} onReached={onNextQuizReached} />
+                  </p>
+                )}
               </div>
             </div>
           )}

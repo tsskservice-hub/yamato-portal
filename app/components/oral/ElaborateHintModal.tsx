@@ -1,16 +1,25 @@
 import React from "react";
 import { Lightbulb, X } from "lucide-react";
+import { safeHtml } from "~/utils/safeHtml";
+import { getElaborateHints } from "~/data/elaborate-hints";
 
 export interface ElaborateHintModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** 質問のトピック（oral-exam-questions の category）。あればそのトピック用のヒントを先に出す */
+  category?: string;
+  /** ヒントを開いた質問（ふりがな付き HTML） */
+  questionHtml?: string;
 }
 
 export const ElaborateHintModal: React.FC<ElaborateHintModalProps> = ({
   isOpen,
   onClose,
+  category,
+  questionHtml,
 }) => {
   if (!isOpen) return null;
+  const topicIdeas = getElaborateHints(category);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
@@ -39,7 +48,40 @@ export const ElaborateHintModal: React.FC<ElaborateHintModalProps> = ({
           </div>
         </div>
 
-        {/* Pattern List */}
+        {/* この質問のトピック用のヒント（Sentence 2・3 で何を書くか） */}
+        {(questionHtml || topicIdeas.length > 0) && (
+          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3">
+            {questionHtml && (
+              <p
+                className="text-sm font-bold text-slate-800"
+                dangerouslySetInnerHTML={{ __html: safeHtml(questionHtml) }}
+              />
+            )}
+            {topicIdeas.length > 0 ? (
+              <>
+                <h4 className="font-bold text-sm text-amber-900">
+                  Ideas for this topic{category ? ` (${category})` : ""}
+                </h4>
+                <ul className="space-y-2">
+                  {topicIdeas.map((idea, i) => (
+                    <li key={i} className="text-xs text-slate-700">
+                      <span className="font-bold">・{idea.en}</span>
+                      <br />
+                      <span className="pl-3 text-sm text-slate-900">{idea.jp}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[11px] text-slate-500">
+                  Replace 〜 with your own information. Pick one or two ideas for Sentence 2 and 3.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-slate-600">Use one of the general patterns below.</p>
+            )}
+          </div>
+        )}
+
+        {/* Pattern List（どの質問にも使える一般的なパターン） */}
         <div className="space-y-4 my-6">
           {/* Pattern 1 */}
           <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100">
@@ -136,17 +178,6 @@ export const ElaborateHintModal: React.FC<ElaborateHintModalProps> = ({
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Writing Rule Reminders */}
-        <div className="bg-slate-100 p-4 rounded-2xl text-xs text-slate-600 space-y-1">
-          <p className="font-bold text-slate-800 mb-1">📌 Writing Rule Guidelines</p>
-          <p>
-            ・Please write at least <strong className="text-slate-800">10 characters</strong> per sentence.
-          </p>
-          <p>
-            ・Single-word responses like "Yes" or "No" will not be counted.
-          </p>
         </div>
 
         {/* Close Button */}

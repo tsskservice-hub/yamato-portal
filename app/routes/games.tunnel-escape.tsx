@@ -1,13 +1,15 @@
 /**
  * @file tunnel-escape.tsx
- * @description ショーシャンクの空に をモチーフにしたひらがな・カタカナトンネル脱出ゲーム
+ * @description ショーシャンクの空に をモチーフにしたひらがな・カタカナトンネル脱出ゲーム（UI は英語）
+ * ログインと先生のロックは GameAccessGate が確認する。
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
+import { GameAccessGate } from '~/components/games/GameAccessGate';
 import { generateModuleMeta } from '~/utils/seoMeta';
+import { shuffle } from '~/utils/shuffle';
 import { supabase } from '~/lib/supabaseClient';
 
 // ひらがな・カタカナの学習プール（順序問題やランダム四択用）
@@ -53,65 +55,18 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 export default function StudentTunnelEscapePage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const [isGlobalUnlocked, setIsGlobalUnlocked] = useState(false);
-  const [isIndividualUnlocked, setIsIndividualUnlocked] = useState(false);
-  const [isCodeUnlocked, setIsCodeUnlocked] = useState(false);
-  const [inputPasscode, setInputPasscode] = useState('');
-
-  const isAccessible = isGlobalUnlocked || isIndividualUnlocked || isCodeUnlocked;
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputPasscode === '1111') {
-      setIsCodeUnlocked(true);
-      alert('✨ 認証成功！脱出トンネルが一時的に解放されました。');
-    } else {
-      alert('❌ パスコードが違います。');
-    }
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef} breadcrumbTitle="Shawshank Tunnel Escape">
       <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
         <header className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">⛏️ ショーシャンクからの脱出</h1>
-            <p className="text-xs text-slate-500 mt-0.5">ひらがな・カタカナ記憶＆四択トンネル掘削ゲーム</p>
+            <h1 className="text-xl font-bold text-slate-800">⛏️ Escape from Shawshank</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Dig the tunnel by answering hiragana and katakana multiple-choice questions</p>
           </div>
         </header>
 
-        {isAccessible ? (
-          <GameArena />
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
-              🔒
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">このエリアは現在ロックされています</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                授業の課題を終わらせるか、先生から伝えられたパスコードを入力してください。早く終わった生徒は先生が個別に解放してくれます！
-              </p>
-            </div>
-
-            <form onSubmit={handlePasscodeSubmit} className="flex gap-2 max-w-xs mx-auto">
-              <input
-                type="text"
-                maxLength={4}
-                placeholder="4桁コード"
-                value={inputPasscode}
-                onChange={(e) => setInputPasscode(e.target.value)}
-                className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-center text-lg font-mono tracking-widest w-full text-slate-900 focus:outline-none focus:border-indigo-500"
-              />
-              <button
-                type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold px-4 py-2 rounded-lg text-white text-sm cursor-pointer shadow-sm transition"
-              >
-                解除
-              </button>
-            </form>
-          </div>
-        )}
+        <GameAccessGate layoutRef={layoutRef}>{() => <GameArena />}</GameAccessGate>
       </div>
     </ToolPageWrapper>
   );
@@ -131,7 +86,7 @@ function GameArena() {
   const [hp, setHp] = useState(3); // ミス許容回数
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCleared, setIsCleared] = useState(false);
-  
+
   // クイズ状態
   const [currentQuiz, setCurrentQuiz] = useState<QuestionData | null>(null);
   const [feedback, setFeedback] = useState<{ text: string; isCorrect: boolean } | null>(null);
@@ -149,33 +104,33 @@ function GameArena() {
 
     if (modeType < 0.4) {
       // パターン1: 読み方（ローマ字/ひらがな）当て
-      questionText = `この文字「 ${targetSymbol} 」の正しい読みはどれ？`;
+      questionText = `What is the correct reading of "${targetSymbol}"?`;
       correctAnswer = item.char;
-      typeHint = `ローマ字: ${item.romaji}`;
+      typeHint = `Romaji: ${item.romaji}`;
     } else if (modeType < 0.7) {
       // パターン2: ひらがな ⇔ カタカナ変換
       if (isKana) {
-        questionText = `カタカナ「 ${targetSymbol} 」のひらがなはどれ？`;
+        questionText = `Which hiragana matches the katakana "${targetSymbol}"?`;
         correctAnswer = item.char;
       } else {
-        questionText = `ひらがな「 ${targetSymbol} 」のカタカナはどれ？`;
+        questionText = `Which katakana matches the hiragana "${targetSymbol}"?`;
         correctAnswer = item.kana;
       }
-      typeHint = `ヒント: [${item.romaji}]`;
+      typeHint = `Hint: [${item.romaji}]`;
     } else {
       // パターン3: アルファベット(ローマ字)からの逆引き
-      questionText = `ローマ字「 ${item.romaji.toUpperCase()} 」に対応する文字はどれ？`;
+      questionText = `Which character is "${item.romaji.toUpperCase()}"?`;
       correctAnswer = targetSymbol;
-      typeHint = `文字認識トレーニング`;
+      typeHint = `Character recognition`;
     }
 
     // 4択の選択肢を作成
     const wrongPool = CHAR_POOL.filter(p => (isKana ? p.kana : p.char) !== targetSymbol);
-    const shuffledWrong = [...wrongPool].sort(() => 0.5 - Math.random()).slice(0, 3);
-    const options = [
+    const shuffledWrong = shuffle(wrongPool).slice(0, 3);
+    const options = shuffle([
       correctAnswer,
       ...shuffledWrong.map(w => (isKana && modeType >= 0.4 ? w.kana : w.char))
-    ].sort(() => 0.5 - Math.random());
+    ]);
 
     setCurrentQuiz({
       questionText,
@@ -197,9 +152,9 @@ function GameArena() {
 
     if (selectedOption === currentQuiz.correctAnswer) {
       // 正解：トンネルを掘り進める！
-      setFeedback({ text: '⛏️ コツ…！壁が崩れ、トンネルが少し進んだ！', isCorrect: true });
+      setFeedback({ text: '⛏️ Chip… The wall crumbles and the tunnel moves forward!', isCorrect: true });
       setStrikeCount((prev) => prev + 1);
-      
+
       const nextProgress = Math.min(100, progress + 10);
       setProgress(nextProgress);
 
@@ -214,7 +169,7 @@ function GameArena() {
       // 不正解：警備員に見つかりそうになる…
       const nextHp = hp - 1;
       setHp(nextHp);
-      setFeedback({ text: `❌ 崩落の危険！ハンマーが滑った… (残りHP: ${nextHp})`, isCorrect: false });
+      setFeedback({ text: `❌ Danger of a cave-in! Your hammer slipped… (HP left: ${nextHp})`, isCorrect: false });
 
       if (nextHp <= 0) {
         setTimeout(() => {
@@ -237,16 +192,16 @@ function GameArena() {
     <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center space-y-5 shadow-xl text-white">
       {/* ステータスバー（アンディの脱出状況） */}
       <div className="flex justify-between items-center bg-slate-800 p-3 rounded-xl border border-slate-700 text-sm">
-        <span className="text-red-400 font-bold">❤️ 警戒度HP: {'❤️'.repeat(hp)}</span>
-        <span className="text-amber-400 font-bold">⛏️ 掘削: {strikeCount}回</span>
-        <span className="text-emerald-400 font-bold">脱出進捗: {progress}%</span>
+        <span className="text-red-400 font-bold">❤️ HP: {'❤️'.repeat(hp)}</span>
+        <span className="text-amber-400 font-bold">⛏️ Digs: {strikeCount}</span>
+        <span className="text-emerald-400 font-bold">Escape: {progress}%</span>
       </div>
 
       {/* ショーシャンク風ビジュアル：トンネルの進捗状況 */}
       <div className="bg-gradient-to-b from-slate-950 to-stone-900 border border-stone-800 rounded-xl p-5 relative overflow-hidden space-y-3">
         <div className="flex justify-between text-xs text-stone-400 font-mono">
-          <span>🔒 独房のポスター裏</span>
-          <span>自由の空・太平洋 🌊</span>
+          <span>🔒 Behind the cell poster</span>
+          <span>Freedom: the Pacific 🌊</span>
         </div>
 
         {/* トンネルのプログレスバー＆アンディのピクトグラム表現 */}
@@ -255,15 +210,15 @@ function GameArena() {
             className="bg-amber-600 h-full transition-all duration-500 flex items-center justify-end pr-2 text-xs font-bold text-amber-100 shadow-inner"
             style={{ width: `${progress}%` }}
           >
-            {progress > 10 && '⛏️ アンディ'}
+            {progress > 10 && '⛏️ Andy'}
           </div>
         </div>
 
         <div className="text-xs text-slate-400 italic">
-          {progress < 30 && "「根気と岩盤。ショーシャンクの壁は硬いが、毎日削ればいつか必ず穴が開く。」"}
-          {progress >= 30 && progress < 70 && "「ポスターの裏に隠された暗いトンネルを、ロックハンマーで少しずつ掘り進めている…」"}
-          {progress >= 70 && progress < 100 && "「もうすぐだ！雨の匂いがする。出口のパイプまであともう一息！」"}
-          {progress >= 100 && "「ついに自由だ！雨に打たれながら両手を広げるアンディの解放感！」"}
+          {progress < 30 && '"Patience and rock. The prison walls are hard, but if you chip away every day, one day you will break through."'}
+          {progress >= 30 && progress < 70 && '"Digging the dark tunnel hidden behind the poster, little by little, with a rock hammer…"'}
+          {progress >= 70 && progress < 100 && '"Almost there! I can smell the rain. Just a little further to the pipe!"'}
+          {progress >= 100 && '"Free at last! Andy stands in the rain with his arms wide open!"'}
         </div>
       </div>
 
@@ -271,30 +226,30 @@ function GameArena() {
       {isCleared ? (
         <div className="bg-stone-900 border-2 border-emerald-500 rounded-2xl p-8 space-y-4 animate-fade-in">
           <div className="text-4xl">🌊🦅✨</div>
-          <h2 className="text-2xl font-black text-emerald-400">脱出成功！</h2>
+          <h2 className="text-2xl font-black text-emerald-400">You escaped!</h2>
           <p className="text-sm text-stone-300 leading-relaxed">
-            見事にすべての文字と四択を正確にマスターし、長いトンネルを突き抜けて自由の空へたどり着きました！
+            You mastered every character and question, dug all the way through the tunnel, and reached freedom!
           </p>
           <button
             onClick={restartGame}
             className="bg-emerald-600 hover:bg-emerald-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
           >
-            もう一度最初から掘り直す
+            Dig again from the start
           </button>
         </div>
       ) : isGameOver ? (
         /* ゲームオーバー画面 */
         <div className="bg-stone-900 border-2 border-red-500 rounded-2xl p-8 space-y-4">
           <div className="text-4xl">🚨</div>
-          <h2 className="text-2xl font-black text-red-500">見つかってしまった…</h2>
+          <h2 className="text-2xl font-black text-red-500">You were caught…</h2>
           <p className="text-sm text-stone-300">
-            連続ミスにより看守に気づかれ、独房行きになってしまいました。もう一度記憶を整理して挑戦しよう！
+            Too many mistakes alerted the guards, and you were sent back to your cell. Review the characters and try again!
           </p>
           <button
             onClick={restartGame}
             className="bg-indigo-600 hover:bg-indigo-700 font-bold px-6 py-2.5 rounded-xl text-white text-sm transition cursor-pointer"
           >
-            リトライする
+            Try again
           </button>
         </div>
       ) : (

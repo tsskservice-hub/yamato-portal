@@ -5,6 +5,7 @@
     "/build/*",
     "/favicon.ico",
     "/assets/*",
+    "/game-assets/*",
     "/*.png",
     "/*.jpg",
     "/*.css",

@@ -155,7 +155,7 @@ export default function AboutPage() {
                 <span>Credits & Daily Rewards</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Platform access uses a flexible credit system. Credits can be purchased or earned through welcome bonuses and daily interactive quizzes.
+                Platform access uses a flexible credit system. Credits can be purchased or earned through the daily quiz.
               </p>
             </div>
           </div>

@@ -10,6 +10,7 @@ import { CreditCostFooter } from "../CreditCostFooter";
 import { useYamatoChat2Logic } from "../../hooks/useYamatoChat2Logic";
 import { YCC2ChatHeaderControls } from "./YCC2ChatHeaderControls";
 import { YCC2ChatOptionButtons } from "./YCC2ChatOptionButtons";
+import { useBroadcastChatColor } from "~/utils/chatThemeColor";
 
 export interface YamatoChatCommon2MetaType {
   componentName: string;
@@ -148,6 +149,8 @@ export function YamatoChatCommon2({
   });
 
   const isHexColor = themeColor.startsWith("#");
+  // このページのヤマトチャットの色を、🔍 Kanji ボタンなどに知らせる（同じ色にそろえるため）
+  useBroadcastChatColor(themeColor);
   const currentTheme =
     !isHexColor && themeStyles[themeColor as ThemeColorKey]
       ? themeStyles[themeColor as ThemeColorKey]

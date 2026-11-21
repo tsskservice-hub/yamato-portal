@@ -67,6 +67,19 @@ export default function TestYamatoPage() {
         password: pass,
       });
       if (error) throw error;
+
+      // 💡 ブラウザのログインをサーバーの Cookie にも反映する（パスキーのログインと同じ /api/auth/callback）。
+      //    これをしないと、サーバー側（ヘッダーの Teacher Panel・教師ダッシュボードなど）はログインに気づかない
+      const session = data.session;
+      if (session) {
+        const res = await fetch("/api/auth/callback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: session.access_token, refreshToken: session.refresh_token }),
+        });
+        if (!res.ok) throw new Error(`サーバーへのログイン反映に失敗しました (${res.status})`);
+      }
+
       setDebugStatus(`✅ ログイン成功！ (${email}) - セッションを反映するためページを更新します...`);
       
       // 💡 ログイン成功直後にページをリロードし、root.tsx のローダーに教師権限を確実に反映させる
@@ -93,6 +106,7 @@ export default function TestYamatoPage() {
   // 💡 ログアウト実行関数
   const handleDebugLogout = async () => {
     await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     setDebugStatus("🔒 ログアウトしました。ページを更新します...");
     setTimeout(() => {
       window.location.reload();

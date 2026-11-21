@@ -9,7 +9,7 @@
  * 5. YamatoChatCommon だけでなく、各種ダッシュボードやエディタページでも汎用利用可能
  */
 import { useState, useEffect, useCallback } from "react";
-import { useRouteLoaderData } from "@remix-run/react";
+import { useRevalidator, useRouteLoaderData } from "@remix-run/react";
 import { supabase } from "../lib/supabaseClient";
 
 interface RootLoaderData {
@@ -40,6 +40,7 @@ export function useYamatoAccount(options: UseYamatoAccountOptions = {}) {
   } = options;
 
   const rootData = useRouteLoaderData("root") as RootLoaderData | undefined;
+  const revalidator = useRevalidator();
 
   const effectiveUserId = propUserId ?? rootData?.user?.id;
   const effectiveCredits = propCredits ?? rootData?.credits ?? 0;
@@ -237,18 +238,25 @@ export function useYamatoAccount(options: UseYamatoAccountOptions = {}) {
   }, []);
 
   // 💡 学習ペース更新用関数
+  //    保存できたら root のローダーを読み直す。root の learningPace は、ページを移動しても自動では読み直されない
+  //    （Remix はページ移動で親のローダーを再実行しない）ため、読み直さないと次のページで古いペースに戻ってしまう。
+  //    保存に失敗したら、画面の表示も元のペースに戻す（保存されていないのに変わったように見せない）。
   const updateLearningPace = useCallback(async (newLevel: "steady" | "normal" | "accelerated") => {
-    setLearningPace(newLevel);
+    let previous: "steady" | "normal" | "accelerated" = newLevel;
+    setLearningPace((prev) => { previous = prev; return newLevel; });
     if (!activeUserId) return;
     try {
-      await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({ learning_pace: newLevel })
         .eq("id", activeUserId);
+      if (error) throw error;
+      revalidator.revalidate();
     } catch (err) {
       console.error("学習ペース更新時の通信エラー:", err);
+      setLearningPace(previous);
     }
-  }, [activeUserId]);
+  }, [activeUserId, revalidator]);
 
   return {
     activeUserId,

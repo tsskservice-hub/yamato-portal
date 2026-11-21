@@ -97,9 +97,15 @@ export default function Footer({}: FooterProps) {
               >
                 Contact
               </Link>
+              {/* Contact の隣に My Account（ヘッダーから移動。右下常駐のヤマトチャットにかぶらないよう、右端には置かない） */}
+              <Link
+                to="/my-account"
+                className="text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center border-slate-200 hover:bg-slate-100 text-slate-700 whitespace-nowrap"
+              >
+                My Account
+              </Link>
             </div>
           </div>
-
         </div>
       </div>
     </footer>

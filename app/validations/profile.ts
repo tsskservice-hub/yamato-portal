@@ -1,5 +1,7 @@
 import { z } from "zod";
 // Import inappropriate words list from JSON file in the app/data directory
+// 💡 api（yamato-api）の src/data/unsuitable-words.json に同じ一覧のコピーがある（クラスのライブゲームの名前チェック用）。
+//    一覧を直すときは両方を同じ内容にして、api もデプロイし直す
 import unsuitableWordsData from "../data/unsuitable-words.json";
 
 // Retrieve and flatten the list of unsuitable words from the categorized JSON data

@@ -4,7 +4,7 @@
  */
 import { DataErrorState } from '~/components/DataErrorState';
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from '~/lib/supabaseClient';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
@@ -45,7 +45,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }: { data: any }) => {
 
 export default function VocabIndexPage() {
   const layoutRef = useRef<PageLayoutRef>(null);
-  const navigate = useNavigate();
 
   const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,7 +53,6 @@ export default function VocabIndexPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLargeFont, setIsLargeFont] = useState(false);
 
   // 実際の kl_vocabulary テーブルの構造に合わせたデータ取得
@@ -106,32 +104,6 @@ export default function VocabIndexPage() {
       return matchesSearch && matchesCategory;
     });
   }, [vocabularies, searchQuery, selectedCategory]);
-
-  const toggleSelect = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((item) => item !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  };
-
-  const toggleSelectAllVisible = () => {
-    const visibleIds = filteredVocabularies.map((v: Vocabulary) => v.id);
-    const allSelected = visibleIds.every((id: string) => selectedIds.includes(id));
-
-    if (allSelected) {
-      setSelectedIds(selectedIds.filter((id: string) => !visibleIds.includes(id)));
-    } else {
-      const combined = Array.from(new Set([...selectedIds, ...visibleIds]));
-      setSelectedIds(combined);
-    }
-  };
-
-  const handleCreateDrillWithSelected = () => {
-    if (selectedIds.length === 0) return;
-    sessionStorage.setItem("preselected_vocab_ids", JSON.stringify(selectedIds));
-    navigate("/vocab-creator"); 
-  };
 
   return (
     <ToolPageWrapper layoutRef={layoutRef}>
@@ -207,15 +179,7 @@ export default function VocabIndexPage() {
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-1 gap-2">
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Results: <span className="font-bold text-slate-900 dark:text-slate-100">{filteredVocabularies.length}</span> terms
-              <span className="ml-3 text-orange-600 dark:text-orange-400 font-semibold">（Selected: {selectedIds.length} terms）</span>
             </p>
-            <button
-              type="button"
-              onClick={toggleSelectAllVisible}
-              className="text-xs bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3 py-2 rounded-xl font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-            >
-              Select / Deselect All Visible
-            </button>
           </div>
 
           {loading ? (
@@ -233,26 +197,14 @@ export default function VocabIndexPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredVocabularies.map((item: Vocabulary) => {
-                const isSelected = selectedIds.includes(item.id);
                 return (
                   <div
                     key={item.id}
-                    onClick={() => toggleSelect(item.id)}
-                    className={`p-5 rounded-3xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
-                      isSelected
-                        ? "bg-orange-50/70 dark:bg-orange-950/40 border-orange-500 shadow-md"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 shadow-sm"
-                    }`}
+                    className="p-5 rounded-3xl border-2 transition-all flex flex-col justify-between bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm"
                   >
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
-                            className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
-                          />
                           <div className={`font-bold text-slate-900 dark:text-slate-100 ${isLargeFont ? "text-3xl" : "text-xl"}`}>
                             {item.jp_text}
                           </div>
@@ -264,12 +216,12 @@ export default function VocabIndexPage() {
                         )}
                       </div>
 
-                      <div className={`text-slate-600 dark:text-slate-400 mb-2 pl-7 ${isLargeFont ? "text-lg" : "text-sm"}`}>
+                      <div className={`text-slate-600 dark:text-slate-400 mb-2 ${isLargeFont ? "text-lg" : "text-sm"}`}>
                         <span className="text-slate-400 mr-2">Romaji:</span>
                         {item.romaji}
                       </div>
 
-                      <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 pl-7 ${isLargeFont ? "text-xl" : "text-base"}`}>
+                      <div className={`text-slate-800 dark:text-slate-200 font-medium mb-3 ${isLargeFont ? "text-xl" : "text-base"}`}>
                         {item.english_text}
                       </div>
                     </div>
@@ -281,22 +233,6 @@ export default function VocabIndexPage() {
 
         </div>
 
-        {selectedIds.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 py-4 px-6 shadow-lg z-50 animate-slide-up">
-            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                🎯 <span className="text-orange-600 dark:text-orange-400">{selectedIds.length} terms</span> selected for practice
-              </div>
-              <button
-                type="button"
-                onClick={handleCreateDrillWithSelected}
-                className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl shadow transition-colors text-xs uppercase tracking-wider cursor-pointer"
-              >
-                Create Review Drill with Selected →
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </ToolPageWrapper>
   );

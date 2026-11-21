@@ -2,8 +2,11 @@
  * @file app/data/culture-tasks.ts
  * @description 各レッスンの文化タスク（紙芝居カード＋ナレーション字幕＋選択式クイズ）の内容
  *
- * 新しい文化タスクを足すときは、CULTURE_TASKS にタスクの ID（例：natural-disasters）をキーにして追加し、
- * レッスンページで CULTURE_TASKS["そのID"] を EduCultureTaskModal に渡す。
+ * 新しい文化タスクを足すときは、CULTURE_TASKS にタスクの ID（例：natural-disasters）をキーにして追加する。
+ * - 追加したタスクは文化ページ（/culture）に自動で並ぶ
+ * - レッスンで使う時は、そのタスクの lessons にレッスンの slug を書く。
+ *   レッスンページは findCultureTaskForLesson(slug) で自分の文化タスクを見つける。
+ *   /culture でタスクを終えた生徒（ログイン中）は、lessons のレッスンの文化タスクも完了になる
  * （タスクの ID はレッスンと切り離しているので、レッスンページができる前に作っておける）
  * - カード画像：public/images/picture-story/ に置く
  * - ナレーション音声：Supabase Storage の picture-story-audio バケットに置く
@@ -50,6 +53,14 @@ export interface CultureThinkAbout {
 
 export interface CultureTask {
   title: string;
+  /** 文化ページ（/culture）の一覧に出す短い紹介（英語・1〜2文） */
+  summary: string;
+  /**
+   * このタスクを6つ目のタスク（文化）として使うレッスン（edu_lessons.slug と表示名）。
+   * ここが「どのレッスンでどの文化タスクを使うか」の唯一の情報源：
+   * レッスンページの文化タスクも、/culture で終えた時に完了にするレッスンも、ここで決まる。
+   */
+  lessons?: { slug: string; label: string }[];
   cards: CultureCard[];
   /** カードを見終わった後の「考えてみよう」（採点しない） */
   thinkAbout?: CultureThinkAbout;
@@ -58,10 +69,20 @@ export interface CultureTask {
 
 const audio = (file: string) => `${PICTURE_STORY_AUDIO_BASE}/${file}`;
 
+/** レッスン（slug）が6つ目のタスクとして使う文化タスクを返す（無ければ null） */
+export function findCultureTaskForLesson(lessonSlug: string): { id: string; task: CultureTask } | null {
+  for (const [id, task] of Object.entries(CULTURE_TASKS)) {
+    if (task.lessons?.some((l) => l.slug === lessonSlug)) return { id, task };
+  }
+  return null;
+}
+
 export const CULTURE_TASKS: Record<string, CultureTask> = {
   // Unit 4 Lesson 1 で使用
   "japanese-names": {
     title: "Japanese Names – Then and Now",
+    summary: "How Japanese parents choose names, and how popular names have changed over 100 years – from Kazuko to Minato.",
+    lessons: [{ slug: "family-1", label: "Family 1: How many people are in your family?" }],
     cards: [
       {
         title: "Names tell a story",
@@ -185,6 +206,7 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
   // まだどのレッスンページにもつないでいない
   "natural-disasters": {
     title: "Living with Natural Disasters in Japan",
+    summary: "Earthquakes, the rainy season, typhoons, an active volcano and the snowiest city in the world – and how people in Japan live with them.",
     cards: [
       {
         title: "Earthquakes 地震 (jishin)",
@@ -320,6 +342,349 @@ export const CULTURE_TASKS: Record<string, CultureTask> = {
         ],
         answerIndex: 1,
         explanation: "The weight of snow on roofs can be dangerous, so people clear their roofs almost every day in winter.",
+        hintCard: 4,
+      },
+    ],
+  },
+
+  // Unit 1 Lesson 1 で使用（原稿：jp_basics.txt）
+  "japan-basics": {
+    title: "Japan Basics",
+    summary: "Japan's flag, where Japan is, how many people live there – and Japanese words and brands you already know.",
+    lessons: [{ slug: "greetings-1", label: "Greetings 1: Greeting and saying goodbye" }],
+    cards: [
+      {
+        title: "The flag of Japan",
+        imageUrl: "/images/picture-story/japan-basics-1.webp",
+        imageAlt: "The Japanese flag: a red circle in the centre of a white background",
+        audioUrl: audio("jp_basics_01.mp3"),
+        narration: [
+          "The Japanese flag has a red circle in the center on a white background.",
+          "The red symbolizes the sun, while the white represents purity and sacredness.",
+        ],
+      },
+      {
+        title: "Where is Japan?",
+        imageUrl: "/images/picture-story/japan-basics-2.webp",
+        imageAlt: "Japan in East Asia, stretching from Hokkaido in the north to Okinawa in the south, with a Shinkansen bullet train",
+        audioUrl: audio("jp_basics_02.mp3"),
+        narration: [
+          "Japan is located in East Asia, in the Northern Hemisphere.",
+          "It stretches approximately 2,200 kilometers from Hokkaido in the north to Okinawa in the south.",
+          "Every part of the country except Okinawa is accessible by train, including the Shinkansen (bullet train).",
+          "Because it is a relatively small country, there is only one time zone nationwide.",
+        ],
+      },
+      {
+        title: "People and money",
+        imageUrl: "/images/picture-story/japan-basics-3.webp",
+        imageAlt: "People in Japan and Japanese yen",
+        audioUrl: audio("jp_basics_03.mp3"),
+        narration: [
+          "Japan has the 12th largest population in the world, with about 120 million people.",
+          "Its currency is the yen.",
+          "Generally speaking, Japanese people tend to have black hair and are not very tall.",
+        ],
+      },
+      {
+        title: "Japanese words and brands",
+        imageUrl: "/images/picture-story/japan-basics-4.webp",
+        imageAlt: "Sushi, karaoke and matcha, with well-known Japanese brands such as cars, electronics and clothes",
+        audioUrl: audio("jp_basics_04.mp3"),
+        narration: [
+          "Many English words originate from Japanese, such as sushi, karaoke, and matcha.",
+          "You can also find many well-known Japanese brands in everyday life,",
+          "including Toyota, Mitsubishi, Honda, Mazda, Kawasaki, Panasonic, Sony, and Uniqlo.",
+        ],
+      },
+    ],
+    thinkAbout: {
+      lines: [
+        "How does your country or state compare to Japan in terms of land size and population?",
+        "What is the weather like in August where you live, and how are the seasons different from Japan's?",
+      ],
+      audioUrl: audio("jp_basics_05.mp3"),
+    },
+    questions: [
+      {
+        question: "What does the red circle on the Japanese flag symbolize?",
+        options: ["The moon", "The sun", "A flower", "Fire"],
+        answerIndex: 1,
+        explanation: "The red circle symbolizes the sun. The white represents purity and sacredness.",
+        hintCard: 1,
+      },
+      {
+        question: "Which part of Japan can you NOT reach by train from the rest of the country?",
+        options: ["Hokkaido", "Tokyo", "Okinawa", "Kyoto"],
+        answerIndex: 2,
+        explanation: "Every part of Japan except Okinawa can be reached by train, including the Shinkansen.",
+        hintCard: 2,
+      },
+      {
+        question: "How many time zones does Japan have?",
+        options: ["One", "Two", "Three", "Four"],
+        answerIndex: 0,
+        explanation: "Japan is a relatively small country, so there is only one time zone.",
+        hintCard: 2,
+      },
+      {
+        question: "About how many people live in Japan?",
+        options: ["12 million", "50 million", "120 million", "1.2 billion"],
+        answerIndex: 2,
+        explanation: "About 120 million people live in Japan – the 12th largest population in the world.",
+        hintCard: 3,
+      },
+      {
+        question: "What is the currency of Japan?",
+        options: ["The yuan", "The won", "The dollar", "The yen"],
+        answerIndex: 3,
+        explanation: "Japan's currency is the yen (円).",
+        hintCard: 3,
+      },
+      {
+        question: "Which English word comes from Japanese?",
+        options: ["Karaoke", "Pizza", "Chocolate", "Robot"],
+        answerIndex: 0,
+        explanation: "Karaoke, sushi and matcha are English words that come from Japanese.",
+        hintCard: 4,
+      },
+    ],
+  },
+
+  // Unit 6 Lesson 1 で使用（原稿：jp_food.txt）
+  "japan-food": {
+    title: "Food in Japan",
+    summary: "Sashimi, breakfast, udon, natto and wagyu – what people in Japan eat, and where their food comes from.",
+    lessons: [{ slug: "food-1", label: "Food 1: Asking about breakfast and meals" }],
+    cards: [
+      {
+        title: "Fish, rice and bread",
+        imageUrl: "/images/picture-story/japan-food-1.webp",
+        imageAlt: "Sashimi with soy sauce and wasabi, a breakfast of rice and miso soup, and bread and milk",
+        audioUrl: audio("jp_food_01.mp3"),
+        narration: [
+          "Japanese people love eating fish, and sashimi is eaten raw by pairing fresh fish with soy sauce and wasabi.",
+          "For breakfast, while some Japanese people eat rice and miso soup, quite a few people also have bread and milk.",
+          "There are many delicious bakeries across Japan.",
+          "Of course, teishoku (set meal) restaurants serving rice and miso soup are also popular",
+          "and become very busy with customers during breakfast and lunch.",
+        ],
+      },
+      {
+        title: "Food from around the world",
+        imageUrl: "/images/picture-story/japan-food-2.webp",
+        imageAlt: "A bowl of udon noodles and salmon sushi",
+        audioUrl: audio("jp_food_02.mp3"),
+        narration: [
+          "Although udon is a noodle dish that originally came from China and developed in Japan,",
+          "it is not uncommon for it to be made using wheat imported from countries like Australia.",
+          "While it is well known that Norwegian salmon is used for sushi,",
+          "Japan has also started farming its own salmon to serve on the dinner table.",
+        ],
+      },
+      {
+        title: "Soybeans: natto, tofu and more",
+        imageUrl: "/images/picture-story/japan-food-3.webp",
+        imageAlt: "Natto (fermented soybeans) with soy sauce, miso, tofu and edamame",
+        audioUrl: audio("jp_food_03.mp3"),
+        narration: [
+          "When it comes to unique Japanese foods, natto stands out,",
+          "and these fermented soybeans are very good for your health.",
+          "Soybeans are the main ingredient for soy sauce, miso, tofu, and edamame,",
+          "making them a familiar and essential source of protein for Japanese people.",
+        ],
+      },
+      {
+        title: "Wagyu beef",
+        imageUrl: "/images/picture-story/japan-food-4.webp",
+        imageAlt: "Wagyu beef",
+        audioUrl: audio("jp_food_04.mp3"),
+        narration: [
+          "Wagyu beef, which has become famous all over the world, is produced in various regions of Japan.",
+          "Because it is so tender and delicious,",
+          "it has become a popular item among tourists and others who are willing to pay a high price for it.",
+        ],
+      },
+    ],
+    thinkAbout: {
+      lines: [
+        "How does Japan balance traditional local ingredients with imported foods in its modern diet?",
+        "Which Japanese food mentioned in the text would you like to try, and why?",
+      ],
+      audioUrl: audio("jp_food_05.mp3"),
+    },
+    questions: [
+      {
+        question: "How is sashimi eaten?",
+        options: [
+          "Raw fish with soy sauce and wasabi",
+          "Fried fish with rice",
+          "Fish soup with noodles",
+          "Grilled fish with bread",
+        ],
+        answerIndex: 0,
+        explanation: "Sashimi is fresh raw fish, eaten with soy sauce and wasabi.",
+        hintCard: 1,
+      },
+      {
+        question: "Besides rice and miso soup, what do quite a few people in Japan have for breakfast?",
+        options: ["Pizza", "Bread and milk", "Curry", "Only fruit"],
+        answerIndex: 1,
+        explanation: "Quite a few people in Japan have bread and milk for breakfast, and there are many delicious bakeries.",
+        hintCard: 1,
+      },
+      {
+        question: "The wheat used to make udon sometimes comes from which country?",
+        options: ["Norway", "Australia", "Brazil", "Egypt"],
+        answerIndex: 1,
+        explanation: "Udon is often made with wheat imported from countries like Australia.",
+        hintCard: 2,
+      },
+      {
+        question: "What is natto?",
+        options: ["Fermented soybeans", "Raw fish", "A rice cake", "Seaweed"],
+        answerIndex: 0,
+        explanation: "Natto is fermented soybeans, and it is very good for your health.",
+        hintCard: 3,
+      },
+      {
+        question: "Which of these is NOT made from soybeans?",
+        options: ["Soy sauce", "Miso", "Tofu", "Wasabi"],
+        answerIndex: 3,
+        explanation: "Soy sauce, miso, tofu and edamame all come from soybeans. Wasabi does not.",
+        hintCard: 3,
+      },
+      {
+        question: "Why are many tourists happy to pay a high price for wagyu beef?",
+        options: [
+          "It is very tender and delicious",
+          "It comes from Norway",
+          "It is eaten raw",
+          "It is only sold at night",
+        ],
+        answerIndex: 0,
+        explanation: "Wagyu is famous all over the world because it is so tender and delicious.",
+        hintCard: 4,
+      },
+    ],
+  },
+
+  // まだどのレッスンページにもつないでいない（文化ページ /culture だけ。原稿：jp_konbini.txt）
+  "japan-konbini": {
+    title: "Konbini – Japan's Convenience Stores",
+    summary: "More than 50,000 stores, open early until late: what you can buy and do at a konbini, and how they help in a disaster.",
+    cards: [
+      {
+        title: "Konbini everywhere",
+        imageUrl: "/images/picture-story/japan-konbini-1.webp",
+        imageAlt: "Convenience stores in Japan: one on the ground floor of a city building and one with a parking lot in the countryside",
+        audioUrl: audio("jp_konbini_01.mp3"),
+        narration: [
+          "There are more than 50,000 convenience stores (konbini) in Japan.",
+          "If you tried to visit one store every day, it would take you over 150 years!",
+          "In cities, konbini are often located on the ground floor of office buildings or apartment complexes,",
+          "while in rural areas, they usually have parking lots to make it easy for drivers to stop by.",
+        ],
+      },
+      {
+        title: "The Big Three",
+        imageUrl: "/images/picture-story/japan-konbini-2.webp",
+        imageAlt: "Three convenience stores with red, blue and green signs, open late at night",
+        audioUrl: audio("jp_konbini_02.mp3"),
+        narration: [
+          "The \"Big Three\" convenience store chains are 7-Eleven, Lawson, and FamilyMart,",
+          "which are easily recognizable by their signature colors: red, blue, and green, respectively.",
+          "Most of these stores are open from early in the morning until late at night",
+          "– with many operating 24 hours a day.",
+        ],
+      },
+      {
+        title: "Much more than a shop",
+        imageUrl: "/images/picture-story/japan-konbini-3.webp",
+        imageAlt: "Inside a konbini: food, drinks and daily goods, an ATM, and a counter for sending packages and paying bills",
+        audioUrl: audio("jp_konbini_03.mp3"),
+        narration: [
+          "At a konbini, you can buy a huge variety of high-quality food, drinks, and daily necessities.",
+          "Beyond shopping, you can also send packages, withdraw cash from ATMs, pay utility bills, and even buy concert tickets.",
+          "Because they offer so many services in one place,",
+          "it makes total sense that the word konbini comes from the English word \"convenience.\"",
+        ],
+      },
+      {
+        title: "Helping in a disaster",
+        imageUrl: "/images/picture-story/japan-konbini-4.webp",
+        imageAlt: "A konbini giving food and water to people in the local community during a natural disaster",
+        audioUrl: audio("jp_konbini_04.mp3"),
+        narration: [
+          "During major natural disasters, convenience stores also act as vital safety hubs for the local community.",
+          "In emergencies, they often step in to provide food and water supplies,",
+          "as well as support for people who are stranded and unable to return home.",
+        ],
+      },
+    ],
+    thinkAbout: {
+      lines: [
+        "How do Japanese konbini compare to convenience stores or corner shops in your own country",
+        "in terms of the food, services, and community roles they offer?",
+      ],
+      audioUrl: audio("jp_konbini_05.mp3"),
+    },
+    questions: [
+      {
+        question: "About how many konbini are there in Japan?",
+        options: ["About 500", "About 5,000", "More than 50,000", "More than 500,000"],
+        answerIndex: 2,
+        explanation: "There are more than 50,000 konbini in Japan – visiting one a day would take over 150 years!",
+        hintCard: 1,
+      },
+      {
+        question: "What do konbini in the countryside usually have?",
+        options: ["A parking lot", "A swimming pool", "A train station", "A cinema"],
+        answerIndex: 0,
+        explanation: "In rural areas, konbini usually have parking lots so drivers can stop by easily.",
+        hintCard: 1,
+      },
+      {
+        question: "Which three chains are the \"Big Three\"?",
+        options: [
+          "7-Eleven, Lawson and FamilyMart",
+          "Toyota, Honda and Mazda",
+          "Sony, Panasonic and Uniqlo",
+          "Coles, Woolworths and Aldi",
+        ],
+        answerIndex: 0,
+        explanation: "The Big Three are 7-Eleven, Lawson and FamilyMart.",
+        hintCard: 2,
+      },
+      {
+        question: "Which of these can you NOT do at a konbini?",
+        options: ["Send a package", "Withdraw cash from an ATM", "Buy concert tickets", "See a doctor"],
+        answerIndex: 3,
+        explanation: "At a konbini you can send packages, use an ATM, pay bills and buy concert tickets – but not see a doctor.",
+        hintCard: 3,
+      },
+      {
+        question: "Where does the word konbini come from?",
+        options: [
+          "The English word \"convenience\"",
+          "The name of a Japanese city",
+          "The name of the first store",
+          "An old Chinese word",
+        ],
+        answerIndex: 0,
+        explanation: "Konbini comes from the English word \"convenience\" – a konbini offers many services in one place.",
+        hintCard: 3,
+      },
+      {
+        question: "How do konbini help during major natural disasters?",
+        options: [
+          "They provide food and water, and support people who cannot get home",
+          "They all close for a month",
+          "They only sell umbrellas",
+          "They become schools",
+        ],
+        answerIndex: 0,
+        explanation: "In emergencies, konbini act as safety hubs: they provide food and water and support people who are stranded.",
         hintCard: 4,
       },
     ],

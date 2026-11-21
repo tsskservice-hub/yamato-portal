@@ -1,11 +1,20 @@
 import { safeHtml } from '~/utils/safeHtml';
 import React from "react";
+import QuestionAudioButton from "./QuestionAudioButton";
+import KanjiReadingsLine from "./KanjiReadingsLine";
+import type { ReadingDict } from "~/utils/kanji-readings";
 
 export interface QuestionItem {
   id: string;
   category?: string;
   question: string;
   isCustom?: boolean;
+  /** 練習を始めるのに必要な答えの最低文字数（あれば、入力欄の下に「今の文字数 / 必要な文字数」を出す） */
+  minLength?: number;
+  /** 質問の音声ファイル（あれば、質問の前に 🔊 ボタンを出す） */
+  audio?: string;
+  /** 見本の答え（ふりがな付き HTML）。読みを出すときに、この読みを優先する */
+  defaultAnswerHtml?: string;
 }
 
 export interface OralUserAnswerListProps {
@@ -19,6 +28,10 @@ export interface OralUserAnswerListProps {
   setOrderMode?: (mode: "sequential" | "random") => void;
   themeColor?: string;
   title?: string;
+  /** 🔊 で質問を聞くときの速さ */
+  speechSpeed?: number;
+  /** VCE 以外の漢字の読み（あれば、答えの欄の下に読みを出す） */
+  readingDict?: ReadingDict;
 }
 
 export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
@@ -32,13 +45,15 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
   setOrderMode,
   themeColor = "#eab308",
   title = "Review & Customize Your Answers",
+  speechSpeed = 1,
+  readingDict,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border rounded-3xl p-6 shadow-sm space-y-6 border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-            1. {title} ({questions.length} Questions)
+            {title} ({questions.length} Questions)
           </h3>
           <p className="text-xs text-slate-500">
             Auto-saves your answers when you click outside the text box.
@@ -71,6 +86,9 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   </span>
                   {/* 💡 問題文のフォントサイズを text-sm から text-base sm:text-lg へ拡大 */}
                   <h4 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-start gap-1.5 leading-snug">
+                    {item.audio && (
+                      <QuestionAudioButton src={item.audio} playbackRate={speechSpeed} themeColor={themeColor} />
+                    )}
                     <span className="shrink-0">Q{idx + 1}. </span>
                     <span dangerouslySetInnerHTML={{ __html: safeHtml(item.question) }} />
                   </h4>
@@ -99,6 +117,16 @@ export const OralUserAnswerList: React.FC<OralUserAnswerListProps> = ({
                   placeholder="Enter your response in Japanese..."
                   className="w-full text-sm sm:text-base p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:outline-none leading-relaxed"
                 />
+                {readingDict && <KanjiReadingsLine text={answers[item.id] ?? ""} dict={readingDict} contextHtml={item.defaultAnswerHtml} />}
+                {item.minLength ? (() => {
+                  const count = (answers[item.id] ?? "").trim().length;
+                  const ok = count >= item.minLength;
+                  return (
+                    <p className={`text-[11px] font-bold ${ok ? "text-emerald-600" : "text-rose-600"}`}>
+                      {ok ? "✓" : "✗"} {count} / {item.minLength}+ characters
+                    </p>
+                  );
+                })() : null}
               </div>
             </div>
           ))

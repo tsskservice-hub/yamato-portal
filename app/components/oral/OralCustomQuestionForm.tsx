@@ -27,6 +27,9 @@ export const OralCustomQuestionForm: React.FC<OralCustomQuestionFormProps> = ({
         <span>➕</span>
         <span>Add Custom Question & Answer</span>
       </h3>
+      <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+        🔊 Your custom questions are read aloud by AI during practice (no extra credits for the reading).
+      </p>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-2">

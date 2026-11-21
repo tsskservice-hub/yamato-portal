@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { normalizeJapanese, normalizeEnglish } from "~/utils/normalization";
+import { normalizeJapanese, normalizeEnglish, englishAnswerOptions, sameJapaneseNumber } from "~/utils/normalization";
 import { useSoundEffect } from "~/hooks/useSoundEffect";
 import { EduFinishedView } from "~/components/lessons/EduFinishedView";
 
@@ -319,7 +319,8 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     const targetClean = normalizeJapanese(target);
     const spokenClean = normalizeJapanese(spoken);
 
-    if (isStrictMatch(spokenClean, targetClean, JP_SIMILARITY_THRESHOLD)) {
+    // 数の語は、書き方の違いを同じとみなす（十一 ＝ 11、じゅういっさい ＝ 11歳）
+    if (isStrictMatch(spokenClean, targetClean, JP_SIMILARITY_THRESHOLD) || sameJapaneseNumber(spoken, target)) {
       setSpeechVerified(true);
       speechVerifiedRef.current = true;
       setSpeechStatusMessage(`🎤 Voice Verified! ("${spoken}"). Now type the English meaning below.`);
@@ -484,9 +485,10 @@ export const EduReadingDrillModal: React.FC<EduReadingDrillModalProps> = ({
     if (!userInput.trim() || feedback !== null) return;
 
     const cleanInput = normalizeEnglish(userInput);
-    const correctEn = normalizeEnglish(currentItem.english_text || "");
+    // english_text が「/」区切りなら、どれか1つに近ければ正解
+    const correctOptions = englishAnswerOptions(currentItem.english_text || "");
 
-    if (isStrictMatch(cleanInput, correctEn, EN_SIMILARITY_THRESHOLD)) {
+    if (correctOptions.some((correctEn) => isStrictMatch(cleanInput, correctEn, EN_SIMILARITY_THRESHOLD))) {
       setFeedback("correct");
       playSound(); // ✅ 正解音
       setScore((prev) => prev + 1);

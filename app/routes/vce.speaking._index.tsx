@@ -70,7 +70,7 @@ export default function VceSpeakingIndex() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {modules.map((drill: any) => {
-                    const isAccelerated = drill.id === 'eoy-oral-accelerated';
+                    const isAccelerated = drill.id === 'eoy-oral-superb' || drill.id === 'eoy-oral-accelerated';
                     return (
                       <div 
                         key={drill.id} 

@@ -3,6 +3,8 @@ import { useState, useRef } from "react";
 import { useYamatoAccount, getSafeString } from "../hooks/useYamatoAccount";
 import { personaliseGreeting, resolveDisplayName } from "../utils/nickname";
 import { addAiGeneratedLabel } from "../utils/aiImageLabel";
+import { requestAuthModal } from "~/utils/openAuthModal";
+import { creditErrorChatHtml } from '~/lib/credit-errors';
 
 export type ChatOption = {
   label: string;
@@ -75,7 +77,7 @@ export function useYamatoChat2Logic({
     if (onOpenAuth) {
       onOpenAuth(mode);
     } else {
-      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: { mode } }));
+      requestAuthModal(mode);
     }
   };
 
@@ -178,7 +180,7 @@ export function useYamatoChat2Logic({
         { role: "user", content: textToSend },
         {
           role: "assistant",
-          content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! It looks like your credit balance has reached zero. To continue our lesson together, please top up your credits! 📚✨`,
+          content: creditErrorChatHtml(),
         },
       ]);
       setTutorInput("");
@@ -272,7 +274,7 @@ export function useYamatoChat2Logic({
             ...newMessages,
             {
               role: "assistant",
-              content: `🌟 **[Zero Credits Remaining]**\n\nHello, ${callName}! Please top up your credits to continue!`,
+              content: creditErrorChatHtml(data?.error),
             },
           ]);
           await refreshUserCredits();

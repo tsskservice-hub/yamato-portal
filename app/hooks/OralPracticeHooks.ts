@@ -4,6 +4,8 @@
  */
 import { yamatoFetch } from '~/lib/yamatoApi';
 import { useState, useEffect, useRef, useCallback } from "react";
+import { isLikelyHallucination } from "~/utils/stt-guard";
+import { CreditError, creditErrorFromResponse } from '~/lib/credit-errors';
 
 export type ChatMessage = {
   role: "assistant" | "user";
@@ -17,6 +19,8 @@ export interface QuestionData {
   questionOriginal: string;
   defaultAnswer?: string;
   category?: string;
+  /** 質問の音声ファイル（例: /audio/Q001.mp3）。あればAIの読み上げの代わりにこれを流す。カスタム質問にはない */
+  audio?: string;
 }
 
 export function getApiEndpoint(): string {
@@ -70,16 +74,27 @@ export function formatOralFeedbackToHtml(rawText: string): string {
   return cleaned;
 }
 
+/**
+ * 生徒が「質問をもう一度言ってほしい」と言ったかどうか。
+ * 「すみません」だけ、または「すみません、もういちど言ってください／お願いします」なら true（漢字・ひらがな・句読点の違いは無視）。
+ * true のときは AI を呼ばずに（クレジットを使わずに）質問をもう一度読む。
+ */
+export function isRepeatRequest(text: string): boolean {
+  const t = (text || "").replace(/[\s、。,.!！?？「」『』…・〜~ー-]/g, "");
+  return /^(すみません|すいません|済みません)(もう(いちど|一度|1度|１度)((いって|言って)(ください|下さい)|(おねがい|お願い)(します|いたします|致します)))?$/.test(t);
+}
+
 export function useOralPracticeEngine(
   selectedLevel = "normal",
   speechSpeed = 1.0,
   userId?: string,
-  userNickname?: string
+  userNickname?: string,
+  initialMessage = "Press the 🚀 Speak to AI Yamato (Start Practice) button to start your practice."
 ) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "ようこそ！練習モードを選択してスタートしてください。",
+      content: initialMessage,
       isHtml: false,
     },
   ]);
@@ -90,6 +105,15 @@ export function useOralPracticeEngine(
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isWaitingForNext, setIsWaitingForNext] = useState<boolean>(false);
+  // 質問の音声ファイルが読めなかったときの内容（null ならエラーなし）。画面はこれがあると DataErrorState を出す
+  const [questionAudioError, setQuestionAudioError] = useState<string | null>(null);
+  // elaborate の「つっこみ質問」: 試験官が今たずねているつっこみ（null ならなし）。token は 1 回だけ使える無料の券
+  const [followUp, setFollowUp] = useState<{ question: string; token: string } | null>(null);
+  const followUpRef = useRef<{ question: string; token: string } | null>(null);
+  const setFollowUpBoth = (value: { question: string; token: string } | null) => {
+    followUpRef.current = value;
+    setFollowUp(value);
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -103,6 +127,12 @@ export function useOralPracticeEngine(
   const silenceTimerRef = useRef<any>(null);
   const isSpeakingDetectedRef = useRef<boolean>(false);
   const animationFrameRef = useRef<number | null>(null);
+
+  // 録音が終わった時点の「今の質問」を確実に読むための参照（録音開始時のクロージャは古いことがある）
+  const latestQuestionRef = useRef<{ list: QuestionData[]; index: number }>({ list: [], index: 0 });
+  latestQuestionRef.current = { list: activeQuestions, index: currentQuestionIndex };
+  // 練習を始めたときの「生徒が登録した答え」（文字起こしの手がかりに使う）
+  const answersRef = useRef<{ [key: string]: string }>({});
 
   // 🔊 TTS Voice Playback
   const playTTS = async (textToSpeak: string): Promise<void> => {
@@ -186,7 +216,47 @@ export function useOralPracticeEngine(
     });
   };
 
+  // 🔊 質問を流す: 音声ファイルがあればそれを（AI を呼ばないので運営側の費用もかからない）、なければ AI の読み上げ（カスタム質問）
+  // 速さの設定（0.8x〜1.2x）は再生速度として同じように効く。
+  // ファイルが読めなかったときは AI に切り替えず、練習を止めて questionAudioError を立てる（画面が DataErrorState でエラー報告を出す）
+  const playQuestion = (q: QuestionData): Promise<void> => {
+    if (!q.audio) return playTTS(q.questionOriginal || q.question);
+    const audioPath = q.audio;
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (!done) {
+          done = true;
+          resolve();
+        }
+      };
+      const fail = (reason: string) => {
+        if (done) return;
+        done = true;
+        console.error(`❌ Question audio failed: ${audioPath} (${reason})`);
+        stopPractice();
+        setQuestionAudioError(`Question audio failed to load: ${audioPath} (${reason})`);
+        resolve();
+      };
+      const audio = new Audio(audioPath);
+      audio.playbackRate = speechSpeed || 1.0;
+      audio.onended = finish;
+      audio.onerror = () => fail(`media error code ${audio.error?.code ?? "unknown"}`);
+      audio.play().catch((err: any) => {
+        // ブラウザが自動再生を止めただけ（ファイルは無事）のときはエラー画面にしない。
+        // 質問の文は画面に出ているので、生徒は「すみません」でもう一度流せる
+        if (err?.name === "NotAllowedError") {
+          finish();
+          return;
+        }
+        fail(err?.name || "play() failed");
+      });
+    });
+  };
+
   const startRecording = async () => {
+    // 言い直し: 前に録音して文字になった答えは消してから録り直す
+    setInputMessage("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       persistentStreamRef.current = stream;
@@ -207,6 +277,9 @@ export function useOralPracticeEngine(
 
       mediaRecorder.onstop = async () => {
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        // 🎙️ 録音が終わったらマイクを閉じる（閉じないと、練習が終わってもブラウザの「録音中」表示が消えない）
+        stream.getTracks().forEach((t) => t.stop());
+        if (persistentStreamRef.current === stream) persistentStreamRef.current = null;
         await transcribeAudioManually(blob);
       };
 
@@ -214,7 +287,7 @@ export function useOralPracticeEngine(
       setIsRecording(true);
     } catch (err) {
       console.error("Microphone access error:", err);
-      alert("マイクへのアクセスが許可されていません。");
+      alert("Microphone access is not allowed. Please check your browser settings.");
     }
   };
 
@@ -225,36 +298,79 @@ export function useOralPracticeEngine(
     }
   };
 
+  // 🔁 今の質問をもう一度読む（「すみません」と言われたとき。AI は呼ばないのでクレジットは使わない）
+  const repeatCurrentQuestion = async (studentText: string) => {
+    // つっこみ質問の途中なら、つっこみ質問をもう一度読む
+    const activeFollowUp = followUpRef.current;
+    if (activeFollowUp) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "user", content: studentText, isHtml: false },
+        { role: "assistant", content: `Yamato: 「${activeFollowUp.question}」`, isHtml: true },
+      ]);
+      await playTTS(activeFollowUp.question);
+      return;
+    }
+    const { list, index } = latestQuestionRef.current;
+    const q = list[index];
+    if (!q) return;
+    setChatMessages((prev) => [
+      ...prev,
+      { role: "user", content: studentText, isHtml: false },
+      { role: "assistant", content: `Yamato: 「${q.question}」`, isHtml: true },
+    ]);
+    await playQuestion(q);
+  };
+
+  // 🎙️ 録音 → 文字起こしだけ（/api/stt。AI の返事は作らないのでクレジットは使わない）
+  // 以前は /chat に送っていたため、文字起こしのたびに AI が呼ばれ 3 クレジット引かれていた（返事は捨てていた）
   const transcribeAudioManually = async (audioBlob: Blob) => {
     setIsAnalyzing(true);
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async () => {
-      const base64Audio = reader.result as string;
-      try {
-        const endpoint = "https://api.jptutoraiyamato.com/chat";
-        const res = await yamatoFetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audioBase64: base64Audio,
-            audio: base64Audio,
-            appType: "eoy-oral-drill",
-            level: selectedLevel,
-            userId,
-            userNickname,
-          }),
-        });
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        const data = (await res.json()) as any;
-        setInputMessage(data.transcript || "");
-      } catch (err) {
-        console.error("Transcription error:", err);
-        alert("音声の文字起こしに失敗しました。");
-      } finally {
-        setIsAnalyzing(false);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.webm");
+      // 文字起こしの手がかり: 今の質問と、生徒が登録した答え。
+      // 「ペットを飼ったことがあります」が「買った」になるような、同じ音の漢字の取り違えを減らす
+      const { list, index } = latestQuestionRef.current;
+      const currentQ = list[index];
+      if (followUpRef.current) {
+        formData.append("prompt", followUpRef.current.question);
+      } else if (currentQ) {
+        const hint = [currentQ.questionOriginal || currentQ.question, answersRef.current[currentQ.id] || ""]
+          .filter(Boolean)
+          .join(" ");
+        if (hint) formData.append("prompt", hint);
       }
-    };
+      const res = await yamatoFetch("https://api.jptutoraiyamato.com/api/stt", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      const data = (await res.json()) as any;
+      const transcript = (data.userText || data.text || "").trim();
+
+      // 雑音から文字起こしの AI が文を作った・質問がそのまま返ってきた → 生徒の答えとして使わない
+      const askedQuestion = followUpRef.current?.question || currentQ?.questionOriginal || currentQ?.question || "";
+      if (isLikelyHallucination(transcript, askedQuestion)) {
+        console.warn(`[oral] ignored a transcript that the student probably did not say: "${transcript}"`);
+        setInputMessage("");
+        alert("We couldn't hear you clearly. Please record again, a little closer to the microphone.");
+        return;
+      }
+
+      if (isRepeatRequest(transcript)) {
+        setInputMessage("");
+        setIsAnalyzing(false);
+        await repeatCurrentQuestion(transcript);
+        return;
+      }
+      setInputMessage(transcript);
+    } catch (err) {
+      console.error("Transcription error:", err);
+      alert("Sorry, we couldn't transcribe your recording. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   // 💡 ハンズフリー自動送信処理（会話をエンドレスに継続させ、終了キーワードで終了する仕様）
@@ -291,6 +407,8 @@ export function useOralPracticeEngine(
           body: JSON.stringify(requestPayload),
         });
 
+        const creditError = await creditErrorFromResponse(res);
+        if (creditError) throw creditError;
         if (!res.ok) {
           const errBody = await res.text();
           console.error(`❌ [DEBUG] Backend HTTP Error ${res.status}:`, errBody);
@@ -348,7 +466,7 @@ export function useOralPracticeEngine(
             },
           ]);
           console.log("🔊 [DEBUG] Playing next question TTS...");
-          await playTTS(nextQ.questionOriginal || nextQ.question);
+          await playQuestion(nextQ);
           console.log("🔊 [DEBUG] Next question TTS finished. Starting auto recording...");
           startAutoRecording(answersMap);
         } else {
@@ -367,6 +485,11 @@ export function useOralPracticeEngine(
       } catch (err) {
         console.error("❌ [DEBUG] Auto send error:", err);
         setIsAnalyzing(false);
+        if (err instanceof CreditError) {
+          // クレジットが使えない（AI 体験・プランの前、または残高不足）→ 案内を出して、録音は再開しない
+          setChatMessages((prev) => [...prev, { role: "assistant", content: err.message, isHtml: false }]);
+          return;
+        }
         setChatMessages((prev) => [
           ...prev,
           { role: "assistant", content: "通信エラーが発生しました。もう一度お話しください。", isHtml: false },
@@ -475,7 +598,7 @@ export function useOralPracticeEngine(
   ) => {
     console.log("🚀 [DEBUG] startPractice invoked with modeType:", modeType);
     if (!questionsList || questionsList.length === 0) {
-      alert("練習用の設問が見つかりません。");
+      alert("No questions found for this practice.");
       return;
     }
 
@@ -493,9 +616,15 @@ export function useOralPracticeEngine(
 
     let qList = [...questionsList];
     if (orderMode === "random") {
-      qList = qList.sort(() => Math.random() - 0.5);
+      // Fisher–Yates（sort(() => Math.random() - 0.5) は並びに偏りが出る）
+      for (let i = qList.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [qList[i], qList[j]] = [qList[j], qList[i]];
+      }
     }
 
+    answersRef.current = answersMap;
+    setFollowUpBoth(null);
     setActiveQuestions(qList);
     setCurrentQuestionIndex(0);
     setIsPracticing(true);
@@ -507,7 +636,7 @@ export function useOralPracticeEngine(
 
     const startMsg = modeType === "handsfree"
       ? `【ハンズフリー会話開始】<br><br>Yamato: 「${firstQ.question}」<br><br>（どうぞ、マイクに向かってお話しください...終了時は「終わり」と言ってください）`
-      : `【ドリルセッション開始】<br><br>Yamato: 「${firstQ.question}」<br><br>(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br>録音ボタンを押して答えてください！`;
+      : `<b>Practice session started</b><br><br>Yamato: 「${firstQ.question}」<br><br><span class="registered-answer">(Your Answer: 「${userTargetAns || "(Empty)"}」)<br><br></span>Press the Record button or the spacebar to answer. To hear the question again, say 「すみません。もういちどおねがいします。」`;
 
     setChatMessages([
       {
@@ -518,7 +647,7 @@ export function useOralPracticeEngine(
     ]);
 
     console.log("🔊 [DEBUG] Playing first question TTS...");
-    await playTTS(firstQ.questionOriginal || firstQ.question);
+    await playQuestion(firstQ);
     console.log("🔊 [DEBUG] First question TTS finished.");
 
     if (modeType === "handsfree") {
@@ -530,6 +659,7 @@ export function useOralPracticeEngine(
   const stopPractice = () => {
     console.log("🛑 [DEBUG] stopPractice invoked.");
     setIsPracticing(false);
+    setFollowUpBoth(null);
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
     }
@@ -555,6 +685,12 @@ export function useOralPracticeEngine(
     const userText = inputMessage.trim();
     setInputMessage("");
 
+    // 「すみません」と打った場合も、AI を呼ばずに質問をもう一度読む
+    if (isRepeatRequest(userText)) {
+      await repeatCurrentQuestion(userText);
+      return;
+    }
+
     const newMessages: ChatMessage[] = [
       ...chatMessages,
       { role: "user", content: userText, isHtml: false },
@@ -564,6 +700,11 @@ export function useOralPracticeEngine(
 
     const currentQ = activeQuestions[currentQuestionIndex];
     const registeredAnswer = answersMap[currentQ?.id] || "";
+    // つっこみ質問への答えか（無料の券を送る）。サーバーが券を確かめて、使えたときだけクレジットを引かない
+    const activeFollowUp = followUpRef.current;
+    // elaborate で 3 問に 1 回（3・6・9 問目…）、フィードバックと一緒につっこみ質問を作ってもらう
+    const requestFollowUp =
+      mode === "elaborate" && !activeFollowUp && (currentQuestionIndex + 1) % 3 === 0;
 
     try {
       const endpoint = "https://api.jptutoraiyamato.com/chat";
@@ -572,44 +713,70 @@ export function useOralPracticeEngine(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
-          appType: "eoy-oral-drill",
-          expectedQuestion: currentQ?.questionOriginal || currentQ?.question,
-          registeredAnswer: registeredAnswer,
+          // elaborate ページは elaborate 用の AI（eoy-oral-elaborate）、それ以外は drill 用。料金はサーバーが appType で決める
+          appType: mode === "elaborate" ? "eoy-oral-elaborate" : "eoy-oral-drill",
+          expectedQuestion: activeFollowUp ? activeFollowUp.question : currentQ?.questionOriginal || currentQ?.question,
+          registeredAnswer: activeFollowUp ? "" : registeredAnswer,
+          followUpToken: activeFollowUp?.token,
+          requestFollowUp,
+          difficulty: selectedLevel,
           mode,
-          level: selectedLevel,
           section,
           userId: userId,
           userNickname: userNickname,
         }),
       });
 
+      // つっこみの券が使えなかった（時間切れ・使用済み）ときは、つっこみをやめて次へ進めるようにする
+      if (res.status === 409 && activeFollowUp) {
+        setFollowUpBoth(null);
+        const nextIdx = currentQuestionIndex + 1;
+        setChatMessages([
+          ...newMessages,
+          {
+            role: "assistant",
+            content: "This follow-up question has expired. Please go on to the next question.",
+            isHtml: false,
+          },
+        ]);
+        if (nextIdx < activeQuestions.length) setIsWaitingForNext(true);
+        else setIsPracticing(false);
+        return;
+      }
+
+      const creditError = await creditErrorFromResponse(res);
+      if (creditError) throw creditError;
       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
       const data = (await res.json()) as any;
       const aiFeedback = data.reply || "◎ よくできました。";
       const formattedHtml = formatOralFeedbackToHtml(aiFeedback);
 
-      const nextIndex = currentQuestionIndex + 1;
-      const isPerfect = aiFeedback.trim().startsWith("◎");
+      // つっこみへの答えが終わったら、つっこみは終わり
+      if (activeFollowUp) setFollowUpBoth(null);
 
-      if (isPerfect && nextIndex < activeQuestions.length) {
-        setTimeout(() => {
-          setCurrentQuestionIndex(nextIndex);
-          const nextQ = activeQuestions[nextIndex];
-          const nextTargetAns = answersMap[nextQ.id] || "";
-          setChatMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: formattedHtml, isHtml: true },
-            {
-              role: "assistant",
-              content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
-              isHtml: true,
-            },
-          ]);
-          setIsWaitingForNext(false);
-          playTTS(nextQ.questionOriginal || nextQ.question);
-        }, 500);
-      } else if (nextIndex < activeQuestions.length) {
+      // 🎙️ つっこみ質問が返ってきたら、フィードバックのあとに試験官がつっこむ（この答えは無料）
+      if (!activeFollowUp && data.followUpQuestion && data.followUpToken) {
+        const fu = { question: String(data.followUpQuestion), token: String(data.followUpToken) };
+        setFollowUpBoth(fu);
+        setChatMessages([
+          ...newMessages,
+          { role: "assistant", content: formattedHtml, isHtml: true },
+          {
+            role: "assistant",
+            content: `<b>【Follow-up question】</b><br><br>Yamato: 「${fu.question}」<br><br>The examiner wants to hear more. Answer in Japanese — this answer is free (no credits).`,
+            isHtml: true,
+          },
+        ]);
+        setIsAnalyzing(false);
+        await playTTS(fu.question);
+        return;
+      }
+
+      const nextIndex = currentQuestionIndex + 1;
+
+      // ◎ でもすぐには進まない。フィードバックを読んでから、生徒が「Next Question」を押して進む
+      if (nextIndex < activeQuestions.length) {
         setIsWaitingForNext(true);
         setChatMessages([
           ...newMessages,
@@ -620,7 +787,7 @@ export function useOralPracticeEngine(
           ...newMessages,
           {
             role: "assistant",
-            content: `${formattedHtml}<br><br><b>🎉 すべての質問が完了しました！お疲れ様でした。</b>`,
+            content: `${formattedHtml}<br><br><b>🎉 You have finished all the questions. Great work!</b>`,
             isHtml: true,
           },
         ]);
@@ -630,7 +797,11 @@ export function useOralPracticeEngine(
       console.error("Send answer error:", err);
       setChatMessages([
         ...newMessages,
-        { role: "assistant", content: "エラーが発生しました。もう一度送信してください。", isHtml: false },
+        {
+          role: "assistant",
+          content: err instanceof CreditError ? err.message : "Sorry, something went wrong. Please send your answer again.",
+          isHtml: false,
+        },
       ]);
     } finally {
       setIsAnalyzing(false);
@@ -638,6 +809,7 @@ export function useOralPracticeEngine(
   };
 
   const proceedToNextQuestion = (answersMap: { [key: string]: string }) => {
+    setFollowUpBoth(null);
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < activeQuestions.length) {
       setCurrentQuestionIndex(nextIndex);
@@ -647,12 +819,12 @@ export function useOralPracticeEngine(
         ...prev,
         {
           role: "assistant",
-          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br>(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br>Your turn!`,
+          content: `【Next Question】<br><br>Yamato: 「${nextQ.question}」<br><br><span class="registered-answer">(Your Answer: 「${nextTargetAns || "(Empty)"}」)<br><br></span>Your turn!`,
           isHtml: true,
         },
       ]);
       setIsWaitingForNext(false);
-      playTTS(nextQ.questionOriginal || nextQ.question);
+      playQuestion(nextQ);
     }
   };
 
@@ -666,6 +838,10 @@ export function useOralPracticeEngine(
     isAnalyzing,
     isRecording,
     isWaitingForNext,
+    questionAudioError,
+    clearQuestionAudioError: () => setQuestionAudioError(null),
+    /** つっこみ質問に答えている途中か（その答えは無料） */
+    isFollowUpActive: followUp !== null,
     startRecording,
     stopRecording,
     playTTS,

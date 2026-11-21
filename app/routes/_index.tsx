@@ -30,6 +30,7 @@ import { useOtherContent } from '~/data/content-other';
 
 import { DAILY_QUIZZES, QuizItem, getRandomQuiz } from '~/data/quizzes';
 import { fetchPricePlansData } from '~/data/price-plans';
+import { getBrowserTimezone, type DailyQuizStatus } from '~/lib/dailyQuiz';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -111,6 +112,7 @@ export default function Home() {
   // Daily Quiz States
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [hasCompletedTodayQuiz, setHasCompletedTodayQuiz] = useState(false);
+  const [nextQuizAt, setNextQuizAt] = useState<number | null>(null); // 次のクイズを解ける時刻（ミリ秒）
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
@@ -185,26 +187,58 @@ export default function Home() {
     loadPricePlans();
   }, [loadPricePlans]);
 
+  // 💡 デイリークイズの状態はサーバーが決める（ユーザーのタイムゾーンの真夜中で切り替わる。SQL 26）
+  //    タイムゾーンが未設定なら、ブラウザの地域で一度だけ自動設定する
+  const refreshDailyQuizStatus = useCallback(async () => {
+    try {
+      let { data, error } = await supabase.rpc('get_daily_quiz_status');
+      let status = data as DailyQuizStatus | null;
+
+      if (!error && status && !status.timezone) {
+        const browserTz = getBrowserTimezone();
+        if (browserTz) {
+          await supabase.rpc('set_my_timezone', { p_timezone: browserTz });
+          ({ data, error } = await supabase.rpc('get_daily_quiz_status'));
+          status = data as DailyQuizStatus | null;
+        }
+      }
+
+      if (error || !status) {
+        console.error('Failed to load daily quiz status:', error?.message);
+        return;
+      }
+      setHasCompletedTodayQuiz(status.completed);
+      setNextQuizAt(status.completed ? Date.now() + status.seconds_until_next * 1000 : null);
+    } catch (err) {
+      console.error('Failed to load daily quiz status:', err);
+    }
+  }, []);
+
+  // カウントダウンが 0 になったら、サーバーに確認して新しいクイズを解けるようにする
+  const handleNextQuizReached = useCallback(() => {
+    setNextQuizAt(null);
+    setIsAnswerSubmitted(false);
+    setSelectedOption(null);
+    setIsQuizCorrect(false);
+    refreshDailyQuizStatus();
+  }, [refreshDailyQuizStatus]);
+
   const fetchUserCredits = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('credits, last_quiz_date')
+        .select('credits')
         .eq('id', userId)
         .single();
 
       if (data && !error) {
-        const typedData = data as { credits?: number; last_quiz_date?: string };
+        const typedData = data as { credits?: number };
         setCredits(typedData.credits ?? 10);
-
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (typedData.last_quiz_date === todayStr) {
-          setHasCompletedTodayQuiz(true);
-        }
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
     }
+    refreshDailyQuizStatus();
   };
 
   useEffect(() => {
@@ -272,7 +306,7 @@ export default function Home() {
       // 🔐 クレジットの付与はデータベース側の関数で行う（1日1回・+2 をサーバー側で確認）
       // ブラウザから profiles.credits を直接書き換えることはできない
       const { data, error } = await supabase.rpc('claim_daily_quiz_reward');
-      const result = data as { granted?: boolean; credits?: number } | null;
+      const result = data as { granted?: boolean; credits?: number; seconds_until_next?: number } | null;
 
       if (!error && result) {
         if (result.granted && typeof result.credits === 'number') {
@@ -280,6 +314,9 @@ export default function Home() {
           window.dispatchEvent(new CustomEvent("yamato:credits-updated", { detail: result.credits }));
         }
         setHasCompletedTodayQuiz(true);
+        if (typeof result.seconds_until_next === 'number') {
+          setNextQuizAt(Date.now() + result.seconds_until_next * 1000);
+        }
       } else if (error) {
         console.error("Failed to claim daily quiz reward:", error.message);
       }
@@ -340,12 +377,14 @@ export default function Home() {
     >
       <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-950'} transition-colors duration-300 relative flex flex-col justify-between`}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 flex-grow w-full">
-          
+
           {/* 1. Hero Section ＆ Auto Demo Chat (CONTENT_OTHER の設定を渡す) */}
           <HeroDemoChat
             isDarkMode={isDarkMode}
             user={user}
             hasCompletedTodayQuiz={hasCompletedTodayQuiz}
+            nextQuizAt={nextQuizAt}
+            onNextQuizReached={handleNextQuizReached}
             onOpenAuthModal={handleOpenAuthModal}
             onOpenQuizModal={() => {
               if (!hasCompletedTodayQuiz) {
@@ -382,7 +421,7 @@ export default function Home() {
             gamesData={gamesData}
             isDarkMode={isDarkMode}
             onSelectModule={async (mod) => {
-              if (mod.isComingSoon) return;
+              if (mod.isComingSoon || !mod.path) return;
               if (!mod.creditRequirement || await validateFeatureCredits(mod.creditRequirement as 'textAi' | 'imageAi')) {
                 navigate(mod.path);
               }
@@ -406,6 +445,8 @@ export default function Home() {
           selectedOption={selectedOption}
           isAnswerSubmitted={isAnswerSubmitted}
           hasCompletedTodayQuiz={hasCompletedTodayQuiz}
+          nextQuizAt={nextQuizAt}
+          onNextQuizReached={handleNextQuizReached}
           isQuizCorrect={isQuizCorrect}
           onAnswer={handleAnswerQuiz}
           portalContent={otherData}
