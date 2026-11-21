@@ -54,6 +54,19 @@ export default function Footer({}: FooterProps) {
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* 1 行目: 音声のクレジット表記（中央）。音読さん（ondoku3.com）の音声を使っているため */}
+        <p className="text-center text-xs text-slate-500 pb-4 mb-4 border-b border-slate-100">
+          <a
+            href="https://ondoku3.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-indigo-600 hover:underline transition-colors"
+          >
+            Voice By ondoku3.com
+          </a>
+        </p>
+
+        {/* 2 行目: これまでのフッター */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
           
           {/* Copyright, ボタン類、法的リンクをすべて左側にまとめて配置 */}
