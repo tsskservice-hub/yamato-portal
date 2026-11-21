@@ -12544,9 +12544,9 @@ function escapeHtml$4(html) {
 function createServerHandoffString(serverHandoff) {
   return escapeHtml$4(JSON.stringify(serverHandoff));
 }
-var define_process_env_default$3 = {};
+var define_process_env_default$4 = {};
 async function broadcastDevReady(build, origin) {
-  origin ?? (origin = define_process_env_default$3.REMIX_DEV_ORIGIN);
+  origin ?? (origin = define_process_env_default$4.REMIX_DEV_ORIGIN);
   if (!origin)
     throw Error("Dev server origin not set");
   let url = new URL(origin);
@@ -39574,7 +39574,7 @@ function shouldShowDeprecationWarning() {
 if (shouldShowDeprecationWarning())
   console.warn("\u26A0\uFE0F  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
 var __vite_import_meta_env__$1 = { "BASE_URL": "/", "DEV": false, "MODE": "production", "PROD": true, "SSR": true, "VITE_SUPABASE_URL": "https://ybquwzoreecxxbewjpdn.supabase.co" };
-var define_process_env_default$2 = {};
+var define_process_env_default$3 = {};
 var cachedSupabase = null;
 var FALLBACK_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
 var FALLBACK_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
@@ -39591,11 +39591,11 @@ var getSupabase = () => {
     }
   } catch (e) {
   }
-  if (!envUrl && typeof process !== "undefined" && define_process_env_default$2) {
-    envUrl = define_process_env_default$2.VITE_SUPABASE_URL || define_process_env_default$2.SUPABASE_URL || "";
+  if (!envUrl && typeof process !== "undefined" && define_process_env_default$3) {
+    envUrl = define_process_env_default$3.VITE_SUPABASE_URL || define_process_env_default$3.SUPABASE_URL || "";
   }
-  if (!envKey && typeof process !== "undefined" && define_process_env_default$2) {
-    envKey = define_process_env_default$2.VITE_SUPABASE_ANON_KEY || define_process_env_default$2.SUPABASE_ANON_KEY || "";
+  if (!envKey && typeof process !== "undefined" && define_process_env_default$3) {
+    envKey = define_process_env_default$3.VITE_SUPABASE_ANON_KEY || define_process_env_default$3.SUPABASE_ANON_KEY || "";
   }
   const finalUrl = envUrl && !envUrl.includes("placeholder") ? envUrl : FALLBACK_URL;
   const finalKey = envKey && !envKey.includes("placeholder") ? envKey : FALLBACK_ANON_KEY;
@@ -40596,7 +40596,7 @@ function warnOnce(message) {
   warnedMessages.add(message);
   console.warn(message);
 }
-var define_process_env_default$1 = {};
+var define_process_env_default$2 = {};
 var warned = false;
 var DEPRECATED_PACKAGES = [
   "@supabase/auth-helpers-nextjs",
@@ -40608,10 +40608,10 @@ function warnIfUsingDeprecatedAuthHelpersPackage() {
   if (warned) {
     return;
   }
-  if (typeof process === "undefined" || !(define_process_env_default$1 == null ? void 0 : define_process_env_default$1.npm_package_name)) {
+  if (typeof process === "undefined" || !(define_process_env_default$2 == null ? void 0 : define_process_env_default$2.npm_package_name)) {
     return;
   }
-  const packageName = define_process_env_default$1.npm_package_name;
+  const packageName = define_process_env_default$2.npm_package_name;
   if (!DEPRECATED_PACKAGES.includes(packageName)) {
     return;
   }
@@ -40681,7 +40681,7 @@ function createServerClient(supabaseUrl, supabaseKey, options) {
   });
   return client;
 }
-var define_process_env_default = {};
+var define_process_env_default$1 = {};
 var DEFAULT_URL = "https://ybquwzoreecxxbewjpdn.supabase.co";
 var DEFAULT_ANON_KEY = "sb_publishable_kxxOp7nY3OuRNYp_Cxl5Sw_QtVCG_te";
 var getEnv = (key, context) => {
@@ -40691,8 +40691,8 @@ var getEnv = (key, context) => {
     return cfEnv[key];
   }
   try {
-    if (typeof process !== "undefined" && (define_process_env_default == null ? void 0 : define_process_env_default[key]) && !String(define_process_env_default[key]).includes("placeholder")) {
-      return define_process_env_default[key];
+    if (typeof process !== "undefined" && (define_process_env_default$1 == null ? void 0 : define_process_env_default$1[key]) && !String(define_process_env_default$1[key]).includes("placeholder")) {
+      return define_process_env_default$1[key];
     }
   } catch {
   }
@@ -41040,7 +41040,7 @@ function requestAuthModal(mode2 = "signin") {
 var DEFAULT_COLOR = "#dc2626";
 var KANJI_RE = /[㐀-䶿一-鿿豈-﫿々]/;
 var MAX_QUERY = 30;
-var HIDDEN_PATHS = ["/print-report", "/prices", "/faq"];
+var HIDDEN_PATHS = ["/print-report", "/prices", "/faq", "/about", "/legal", "/contact", "/my-account"];
 function textWithoutRuby(node) {
   const clone = node.cloneNode(true);
   if ("querySelectorAll" in clone)
@@ -41319,7 +41319,7 @@ var links$1 = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
   }
 ];
-async function loader$14({ request, context }) {
+async function loader$15({ request, context }) {
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
   const { data: { user } } = await serverSupabase.auth.getUser();
   let nickname = "";
@@ -41430,7 +41430,7 @@ var route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   Layout,
   default: App,
   links: links$1,
-  loader: loader$14
+  loader: loader$15
 }, Symbol.toStringTag, { value: "Module" }));
 var OUTSIDE_AU = "OUTSIDE_AU";
 var AU_STATES = [
@@ -41638,7 +41638,7 @@ async function getVerifiedSchoolEmails(admin, userId) {
 }
 var IMAGE_BUCKET = "writing-submissions";
 var SIGNED_URL_SECONDS = 300;
-async function loader$13({ request, context, params }) {
+async function loader$14({ request, context, params }) {
   const { user, admin } = await requireTeacher(request, context);
   const notFound = () => new Response("Image not found or no longer kept.", { status: 404 });
   const { data: submission } = await admin.from("edu_writing_submissions").select("user_id, image_path, image_deleted_at, image_delete_after").eq("id", params.submissionId ?? "").maybeSingle();
@@ -41660,15 +41660,15 @@ async function loader$13({ request, context, params }) {
 }
 var route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$13
+  loader: loader$14
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$12({ request }) {
+async function loader$13({ request }) {
   const url = new URL(request.url);
   return dist$1.redirect(`/vce/speaking/eoy-oral-superb${url.search}`, 301);
 }
 var route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$12
+  loader: loader$13
 }, Symbol.toStringTag, { value: "Module" }));
 var toKebabCase = (string) => string == null ? void 0 : string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 function toLucideIconData(iconName, iconNode, aliases = []) {
@@ -43484,6 +43484,44 @@ function Header({
     ] }) })
   ] });
 }
+var VOICE_SERVICES = [
+  {
+    name: "ondoku3.com",
+    link: "https://ondoku3.com/",
+    usedFor: ["Audio for the listening tasks in the lessons"]
+  },
+  {
+    name: "ElevenLabs",
+    usedFor: ["Audio for the VCE oral exam questions (Oral Exam Questions, Drill, Elaborate and Mock)"]
+  },
+  {
+    name: "OpenAI",
+    usedFor: [
+      "AI Yamato reading answers aloud",
+      "The examiner's voice in the Oral Mock Exam",
+      "Yamato-sensei's voice in the Oral Superb conversation"
+    ]
+  }
+];
+var AI_SERVICES = [
+  {
+    name: "OpenAI",
+    usedFor: ["Turning your recorded voice into text in the speaking practice pages", "Real-time conversation in Oral Superb"]
+  },
+  {
+    name: "Google Gemini (Google Cloud)",
+    usedFor: ["AI Yamato's replies and feedback", "Pictures drawn by AI Yamato"]
+  }
+];
+var PICTURE_SOURCES = [
+  { name: "Our own photos", usedFor: ["Photos we took ourselves"] },
+  { name: "Stock photos", usedFor: ["Photos used under their licence terms, such as Photo AC (\u5199\u771FAC)"] },
+  { name: "Public-domain artworks", usedFor: ["For example, ukiyo-e prints"] },
+  {
+    name: "AI illustrations",
+    usedFor: ["Some illustrations, for example some pictures in the class live game. Every picture is checked by a teacher before it is used."]
+  }
+];
 function BugReportButton({ className = "" }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "a",
@@ -43516,67 +43554,87 @@ function QuickFeedbackButton({ className = "" }) {
 }
 function Footer({}) {
   const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { className: "bg-white border-t border-slate-200 mt-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col lg:flex-row justify-between items-center gap-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-sm text-slate-500", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-      "\xA9 ",
-      currentYear,
-      " AI Yamato. All rights reserved."
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("footer", { className: "bg-white border-t border-slate-200 mt-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-center text-xs text-slate-500 pb-4 mb-4 border-b border-slate-100", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "AI voices: " }),
+      VOICE_SERVICES.map((s2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React.Fragment, { children: [
+        i > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: " \xB7 " }),
+        s2.link ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "a",
+          {
+            href: s2.link,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "hover:text-indigo-600 hover:underline transition-colors",
+            children: s2.name
+          }
+        ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: s2.name })
+      ] }, s2.name)),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mx-2 text-slate-300", children: "|" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/credits", className: "hover:text-indigo-600 hover:underline transition-colors", children: "Credits" })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(BugReportButton, {}),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(QuickFeedbackButton, {})
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-slate-600", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/about",
-          className: "hover:text-indigo-600 transition-colors font-medium text-indigo-700",
-          children: "About Us"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/legal/terms",
-          className: "hover:text-indigo-600 transition-colors",
-          children: "Terms of Service"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/legal/privacy",
-          className: "hover:text-indigo-600 transition-colors",
-          children: "Privacy Policy"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/legal/disclaimer",
-          className: "hover:text-indigo-600 transition-colors",
-          children: "Disclaimer"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/contact",
-          className: "hover:text-indigo-600 transition-colors",
-          children: "Contact"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link,
-        {
-          to: "/my-account",
-          className: "text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center border-slate-200 hover:bg-slate-100 text-slate-700 whitespace-nowrap",
-          children: "My Account"
-        }
-      )
-    ] })
-  ] }) }) }) });
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col lg:flex-row justify-between items-center gap-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-sm text-slate-500", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "\xA9 ",
+        currentYear,
+        " AI Yamato. All rights reserved."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(BugReportButton, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(QuickFeedbackButton, {})
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-slate-600", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/about",
+            className: "hover:text-indigo-600 transition-colors font-medium text-indigo-700",
+            children: "About Us"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/legal/terms",
+            className: "hover:text-indigo-600 transition-colors",
+            children: "Terms of Service"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/legal/privacy",
+            className: "hover:text-indigo-600 transition-colors",
+            children: "Privacy Policy"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/legal/disclaimer",
+            className: "hover:text-indigo-600 transition-colors",
+            children: "Disclaimer"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/contact",
+            className: "hover:text-indigo-600 transition-colors",
+            children: "Contact"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link,
+          {
+            to: "/my-account",
+            className: "text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-all flex items-center border-slate-200 hover:bg-slate-100 text-slate-700 whitespace-nowrap",
+            children: "My Account"
+          }
+        )
+      ] })
+    ] }) })
+  ] }) });
 }
 var Breadcrumbs = ({ pathname, breadcrumbTitle }) => {
   if (pathname === "/")
@@ -43884,8 +43942,22 @@ var PageLayout = reactExports.forwardRef(({
     }
   };
   const resolvedNickname = nickname && nickname.trim() !== "" ? nickname : "My friend";
-  const publicPaths = ["/", "/privacy", "/terms", "/disclaimer", "/prices", "/faq", "/contact"];
-  const isPublicPage = publicPaths.includes(location2.pathname);
+  const publicPaths = [
+    "/",
+    "/privacy",
+    "/terms",
+    "/disclaimer",
+    "/prices",
+    "/faq",
+    "/contact",
+    "/about",
+    "/legal",
+    "/legal/terms",
+    "/legal/privacy",
+    "/legal/disclaimer"
+  ];
+  const normalizedPath = location2.pathname.length > 1 ? location2.pathname.replace(/\/+$/, "") : location2.pathname;
+  const isPublicPage = publicPaths.includes(normalizedPath);
   const shouldRequireAuth = requireAuth !== void 0 ? requireAuth : !isPublicPage && !user;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col min-h-screen bg-white text-slate-900", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -47459,7 +47531,7 @@ function generateModuleMeta(portalContent, currentPath) {
 var links = () => [
   { rel: "stylesheet", href: genkoStyles }
 ];
-async function loader$11({ request }) {
+async function loader$12({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -47472,7 +47544,7 @@ async function loader$11({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$_ = ({ data: data2 }) => {
+var meta$$ = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function GenkoyoshiEditorVce() {
@@ -47729,8 +47801,8 @@ var route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty
   __proto__: null,
   default: GenkoyoshiEditorVce,
   links,
-  loader: loader$11,
-  meta: meta$_
+  loader: loader$12,
+  meta: meta$$
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoKanjiGrammarCheckerVce = ({
   defaultOpen = false,
@@ -47879,7 +47951,7 @@ var VCE_GRAMMAR_LIST = [
   "\u3066\u3044\u307E\u3059",
   "\u3067\u3044\u307E\u3059"
 ];
-async function loader$10({ request }) {
+async function loader$11({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48190,14 +48262,14 @@ function KanjiGrammarCheckerPage() {
     ) })
   ] }) });
 }
-var meta$Z = ({ data: data2 }) => {
+var meta$_ = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiGrammarCheckerPage,
-  loader: loader$10,
-  meta: meta$Z
+  loader: loader$11,
+  meta: meta$_
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoOralExamQuestions = ({
   systemPrompt = "",
@@ -48266,7 +48338,7 @@ async function fetchOralExamQuestionsData(supabaseClient) {
     return null;
   }
 }
-async function loader$$({ request }) {
+async function loader$10({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -48279,7 +48351,7 @@ async function loader$$({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$Y = ({ data: data2 }) => {
+var meta$Z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OralExamQuestions() {
@@ -48486,8 +48558,8 @@ function OralExamQuestions() {
 var route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OralExamQuestions,
-  loader: loader$$,
-  meta: meta$Y
+  loader: loader$10,
+  meta: meta$Z
 }, Symbol.toStringTag, { value: "Module" }));
 var OralExaminerAvatar = ({
   isSpeaking = false,
@@ -50404,14 +50476,14 @@ var KanjiReadingsLine = ({ text, dict, contextHtml }) => {
     ] }, r2.base))
   ] });
 };
-async function loader$_({ request }) {
+async function loader$$({ request }) {
   const url = new URL(request.url);
   return dist$1.json({
     portalContent: null,
     currentPath: url.pathname
   });
 }
-var meta$X = ({ data: data2 }) => {
+var meta$Y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralElaboratePage() {
@@ -51109,8 +51181,8 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (${st.sentences} sentence
 var route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralElaboratePage,
-  loader: loader$_,
-  meta: meta$X
+  loader: loader$$,
+  meta: meta$Y
 }, Symbol.toStringTag, { value: "Module" }));
 function FeedbackPdfModal({
   initialContent,
@@ -51428,7 +51500,7 @@ function ChatYamatoEoyWritingCustom({
     )
   ] });
 }
-async function loader$Z({ request }) {
+async function loader$_({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -51441,7 +51513,7 @@ async function loader$Z({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$W = ({ data: data2 }) => {
+var meta$X = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CustomDashboard() {
@@ -51785,8 +51857,8 @@ Details: ${assignedQuestionText}` : "";
 var route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CustomDashboard,
-  loader: loader$Z,
-  meta: meta$W
+  loader: loader$_,
+  meta: meta$X
 }, Symbol.toStringTag, { value: "Module" }));
 var ChatYamatoEoyOralDrill = ({
   systemPrompt = "",
@@ -52617,11 +52689,11 @@ var OralMockReport = ({
     ) })
   ] });
 };
-async function loader$Y({ request }) {
+async function loader$Z({ request }) {
   const url = new URL(request.url);
   return dist$1.json({ portalContent: null, currentPath: url.pathname });
 }
-var meta$V = ({ data: data2 }) => {
+var meta$W = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var THEME$1 = "#8b5cf6";
@@ -52848,8 +52920,8 @@ Find a quiet place and allow the microphone. Headphones work best.`))
 var route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingEoyOralSuperbPage,
-  loader: loader$Y,
-  meta: meta$V
+  loader: loader$Z,
+  meta: meta$W
 }, Symbol.toStringTag, { value: "Module" }));
 var OralUserAnswerList = ({
   questions,
@@ -52987,14 +53059,14 @@ var OralUserAnswerList = ({
     ] })
   ] });
 };
-async function loader$X({ request }) {
+async function loader$Y({ request }) {
   const url = new URL(request.url);
   return dist$1.json({
     portalContent: null,
     currentPath: url.pathname
   });
 }
-var meta$U = ({ data: data2 }) => {
+var meta$V = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function EoyOralDrillPage() {
@@ -53409,10 +53481,10 @@ First one: "${first.questionOriginal.slice(0, 20)}..." (Current: ${(answers[firs
 var route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: EoyOralDrillPage,
-  loader: loader$X,
-  meta: meta$U
+  loader: loader$Y,
+  meta: meta$V
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$W({ request }) {
+async function loader$X({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -53426,7 +53498,7 @@ async function loader$W({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$T = ({ data: data2 }) => {
+var meta$U = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var sportsColorTemplates = [
@@ -53953,8 +54025,8 @@ function TestYamatoNotePage() {
 var route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoNotePage,
-  loader: loader$W,
-  meta: meta$T
+  loader: loader$X,
+  meta: meta$U
 }, Symbol.toStringTag, { value: "Module" }));
 var MOCK_SECTION_COST = {
   section1: CREDIT_COSTS.mockSection1,
@@ -54975,11 +55047,11 @@ var ChatYamatoEoyOralMock = ({
     }
   );
 };
-async function loader$V({ request }) {
+async function loader$W({ request }) {
   const url = new URL(request.url);
   return dist$1.json({ portalContent: null, currentPath: url.pathname });
 }
-var meta$S = ({ data: data2 }) => {
+var meta$T = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var THEME = "#ef4444";
@@ -55175,8 +55247,8 @@ Find a quiet place and allow the microphone.`))
 var route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MockOralMode,
-  loader: loader$V,
-  meta: meta$S
+  loader: loader$W,
+  meta: meta$T
 }, Symbol.toStringTag, { value: "Module" }));
 var POLL_MS = 3e4;
 function sameTeacher(a, b) {
@@ -55531,8 +55603,8 @@ async function loadGamePage(request) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var loader$U = ({ request }) => loadGamePage(request);
-var meta$R = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$V = ({ request }) => loadGamePage(request);
+var meta$S = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function HiraganaSolitaireRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hiragana Solitaire", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -55548,8 +55620,8 @@ function HiraganaSolitaireRoute() {
 var route12 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HiraganaSolitaireRoute,
-  loader: loader$U,
-  meta: meta$R
+  loader: loader$V,
+  meta: meta$S
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$b = "WRITING_STYLES";
 async function fetchWritingStylesData(supabaseClient) {
@@ -55569,7 +55641,7 @@ async function fetchWritingStylesData(supabaseClient) {
     return null;
   }
 }
-async function loader$T({ request }) {
+async function loader$U({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -55582,7 +55654,7 @@ async function loader$T({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$Q = ({ data: data2 }) => {
+var meta$R = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function WritingStylesGuide() {
@@ -55710,11 +55782,11 @@ function WritingStylesGuide() {
 var route13 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WritingStylesGuide,
-  loader: loader$T,
-  meta: meta$Q
+  loader: loader$U,
+  meta: meta$R
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$S = ({ request }) => loadGamePage(request);
-var meta$P = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$T = ({ request }) => loadGamePage(request);
+var meta$Q = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 var VARIANTS = [
   { key: "easy", label: "Easy", params: { version: "easy" } },
   { key: "hard", label: "Hard", params: { version: "hard" } }
@@ -55735,8 +55807,8 @@ function PrefecturePuzzleRoute() {
 var route14 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrefecturePuzzleRoute,
-  loader: loader$S,
-  meta: meta$P
+  loader: loader$T,
+  meta: meta$Q
 }, Symbol.toStringTag, { value: "Module" }));
 function shuffle$5(arr) {
   const a = [...arr];
@@ -55761,7 +55833,7 @@ var RINGS_DATA = STAGES.map((s2, i) => [
   ...RING_OK[i].map((j) => [...s2[j], true]),
   ...RING_BAD[i].map(([k2, r2]) => [k2, r2, false])
 ]);
-async function loader$R({ request }) {
+async function loader$S({ request }) {
   let portalContent = null;
   try {
     const { data: data2 } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -55770,7 +55842,7 @@ async function loader$R({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: new URL(request.url).pathname });
 }
-var meta$O = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var meta$P = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function RollingCharacterPage() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Rolling Character", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto px-4 py-8 space-y-6", children: [
@@ -56313,8 +56385,8 @@ function RollingCharacterArena() {
 var route15 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: RollingCharacterPage,
-  loader: loader$R,
-  meta: meta$O
+  loader: loader$S,
+  meta: meta$P
 }, Symbol.toStringTag, { value: "Module" }));
 var KANJI_GROUP_ORDER = [
   "Numbers",
@@ -56594,10 +56666,10 @@ function lookalikeChars(type) {
 function isLookalikeType(v2) {
   return v2 === "hiragana" || v2 === "katakana" || v2 === "kanji";
 }
-async function loader$Q({ request }) {
+async function loader$R({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$N = () => [
+var meta$O = () => [
   { title: "Look-alike Characters \u2013 Accepted Answers | JP Tutor AI Yamato" },
   { name: "description", content: "The look-alike hiragana, katakana and kanji, with the answers accepted in the test." }
 ];
@@ -56662,8 +56734,8 @@ function LookalikeAnswersPage() {
 var route16 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LookalikeAnswersPage,
-  loader: loader$Q,
-  meta: meta$N
+  loader: loader$R,
+  meta: meta$O
 }, Symbol.toStringTag, { value: "Module" }));
 function renderGrammarText(text, modalKey) {
   const grammarLinks = {
@@ -56972,7 +57044,7 @@ async function fetchTextTypesData(supabaseClient) {
     return null;
   }
 }
-async function loader$P({ request }) {
+async function loader$Q({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -57363,14 +57435,14 @@ Prompt (Japanese): ${selectedQuestion.japanese}` : "";
     }
   );
 }
-var meta$M = ({ data: data2 }) => {
+var meta$N = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route17 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$P,
-  meta: meta$M
+  loader: loader$Q,
+  meta: meta$N
 }, Symbol.toStringTag, { value: "Module" }));
 var COLUMN_SETS = [
   "id, title, kind, item_type, lesson_id, task_keys, quiz_id, assign_to, due_at, allow_during_school, catchup_until",
@@ -57718,7 +57790,7 @@ function shuffle$4(list2) {
   }
   return a;
 }
-async function loader$O({ request, context, params }) {
+async function loader$P({ request, context, params }) {
   const { user, headers } = await getSessionUser(request, context);
   if (!user)
     return dist$1.json({ status: "signin" }, { headers });
@@ -58037,7 +58109,7 @@ function QuizRunner({ data: data2 }) {
     ] })
   ] });
 }
-var meta$L = () => [
+var meta$M = () => [
   { title: "Vocabulary Quiz | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
@@ -58045,14 +58117,14 @@ var route18 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   action: action$a,
   default: ClassQuizPage,
-  loader: loader$O,
-  meta: meta$L
+  loader: loader$P,
+  meta: meta$M
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$N({ request }) {
+async function loader$O({ request }) {
   blockOnProduction(request);
   return null;
 }
-var meta$K = () => {
+var meta$L = () => {
   return [
     { title: "AI Yamato \u72EC\u7ACBAPI\u30C6\u30B9\u30C8\u753B\u9762" },
     { name: "description", content: "\u72EC\u7ACBAPI\u30B5\u30FC\u30D0\u30FC\u3068\u9023\u643A\u3059\u308B\u30E4\u30DE\u30C8\u306E\u30C6\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u3059\u3002" }
@@ -58450,8 +58522,8 @@ function TestYamatoPage() {
 var route19 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestYamatoPage,
-  loader: loader$N,
-  meta: meta$K
+  loader: loader$O,
+  meta: meta$L
 }, Symbol.toStringTag, { value: "Module" }));
 var ENEMY_POOL = [
   { char: "\u3042", romaji: "a" },
@@ -58487,7 +58559,7 @@ var SOUND_DIR = "/game-assets/ogre-star-sword";
 var SWORD_SOUND = `${SOUND_DIR}/sword-sound.mp3`;
 var COUNT_SOUNDS = Array.from({ length: 10 }, (_2, i) => `${SOUND_DIR}/count-${i + 1}.mp3`);
 var COUNT_FALLBACK_MS = 1500;
-async function loader$M({ request }) {
+async function loader$N({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -58500,7 +58572,7 @@ async function loader$M({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$J = ({ data: data2 }) => {
+var meta$K = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function OgreStarSwordPage() {
@@ -58870,8 +58942,8 @@ function OgreStarSwordArena() {
 var route20 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: OgreStarSwordPage,
-  loader: loader$M,
-  meta: meta$J
+  loader: loader$N,
+  meta: meta$K
 }, Symbol.toStringTag, { value: "Module" }));
 var handleScrollToSection = (e, anchorId) => {
   e.preventDefault();
@@ -58883,7 +58955,7 @@ var handleScrollToSection = (e, anchorId) => {
 var getAnchorId = (text) => {
   return `cat-${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 };
-async function loader$L({ request }) {
+async function loader$M({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   let grammarCategories = [];
@@ -58909,7 +58981,7 @@ async function loader$L({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$I = ({ data: data2 }) => {
+var meta$J = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VceGrammarComponent() {
@@ -59061,10 +59133,10 @@ function VceGrammarComponent() {
 var route21 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceGrammarComponent,
-  loader: loader$L,
-  meta: meta$I
+  loader: loader$M,
+  meta: meta$J
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$K() {
+async function loader$L() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405 });
 }
 async function action$9({ request, context }) {
@@ -59116,9 +59188,9 @@ async function action$9({ request, context }) {
 var route22 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$9,
-  loader: loader$K
+  loader: loader$L
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$J({ request, context }) {
+async function loader$K({ request, context }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -59189,16 +59261,16 @@ function ImageTestPage() {
     ] })
   ] }) });
 }
-var meta$H = ({ data: data2 }) => {
+var meta$I = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route23 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ImageTestPage,
-  loader: loader$J,
-  meta: meta$H
+  loader: loader$K,
+  meta: meta$I
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$I({ request }) {
+async function loader$J({ request }) {
   blockOnProduction(request);
   const url = new URL(request.url);
   let portalContent = null;
@@ -59212,7 +59284,7 @@ async function loader$I({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$G = ({ data: data2 }) => {
+var meta$H = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TestAudioPage() {
@@ -59560,8 +59632,8 @@ function TestAudioPage() {
 var route24 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestAudioPage,
-  loader: loader$I,
-  meta: meta$G
+  loader: loader$J,
+  meta: meta$H
 }, Symbol.toStringTag, { value: "Module" }));
 function useGameSounds(files, volume = 0.8) {
   const baseRef = reactExports.useRef(null);
@@ -59674,7 +59746,7 @@ var KANA_SETS$1 = [
   { key: "all", label: "All", example: { hiragana: "\u3042\u301C\u3074\u3087", katakana: "\u30A2\u301C\u30D4\u30E7" } }
 ];
 var clean$2 = (v2) => typeof v2 === "string" ? v2.trim() : "";
-async function loader$H({ request }) {
+async function loader$I({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -59722,7 +59794,7 @@ async function loader$H({ request }) {
   }
   return dist$1.json({ portalContent, currentPath: url.pathname, pools, loadError });
 }
-var meta$F = ({ data: data2 }) => {
+var meta$G = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function CharacterMazePage() {
@@ -60183,10 +60255,10 @@ function CharacterMazeArena({ pools }) {
 var route25 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CharacterMazePage,
-  loader: loader$H,
-  meta: meta$F
+  loader: loader$I,
+  meta: meta$G
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$G({ request }) {
+async function loader$H({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60199,7 +60271,7 @@ async function loader$G({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$E = ({ data: data2 }) => {
+var meta$F = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function TextTypesComponent() {
@@ -60295,12 +60367,12 @@ function TextTypesComponent() {
 var route26 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TextTypesComponent,
-  loader: loader$G,
-  meta: meta$E
+  loader: loader$H,
+  meta: meta$F
 }, Symbol.toStringTag, { value: "Module" }));
 var UUID = /^[0-9a-f-]{36}$/i;
 var BROWSER_TASKS = ["vocabulary", "listening", "reading", "speaking", "culture"];
-async function loader$F({ request, context }) {
+async function loader$G({ request, context }) {
   const { user, headers } = await getSessionUser(request, context);
   const lessonId = new URL(request.url).searchParams.get("lessonId") ?? "";
   if (!user || !UUID.test(lessonId))
@@ -60357,7 +60429,7 @@ async function action$8({ request, context }) {
 var route27 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$8,
-  loader: loader$F
+  loader: loader$G
 }, Symbol.toStringTag, { value: "Module" }));
 var TICKET_TTL_MS = 10 * 6e4;
 async function getUserIdFromBearer(request, admin) {
@@ -60491,7 +60563,7 @@ async function getLessonTaskSettingsForUser(admin, userId, lessonId) {
 }
 var NO_STORE$1 = { "Cache-Control": "no-store" };
 var NO_LIMIT = { vocabWordsPerMode: null };
-async function loader$E() {
+async function loader$F() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE$1 });
 }
 async function action$7({ request, context }) {
@@ -60515,7 +60587,7 @@ async function action$7({ request, context }) {
 var route28 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$7,
-  loader: loader$E
+  loader: loader$F
 }, Symbol.toStringTag, { value: "Module" }));
 var CHAR_POOL = [
   { char: "\u3042", kana: "\u30A2", romaji: "a" },
@@ -60534,7 +60606,7 @@ var CHAR_POOL = [
   { char: "\u305B", kana: "\u30BB", romaji: "se" },
   { char: "\u305D", kana: "\u30BD", romaji: "so" }
 ];
-async function loader$D({ request }) {
+async function loader$E({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60547,7 +60619,7 @@ async function loader$D({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$D = ({ data: data2 }) => {
+var meta$E = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function StudentTunnelEscapePage() {
@@ -60740,13 +60812,13 @@ function GameArena() {
 var route29 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: StudentTunnelEscapePage,
-  loader: loader$D,
-  meta: meta$D
+  loader: loader$E,
+  meta: meta$E
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$C({ request }) {
+async function loader$D({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$C = () => [
+var meta$D = () => [
   { title: "VCE Kanji Test \u2013 Accepted Answers | JP Tutor AI Yamato" },
   { name: "description", content: "The 200 VCE kanji and the English answers accepted in the kanji test." }
 ];
@@ -60820,8 +60892,8 @@ function KanjiAnswersPage() {
 var route30 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiAnswersPage,
-  loader: loader$C,
-  meta: meta$C
+  loader: loader$D,
+  meta: meta$D
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$8 = "CONTENT_VCE_SPEAKING";
 async function fetchVceSpeakingContentData(supabase2) {
@@ -60883,7 +60955,7 @@ function useVceSpeakingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$B({ request }) {
+async function loader$C({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -60953,17 +61025,17 @@ function VceSpeakingIndex() {
     }
   );
 }
-var meta$B = ({ data: data2 }) => {
+var meta$C = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route31 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceSpeakingIndex,
-  loader: loader$B,
-  meta: meta$B
+  loader: loader$C,
+  meta: meta$C
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$A = ({ request }) => loadGamePage(request);
-var meta$A = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$B = ({ request }) => loadGamePage(request);
+var meta$B = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function KanjiSudokuRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Kanji Sudoku", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -60979,8 +61051,8 @@ function KanjiSudokuRoute() {
 var route32 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSudokuRoute,
-  loader: loader$A,
-  meta: meta$A
+  loader: loader$B,
+  meta: meta$B
 }, Symbol.toStringTag, { value: "Module" }));
 var DEFAULT_CATEGORY = "Miscellaneous";
 var CATEGORY_ORDER$1 = [
@@ -61387,7 +61459,7 @@ function buildPools(rows) {
   kanjiMeaning.sort(byCategoryThenSortOrder);
   return { hiragana, katakana, kanjiReading, kanjiMeaning };
 }
-async function loader$z({ request }) {
+async function loader$A({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -61429,7 +61501,7 @@ async function loader$z({ request }) {
     kanjiReadingAvailable
   });
 }
-var meta$z = ({
+var meta$A = ({
   data: data2
 }) => {
   return generateModuleMeta(
@@ -61964,8 +62036,8 @@ function MemoryMatchGame({
 var route33 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: MemoryMatchPage,
-  loader: loader$z,
-  meta: meta$z
+  loader: loader$A,
+  meta: meta$A
 }, Symbol.toStringTag, { value: "Module" }));
 var CATEGORY_ORDER = [
   "Numbers",
@@ -61994,7 +62066,7 @@ var CATEGORY_ORDER = [
   "Repeat sign",
   "Miscellaneous"
 ];
-async function loader$y({ request }) {
+async function loader$z({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -62007,7 +62079,7 @@ async function loader$y({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$y = ({ data: data2 }) => {
+var meta$z = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Kanji200Component() {
@@ -62161,8 +62233,8 @@ function Kanji200Component() {
 var route34 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Kanji200Component,
-  loader: loader$y,
-  meta: meta$y
+  loader: loader$z,
+  meta: meta$z
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$7 = "CONTENT_VCE_WRITING";
 async function fetchVceWritingContentData(supabase2) {
@@ -62224,7 +62296,7 @@ function useVceWritingContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$x({ request }) {
+async function loader$y({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -62291,14 +62363,14 @@ function VceWritingIndex() {
     }
   );
 }
-var meta$x = ({ data: data2 }) => {
+var meta$y = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route35 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceWritingIndex,
-  loader: loader$x,
-  meta: meta$x
+  loader: loader$y,
+  meta: meta$y
 }, Symbol.toStringTag, { value: "Module" }));
 async function action$6({ request, context }) {
   try {
@@ -62324,7 +62396,7 @@ var route36 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   action: action$6
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$w({ request, context }) {
+async function loader$x({ request, context }) {
   const { admin } = await requireTeacher(request, context);
   const lessonId = new URL(request.url).searchParams.get("lessonId") ?? "";
   if (!/^[0-9a-f-]{36}$/i.test(lessonId))
@@ -62345,7 +62417,7 @@ async function loader$w({ request, context }) {
 }
 var route37 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$w
+  loader: loader$x
 }, Symbol.toStringTag, { value: "Module" }));
 var MAX_ITEMS = 300;
 var MAX_MS = 6e5;
@@ -64292,7 +64364,7 @@ function memberSubtitle(schoolEmail, inviteLabel) {
     return schoolEmail;
   return inviteLabel ? `Invite code: ${inviteLabel}` : "Joined with an invite code";
 }
-async function loader$v({ request, context }) {
+async function loader$w({ request, context }) {
   var _a;
   const { user, profile, admin } = await getTeacherOrApplicant(request, context);
   const url = new URL(request.url);
@@ -65079,7 +65151,7 @@ var shouldRevalidate = ({ currentUrl, nextUrl, formMethod, defaultShouldRevalida
   };
   return strip(currentUrl) === strip(nextUrl) ? false : defaultShouldRevalidate;
 };
-var meta$w = () => [
+var meta$x = () => [
   { title: "Teacher Dashboard | AI Yamato Japanese Hub" },
   { name: "robots", content: "noindex, nofollow" }
 ];
@@ -65087,8 +65159,8 @@ var route39 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   action: action$4,
   default: TeacherDashboardPage,
-  loader: loader$v,
-  meta: meta$w,
+  loader: loader$w,
+  meta: meta$x,
   shouldRevalidate
 }, Symbol.toStringTag, { value: "Module" }));
 var shogi = `<!doctype html>
@@ -71983,7 +72055,7 @@ function messagePage(message, status) {
 </head><body><p>${message}</p></body></html>`;
   return new Response(html, { status, headers: BASE_HEADERS });
 }
-async function loader$u({ request, context, params }) {
+async function loader$v({ request, context, params }) {
   const html = FRAMES[params.name ?? ""];
   if (!html)
     return messagePage("This game could not be found.", 404);
@@ -72000,7 +72072,7 @@ async function loader$u({ request, context, params }) {
 }
 var route40 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$u
+  loader: loader$v
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$6 = "LEGAL_CONTENTS";
 async function fetchLegalContentData(supabaseClient) {
@@ -72020,7 +72092,7 @@ async function fetchLegalContentData(supabaseClient) {
     return null;
   }
 }
-async function loader$t({ request }) {
+async function loader$u({ request }) {
   const url = new URL(request.url);
   const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
   return dist$1.json({
@@ -72028,7 +72100,7 @@ async function loader$t({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$v = ({ data: data2 }) => {
+var meta$w = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function Disclaimer() {
@@ -72129,8 +72201,8 @@ function Disclaimer() {
 var route41 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Disclaimer,
-  loader: loader$t,
-  meta: meta$v
+  loader: loader$u,
+  meta: meta$w
 }, Symbol.toStringTag, { value: "Module" }));
 async function fetchTextbookRefs(lessonIds) {
   var _a;
@@ -78904,7 +78976,7 @@ async function fetchLessonPageData(slug) {
   return data2;
 }
 var LESSON_SLUG = "family-1";
-async function loader$s({ request }) {
+async function loader$t({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -78918,7 +78990,7 @@ async function loader$s({ request }) {
     ...await fetchLessonPageData(LESSON_SLUG)
   });
 }
-var meta$u = ({ data: data2 }) => {
+var meta$v = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsFamily1Page() {
@@ -78928,8 +79000,8 @@ function LessonsFamily1Page() {
 var route42 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsFamily1Page,
-  loader: loader$s,
-  meta: meta$u
+  loader: loader$t,
+  meta: meta$v
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$5 = "CONTENT_REFERENCE";
 async function fetchReferenceContentData(supabase2) {
@@ -78991,7 +79063,7 @@ function useReferenceContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$r({ request }) {
+async function loader$s({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -79130,14 +79202,14 @@ function ReferenceIndex() {
     }
   );
 }
-var meta$t = ({ data: data2 }) => {
+var meta$u = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route43 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ReferenceIndex,
-  loader: loader$r,
-  meta: meta$t
+  loader: loader$s,
+  meta: meta$u
 }, Symbol.toStringTag, { value: "Module" }));
 async function action$3({ request, context }) {
   const { supabase: supabase2, headers } = createServerSupabaseClient(request, context);
@@ -79148,16 +79220,16 @@ async function action$3({ request, context }) {
   appendClearAuthCookies(request, headers);
   return dist$1.json({ success: true }, { headers });
 }
-async function loader$q() {
+async function loader$r() {
   return dist$1.json({ error: "Method Not Allowed" }, { status: 405 });
 }
 var route44 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$3,
-  loader: loader$q
+  loader: loader$r
 }, Symbol.toStringTag, { value: "Module" }));
 var NO_STORE = { "Cache-Control": "no-store" };
-async function loader$p() {
+async function loader$q() {
   return dist$1.json({ error: "Method not allowed." }, { status: 405, headers: NO_STORE });
 }
 async function action$2({ request, context }) {
@@ -79181,9 +79253,9 @@ async function action$2({ request, context }) {
 var route45 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$2,
-  loader: loader$p
+  loader: loader$q
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$o({ request }) {
+async function loader$p({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -79196,7 +79268,7 @@ async function loader$o({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$s = ({ data: data2 }) => {
+var meta$t = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function VocabIndexPage() {
@@ -79336,8 +79408,8 @@ function VocabIndexPage() {
 var route46 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VocabIndexPage,
-  loader: loader$o,
-  meta: meta$s
+  loader: loader$p,
+  meta: meta$t
 }, Symbol.toStringTag, { value: "Module" }));
 var WORLD_PLACES = [
   {
@@ -79639,13 +79711,13 @@ var WORLD_PLACES_COMING_SOON = [
 var findWorldPlace = (id2) => WORLD_PLACES.find((p2) => p2.id === id2) ?? null;
 var TITLE$1 = "Speaking Tasks";
 var DESCRIPTION$1 = "All speaking tasks in one place: conversations with AI characters, lesson speaking tasks and VCE oral exam practice.";
-var meta$r = () => [
+var meta$s = () => [
   { title: `${TITLE$1} | AI Yamato Portal` },
   { name: "description", content: DESCRIPTION$1 },
   { property: "og:title", content: `${TITLE$1} | AI Yamato Portal` },
   { property: "og:description", content: DESCRIPTION$1 }
 ];
-async function loader$n(_2) {
+async function loader$o(_2) {
   const lessons = [];
   try {
     const { data: data2 } = await supabase.from("edu_topics").select("*, edu_lessons (*)").order("sort_order", { ascending: true });
@@ -79762,12 +79834,12 @@ function SpeakingTasksPage() {
 var route47 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: SpeakingTasksPage,
-  loader: loader$n,
-  meta: meta$r
+  loader: loader$o,
+  meta: meta$s
 }, Symbol.toStringTag, { value: "Module" }));
 var PAGE_TITLE = "Japanese Culture";
 var PAGE_DESCRIPTION = "Picture stories about life in Japan, with narration and English subtitles. No Japanese needed \u2013 watch the story, then try a short quiz.";
-var meta$q = () => [
+var meta$r = () => [
   { title: `${PAGE_TITLE} | AI Yamato Portal` },
   { name: "description", content: PAGE_DESCRIPTION },
   { property: "og:title", content: `${PAGE_TITLE} | AI Yamato Portal` },
@@ -79993,10 +80065,10 @@ function CultureHubPage() {
 var route48 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: CultureHubPage,
-  meta: meta$q
+  meta: meta$r
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$m = ({ request }) => loadGamePage(request);
-var meta$p = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$n = ({ request }) => loadGamePage(request);
+var meta$q = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function HanafudaRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Hanafuda Koi-Koi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -80012,10 +80084,10 @@ function HanafudaRoute() {
 var route49 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: HanafudaRoute,
-  loader: loader$m,
-  meta: meta$p
+  loader: loader$n,
+  meta: meta$q
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$l({ request }) {
+async function loader$m({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -80052,7 +80124,7 @@ async function loader$l({ request }) {
     errorMessage: fetchError
   });
 }
-var meta$o = ({ data: data2 }) => {
+var meta$p = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonsHubIndex() {
@@ -80180,8 +80252,8 @@ function LessonsHubIndex() {
 var route50 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonsHubIndex,
-  loader: loader$l,
-  meta: meta$o
+  loader: loader$m,
+  meta: meta$p
 }, Symbol.toStringTag, { value: "Module" }));
 var SPEED = 0.6;
 var TALK_DISTANCE = 12;
@@ -80961,7 +81033,7 @@ function WorldTalk({
     ] })
   ] });
 }
-var meta$n = ({ params }) => {
+var meta$o = ({ params }) => {
   const place = findWorldPlace(params.task);
   const title = place ? `${place.title} \u2013 Speaking Task` : "Speaking Task";
   const description = place ? `${place.description} Talk to an AI character in Japanese \u2013 voice only, no camera.` : "Practise everyday Japanese conversations with AI characters.";
@@ -81105,12 +81177,12 @@ function SpeakingTaskPage() {
 var route51 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: SpeakingTaskPage,
-  meta: meta$n
+  meta: meta$o
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$k({ request }) {
+async function loader$l({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$m = () => [
+var meta$n = () => [
   { title: "Look-alike Characters Test | JP Tutor AI Yamato" },
   {
     name: "description",
@@ -81705,10 +81777,10 @@ function Card$1({ title, children }) {
 var route52 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LookalikeTest,
-  loader: loader$k,
-  meta: meta$m
+  loader: loader$l,
+  meta: meta$n
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$j({ request }) {
+async function loader$k({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -81721,7 +81793,7 @@ async function loader$j({ request }) {
     currentPath: url.pathname
   });
 }
-var meta$l = ({ data: data2 }) => {
+var meta$m = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function PrivacyPolicy() {
@@ -81788,10 +81860,10 @@ function PrivacyPolicy() {
 var route53 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrivacyPolicy,
-  loader: loader$j,
-  meta: meta$l
+  loader: loader$k,
+  meta: meta$m
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$i({ request, params }) {
+async function loader$j({ request, params }) {
   const url = new URL(request.url);
   const slug = String(params.slug || "");
   const renamed = newSlugFor(slug);
@@ -81852,7 +81924,7 @@ async function loader$i({ request, params }) {
     loadError
   });
 }
-var meta$k = ({ data: data2 }) => {
+var meta$l = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 function LessonSlugPage() {
@@ -82025,8 +82097,8 @@ function LessonTopicHubPage() {
 var route54 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LessonSlugPage,
-  loader: loader$i,
-  meta: meta$k
+  loader: loader$j,
+  meta: meta$l
 }, Symbol.toStringTag, { value: "Module" }));
 var generatedRoutes = [
   "/about",
@@ -82037,6 +82109,7 @@ var generatedRoutes = [
   "/api.test-attempts",
   "/class-quiz.$homeworkId",
   "/contact",
+  "/credits",
   "/culture._index",
   "/faq",
   "/games._index",
@@ -82089,7 +82162,7 @@ var generatedRoutes = [
   "/world.$place",
   "/world._index"
 ];
-async function loader$h({ request }) {
+async function loader$i({ request }) {
   const baseUrl = "https://jptutoraiyamato.com";
   const routes2 = generatedRoutes.includes("") ? generatedRoutes : ["", ...generatedRoutes];
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -82112,7 +82185,7 @@ ${routes2.map(
 }
 var route55 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  loader: loader$h
+  loader: loader$i
 }, Symbol.toStringTag, { value: "Module" }));
 var KNOWLEDGE_KEY$4 = "CONTENT_GAMES";
 async function fetchGamesContentData(supabase2) {
@@ -82175,7 +82248,7 @@ function useGamesContent(supabase2) {
     refetch: loadData
   };
 }
-async function loader$g({ request }) {
+async function loader$h({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -82322,16 +82395,16 @@ function GamesHubIndex() {
     }
   );
 }
-var meta$j = ({ data: data2 }) => {
+var meta$k = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route56 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: GamesHubIndex,
-  loader: loader$g,
-  meta: meta$j
+  loader: loader$h,
+  meta: meta$k
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$f({ request }) {
+async function loader$g({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -82421,16 +82494,16 @@ function LegalIndex() {
     }
   );
 }
-var meta$i = ({ data: data2 }) => {
+var meta$j = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route57 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: LegalIndex,
-  loader: loader$f,
-  meta: meta$i
+  loader: loader$g,
+  meta: meta$j
 }, Symbol.toStringTag, { value: "Module" }));
-var meta$h = () => [
+var meta$i = () => [
   { title: "Preparing report..." },
   { name: "robots", content: "noindex, nofollow" }
 ];
@@ -82440,7 +82513,7 @@ function PrintReport() {
 var route58 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: PrintReport,
-  meta: meta$h
+  meta: meta$i
 }, Symbol.toStringTag, { value: "Module" }));
 var PLAZA_RULES_VERSION = 1;
 var PLAZA_CLOSED_MESSAGES = {
@@ -82939,7 +83012,7 @@ function useSchoolAccountRedirect(target) {
   }, [navigate, target]);
   return state;
 }
-var meta$g = ({ params }) => {
+var meta$h = ({ params }) => {
   const place = findWorldPlace(params.place);
   const title = place ? `${place.title} \u2013 Yamato Town` : "Yamato Town";
   const description = "Meet other Japanese learners, greet them with set Japanese phrases and stamps, and talk to an AI character in Japanese.";
@@ -83161,11 +83234,11 @@ function WorldPlacePage() {
 var route59 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WorldPlacePage,
-  meta: meta$g
+  meta: meta$h
 }, Symbol.toStringTag, { value: "Module" }));
 var TITLE = "Yamato Town";
 var DESCRIPTION = "Walk around a little Japanese town, meet other Japanese learners and greet each other with set Japanese phrases and stamps. In every place there is an AI character you can talk to.";
-var meta$f = () => [
+var meta$g = () => [
   { title: `${TITLE} | AI Yamato Portal` },
   { name: "description", content: DESCRIPTION },
   { property: "og:title", content: `${TITLE} | AI Yamato Portal` },
@@ -83233,10 +83306,10 @@ function WorldIndexPage() {
 var route60 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: WorldIndexPage,
-  meta: meta$f
+  meta: meta$g
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$e = ({ request }) => loadGamePage(request);
-var meta$e = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$f = ({ request }) => loadGamePage(request);
+var meta$f = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function ShogiRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "Shogi", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -83252,10 +83325,10 @@ function ShogiRoute() {
 var route61 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ShogiRoute,
-  loader: loader$e,
-  meta: meta$e
+  loader: loader$f,
+  meta: meta$f
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$d({ request }) {
+async function loader$e({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -83329,14 +83402,14 @@ function TermsOfService() {
     }
   );
 }
-var meta$d = ({ data: data2 }) => {
+var meta$e = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route62 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TermsOfService,
-  loader: loader$d,
-  meta: meta$d
+  loader: loader$e,
+  meta: meta$e
 }, Symbol.toStringTag, { value: "Module" }));
 var TYPING_STORE_KEY = "yamato-typing-progress-v1";
 var TYPING_LESSON_COUNT = 22;
@@ -83348,10 +83421,10 @@ function readTypingProgress() {
     return {};
   }
 }
-async function loader$c({ request }) {
+async function loader$d({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$c = () => [
+var meta$d = () => [
   { title: "Touch Typing | JP Tutor AI Yamato" },
   { name: "description", content: "Learn to type without looking at the keyboard, step by step, then type Japanese in romaji." }
 ];
@@ -83783,13 +83856,13 @@ function FingerLegend() {
 var route63 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TypingPage,
-  loader: loader$c,
-  meta: meta$c
+  loader: loader$d,
+  meta: meta$d
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$b({ request }) {
+async function loader$c({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$b = () => [
+var meta$c = () => [
   { title: "Tests | JP Tutor AI Yamato" },
   {
     name: "description",
@@ -83908,8 +83981,8 @@ function ItemBody({ item }) {
 var route64 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: TestHub,
-  loader: loader$b,
-  meta: meta$b
+  loader: loader$c,
+  meta: meta$c
 }, Symbol.toStringTag, { value: "Module" }));
 var BGM_TRACKS = [
   // 曲名はひとまずファイル名のまま（あとで英語の曲名に変える）
@@ -86001,10 +86074,10 @@ function JigsawSetup({
     ] })
   ] });
 }
-async function loader$a({ request }) {
+async function loader$b({ request }) {
   return dist$1.json({ portalContent: null, currentPath: new URL(request.url).pathname });
 }
-var meta$a = () => [
+var meta$b = () => [
   { title: "Class Live Game | JP Tutor AI Yamato" },
   { name: "description", content: "A live Japanese game for the whole class, run by your teacher." },
   { name: "robots", content: "noindex, nofollow" }
@@ -86299,8 +86372,8 @@ function Field({ label, children }) {
 var route65 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ClassGamePage,
-  loader: loader$a,
-  meta: meta$a
+  loader: loader$b,
+  meta: meta$b
 }, Symbol.toStringTag, { value: "Module" }));
 var util;
 (function(util2) {
@@ -90675,7 +90748,8 @@ function DeleteAccountModal({ className = "" }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `bg-white border border-red-200 rounded-lg shadow-sm p-6 space-y-4 ${className}`, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-b border-red-100 pb-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-lg font-semibold text-red-600", children: "Delete Account" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mt-1", children: "Deleting your account will permanently erase all saved data, learning history, purchased credits, and personal information. This action cannot be undone." })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mt-1", children: "Deleting your account will permanently erase all saved data, learning history, purchased credits, and personal information. This action cannot be undone." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600 mt-1", children: "If you have a subscription, it will be cancelled straight away and you will not be charged again. The rest of the current period is not refunded." })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       "button",
@@ -90730,6 +90804,59 @@ function DeleteAccountModal({ className = "" }) {
       ] })
     ] }) })
   ] });
+}
+var define_process_env_default = {};
+var ACTIVE_STATUSES = ["active", "trialing", "past_due", "unpaid", "incomplete", "paused"];
+function stripeKey(context) {
+  var _a;
+  const env = ((_a = context == null ? void 0 : context.cloudflare) == null ? void 0 : _a.env) || (context == null ? void 0 : context.env) || {};
+  if (env.STRIPE_SECRET_KEY)
+    return String(env.STRIPE_SECRET_KEY);
+  try {
+    if (typeof process !== "undefined" && (define_process_env_default == null ? void 0 : define_process_env_default.STRIPE_SECRET_KEY))
+      return define_process_env_default.STRIPE_SECRET_KEY;
+  } catch {
+  }
+  return "";
+}
+async function stripeCall(key, method, id2) {
+  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(id2)}`, {
+    method,
+    headers: { Authorization: `Bearer ${key}` }
+  });
+  const data2 = await res.json().catch(() => ({}));
+  return { ok: res.ok, data: data2 };
+}
+async function cancelUserSubscriptions(admin, userId, context) {
+  var _a, _b, _c, _d, _e;
+  const { data: rows, error } = await admin.from("subscriptions").select("id, status").eq("user_id", userId).in("status", ACTIVE_STATUSES);
+  if (error) {
+    console.error("cancelUserSubscriptions: could not read subscriptions:", error.message);
+    return { ok: false, error: "We could not check your subscription. Please try again." };
+  }
+  if (!rows || rows.length === 0)
+    return { ok: true, cancelled: 0 };
+  const key = stripeKey(context);
+  if (!key) {
+    console.error("cancelUserSubscriptions: STRIPE_SECRET_KEY is missing.");
+    return { ok: false, error: "We could not cancel your subscription. Please cancel it in \u201CManage plan, card and receipts\u201D first, then delete your account." };
+  }
+  let cancelled = 0;
+  for (const row of rows) {
+    const res = await stripeCall(key, "DELETE", row.id);
+    if (res.ok) {
+      cancelled += 1;
+      continue;
+    }
+    if (((_b = (_a = res.data) == null ? void 0 : _a.error) == null ? void 0 : _b.code) === "resource_missing")
+      continue;
+    const check = await stripeCall(key, "GET", row.id);
+    if (check.ok && ["canceled", "incomplete_expired"].includes((_c = check.data) == null ? void 0 : _c.status))
+      continue;
+    console.error(`cancelUserSubscriptions: could not cancel ${row.id}:`, (_e = (_d = res.data) == null ? void 0 : _d.error) == null ? void 0 : _e.message);
+    return { ok: false, error: "We could not cancel your subscription. Please cancel it in \u201CManage plan, card and receipts\u201D first, then delete your account." };
+  }
+  return { ok: true, cancelled };
 }
 function studentStatusText(hw) {
   switch (hw.status) {
@@ -90971,7 +91098,7 @@ function AssignmentList({ title, icon, items }) {
     }) })
   ] });
 }
-async function loader$9({ request, context }) {
+async function loader$a({ request, context }) {
   var _a;
   const url = new URL(request.url);
   const { supabase: serverSupabase } = createServerSupabaseClient(request, context);
@@ -91056,6 +91183,10 @@ async function action$1({ request, context }) {
       return dist$1.json({ error: "The confirmation keyword is incorrect.", success: false }, { status: 400 });
     }
     const supabaseAdmin = createAdminSupabaseClient(context);
+    const cancel = await cancelUserSubscriptions(supabaseAdmin, user.id, context);
+    if (!cancel.ok) {
+      return dist$1.json({ error: cancel.error, success: false }, { status: 500 });
+    }
     await deleteHandwritingSubmissions(supabaseAdmin, user.id);
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
     if (deleteError) {
@@ -91416,20 +91547,20 @@ function AccountSettingsRoute() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(DeleteAccountModal, {})
   ] }) });
 }
-var meta$9 = ({ data: data2 }) => {
+var meta$a = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route66 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: AccountSettingsRoute,
-  loader: loader$9,
-  meta: meta$9
+  loader: loader$a,
+  meta: meta$a
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$8({ request }) {
+async function loader$9({ request }) {
   return dist$1.json({ currentPath: new URL(request.url).pathname });
 }
-var meta$8 = () => [
+var meta$9 = () => [
   { title: "VCE Kanji Test | JP Tutor AI Yamato" },
   { name: "description", content: "See each VCE kanji and type its English meaning as fast as you can." },
   { name: "robots", content: "noindex" }
@@ -92001,10 +92132,10 @@ function Card({ title, children }) {
 var route67 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: KanjiSpeedTest,
-  loader: loader$8,
-  meta: meta$8
+  loader: loader$9,
+  meta: meta$9
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$7({ request }) {
+async function loader$8({ request }) {
   const url = new URL(request.url);
   let portalContent = null;
   try {
@@ -92126,17 +92257,17 @@ function VceHubIndex() {
     }
   );
 }
-var meta$7 = ({ data: data2 }) => {
+var meta$8 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 var route68 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: VceHubIndex,
-  loader: loader$7,
-  meta: meta$7
+  loader: loader$8,
+  meta: meta$8
 }, Symbol.toStringTag, { value: "Module" }));
-var loader$6 = ({ request }) => loadGamePage(request);
-var meta$6 = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
+var loader$7 = ({ request }) => loadGamePage(request);
+var meta$7 = ({ data: data2 }) => generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 function IgoRoute() {
   const layoutRef = reactExports.useRef(null);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, breadcrumbTitle: "9x9 Go", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -92152,10 +92283,10 @@ function IgoRoute() {
 var route69 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: IgoRoute,
-  loader: loader$6,
-  meta: meta$6
+  loader: loader$7,
+  meta: meta$7
 }, Symbol.toStringTag, { value: "Module" }));
-var meta$5 = () => [
+var meta$6 = () => [
   { title: "My Progress | AI Yamato Portal" },
   { name: "robots", content: "noindex" }
 ];
@@ -92169,7 +92300,7 @@ var TASKS = [
 ];
 var BREAKTHROUGH_MS = 500;
 var SLOW_MS = 4e3;
-async function loader$5({ request, context }) {
+async function loader$6({ request, context }) {
   const { user, headers } = await getSessionUser(request, context);
   if (!user)
     return dist$1.json({ signedIn: false }, { headers });
@@ -92545,10 +92676,10 @@ function Sparkline({ values, highlightLast }) {
 var route70 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: ProgressPage,
-  loader: loader$5,
-  meta: meta$5
+  loader: loader$6,
+  meta: meta$6
 }, Symbol.toStringTag, { value: "Module" }));
-async function loader$4({ request }) {
+async function loader$5({ request }) {
   const url = new URL(request.url);
   try {
     const { data: portalData } = await supabase.from("portal_settings").select("content").eq("key", "PORTAL_CONTENT").single();
@@ -92563,7 +92694,7 @@ async function loader$4({ request }) {
     });
   }
 }
-var meta$4 = ({ data: data2 }) => {
+var meta$5 = ({ data: data2 }) => {
   return generateModuleMeta((data2 == null ? void 0 : data2.portalContent) || null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
 async function action({ request }) {
@@ -92727,6 +92858,50 @@ var route71 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   __proto__: null,
   action,
   default: Contact,
+  loader: loader$5,
+  meta: meta$5
+}, Symbol.toStringTag, { value: "Module" }));
+async function loader$4({ request }) {
+  return dist$1.json({ currentPath: new URL(request.url).pathname });
+}
+var meta$4 = ({ data: data2 }) => {
+  return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "/credits");
+};
+function CreditList({ items }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "space-y-3", children: items.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "font-bold text-slate-900", children: item.link ? /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: item.link, target: "_blank", rel: "noopener noreferrer", className: "text-indigo-700 hover:underline", children: item.name }) : item.name }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "mt-1 list-disc pl-5 text-sm text-slate-600 space-y-0.5", children: item.usedFor.map((u2) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: u2 }, u2)) })
+  ] }, item.name + item.usedFor[0])) });
+}
+function CreditsPage() {
+  const layoutRef = reactExports.useRef(null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ToolPageWrapper, { layoutRef, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen bg-slate-50 text-slate-800 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-3xl mx-auto bg-white shadow-sm rounded-2xl p-6 sm:p-10 border border-slate-200 space-y-8", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold tracking-tight text-slate-900", children: "Credits" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm sm:text-base text-slate-600 leading-relaxed", children: "AI Yamato uses services and materials from other providers. Thank you to all of them." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900", children: "\u{1F50A} AI Voices" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-slate-700", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "All the voices you hear on this site are AI-generated." }),
+        " They are not recordings of real people."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(CreditList, { items: VOICE_SERVICES }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-slate-500", children: "If an audio file cannot be played, your device's built-in voice may read the text instead." })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900", children: "\u{1F916} AI Services" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(CreditList, { items: AI_SERVICES })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold text-slate-900", children: "\u{1F5BC}\uFE0F Photos and Pictures" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(CreditList, { items: PICTURE_SOURCES })
+    ] })
+  ] }) }) });
+}
+var route72 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: CreditsPage,
   loader: loader$4,
   meta: meta$4
 }, Symbol.toStringTag, { value: "Module" }));
@@ -93451,7 +93626,7 @@ function Prices() {
     }
   );
 }
-var route72 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route73 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Prices,
   loader: loader$3,
@@ -94893,7 +95068,7 @@ function Home() {
 var meta$2 = ({ data: data2 }) => {
   return generateModuleMeta(null, (data2 == null ? void 0 : data2.currentPath) || "");
 };
-var route73 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route74 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Home,
   loader: loader$2,
@@ -95039,7 +95214,7 @@ function AboutPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollTopButton, { floatingClass: "fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white border border-blue-400 shadow-xl" })
   ] }) });
 }
-var route74 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route75 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: AboutPage,
   loader: loader$1,
@@ -95284,13 +95459,13 @@ function FaqPage() {
     }
   );
 }
-var route75 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var route76 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: FaqPage,
   loader,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-var serverManifest = { "entry": { "module": "/assets/entry.client-beQJ8Odh.js", "imports": ["/assets/components-cQBx1qLm.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-DHMR3rWp.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-D5ucPzZx.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-BNCMes_T.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/rotate-ccw-CDJfDj30.js", "/assets/check-CTBxRf77.js", "/assets/book-open-BRGstXjJ.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-BAH1F63r.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/loader-circle-BJe_4Wk3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-BHKHhSgw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-D8JPZvDn.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/trash-CZ9afL-o.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-D8Gyqk0z.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-superb": { "id": "routes/vce.speaking.eoy-oral-superb", "parentId": "root", "path": "vce/speaking/eoy-oral-superb", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-superb-CaTdgmsM.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/oral-topics-DETRyncq.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-CsLcNCBr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-Dk1GBJCc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-BTdPyV3U.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/oral-topics-DETRyncq.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.hiragana-solitaire": { "id": "routes/games.hiragana-solitaire", "parentId": "root", "path": "games/hiragana-solitaire", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-solitaire-Dtovtpg-.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-Ciul9TPw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-BNeQMBBE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-sAXtO6y2.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/test.lookalike_.answers": { "id": "routes/test.lookalike_.answers", "parentId": "root", "path": "test/lookalike/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike_.answers-gIDgmt41.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-26arvpsc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/class-quiz.$homeworkId": { "id": "routes/class-quiz.$homeworkId", "parentId": "root", "path": "class-quiz/:homeworkId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-quiz._homeworkId-BLvXCUI5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/languages-f5rc3Mk7.js", "/assets/rotate-ccw-CDJfDj30.js", "/assets/volume-2-DlMUskwB.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-_pGxLHlr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-CIr4zR1g.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-Cr0JD7eY.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-CYN3RrhV.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-DnFiUaoK.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-CSz-LCvw.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-CIpVHEF5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.lesson-progress": { "id": "routes/api.lesson-progress", "parentId": "root", "path": "api/lesson-progress", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-progress-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.lesson-settings": { "id": "routes/api.lesson-settings", "parentId": "root", "path": "api/lesson-settings", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-settings-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-D44cFWbU.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/test.kanji_.answers": { "id": "routes/test.kanji_.answers", "parentId": "root", "path": "test/kanji/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji_.answers-Dqb-KgU_.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-Cq1jxk5i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-BO3kiPqp.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-DBlkj-PE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/shuffle-Direv13U.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-h1XP00Xl.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-D3DAOUzJ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.teacher-vocab": { "id": "routes/api.teacher-vocab", "parentId": "root", "path": "api/teacher-vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-vocab-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.test-attempts": { "id": "routes/api.test-attempts", "parentId": "root", "path": "api/test-attempts", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.test-attempts-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-BcFCTGns.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/homework-status-BDxcHou9.js", "/assets/users-DZxb_BmH.js", "/assets/check-CTBxRf77.js", "/assets/pen-line-BNCMes_T.js", "/assets/refresh-cw-CjqU7v3J.js", "/assets/trash-CZ9afL-o.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/lock-open-CGHurGbI.js", "/assets/book-open-BRGstXjJ.js", "/assets/languages-f5rc3Mk7.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DPJ83gPC.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-CbzhgaZb.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-p6zxhtLp.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-YDGOigFf.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.logout": { "id": "routes/api.auth.logout", "parentId": "root", "path": "api/auth/logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-kyE4xxO2.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js"], "css": [] }, "routes/speaking._index": { "id": "routes/speaking._index", "parentId": "root", "path": "speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._index-C12JH2lW.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-Cjfntb0Y.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/culture-tasks-gcwModMq.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useSoundEffect-4xvled9u.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-BbwgLsPa.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-_bNvlbMR.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/speaking.$task": { "id": "routes/speaking.$task", "parentId": "root", "path": "speaking/:task", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._task-D-asWaCE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/test.lookalike": { "id": "routes/test.lookalike", "parentId": "root", "path": "test/lookalike", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike-CKQxyh5k.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-Bmp_4wqE.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-BF7_C2pk.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-p6zxhtLp.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-Ci-apAfr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/lock-open-CGHurGbI.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/grid-3x3-CGlWQa9D.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-CRdYFQGa.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/world.$place": { "id": "routes/world.$place", "parentId": "root", "path": "world/:place", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._place-BEjpzc1i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/world._index": { "id": "routes/world._index", "parentId": "root", "path": "world", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._index-BziB17ez.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CA1QpMF0.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-Bu39KJ4i.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test.typing": { "id": "routes/test.typing", "parentId": "root", "path": "test/typing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.typing-B8utSbBL.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test._index": { "id": "routes/test._index", "parentId": "root", "path": "test", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test._index-BNWt8Ph-.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-DhOrPpKM.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/volume-2-DlMUskwB.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/users-DZxb_BmH.js", "/assets/log-in-D0rZrxE0.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-13811aDc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/homework-status-BDxcHou9.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/billing-client-DAJJrg7K.js", "/assets/users-DZxb_BmH.js", "/assets/languages-f5rc3Mk7.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/test.kanji": { "id": "routes/test.kanji", "parentId": "root", "path": "test/kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji-CHmtk0Op.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-ZOYq2lMX.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-Czw61IK9.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/IframeGamePage-D9SQ5Ml6.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-B2pasEyU.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-D0rZrxE0.js", "/assets/refresh-cw-CjqU7v3J.js"], "css": [] }, "routes/progress": { "id": "routes/progress", "parentId": "root", "path": "progress", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/progress-BNzrHLxZ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-CfLYGk2L.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-Bn3Y60wV.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/FreePlanFeatures-DDWzzX7f.js", "/assets/billing-client-DAJJrg7K.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/check-CTBxRf77.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CtOopfJJ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/volume-2-DlMUskwB.js", "/assets/FreePlanFeatures-DDWzzX7f.js", "/assets/check-CTBxRf77.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/price-plans-CbxlD04y.js", "/assets/loader-circle-BJe_4Wk3.js", "/assets/book-open-BRGstXjJ.js", "/assets/gamepad-2-DJ2Mzr-p.js", "/assets/grid-3x3-CGlWQa9D.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/credit-costs-_rK41Fr1.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-BPXO0CLB.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/book-open-BRGstXjJ.js", "/assets/users-DZxb_BmH.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-DYXaTrss.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-DnWFntMe.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-Sc9uiS3X.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] } }, "url": "/assets/manifest-68b4fe3a.js", "version": "68b4fe3a" };
+var serverManifest = { "entry": { "module": "/assets/entry.client-beQJ8Odh.js", "imports": ["/assets/components-cQBx1qLm.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-0ZgWzMMl.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/teacher-handwriting.$submissionId": { "id": "routes/teacher-handwriting.$submissionId", "parentId": "root", "path": "teacher-handwriting/:submissionId", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-handwriting._submissionId-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.speaking.eoy-oral-accelerated": { "id": "routes/vce.speaking.eoy-oral-accelerated", "parentId": "root", "path": "vce/speaking/eoy-oral-accelerated", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-accelerated-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/vce.writing.genkoyoshi-editor-vce": { "id": "routes/vce.writing.genkoyoshi-editor-vce", "parentId": "root", "path": "vce/writing/genkoyoshi-editor-vce", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.genkoyoshi-editor-vce-BeX4juXy.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/pen-line-Ck1Zf9UQ.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/rotate-ccw-CKD3qyfQ.js", "/assets/check--4iVUNyt.js", "/assets/book-open-Iet3k_vB.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.writing.kanji-grammar-checker": { "id": "routes/vce.writing.kanji-grammar-checker", "parentId": "root", "path": "vce/writing/kanji-grammar-checker", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.kanji-grammar-checker-4aZBTsk5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-list-B5hdfcH_.js", "/assets/loader-circle-DgdehLb4.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.oral-exam-questions": { "id": "routes/vce.speaking.oral-exam-questions", "parentId": "root", "path": "vce/speaking/oral-exam-questions", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.oral-exam-questions-CI0JFM25.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-elaborate": { "id": "routes/vce.speaking.eoy-oral-elaborate", "parentId": "root", "path": "vce/speaking/eoy-oral-elaborate", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-elaborate-DLMyMmYN.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/trash-D2Nsuvrq.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/vce.writing.eoy-writing-custom": { "id": "routes/vce.writing.eoy-writing-custom", "parentId": "root", "path": "vce/writing/eoy-writing-custom", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-custom-DQ-E01lK.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-superb": { "id": "routes/vce.speaking.eoy-oral-superb", "parentId": "root", "path": "vce/speaking/eoy-oral-superb", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-superb-BElyEehL.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/oral-topics-DETRyncq.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/vce.speaking.eoy-oral-drill": { "id": "routes/vce.speaking.eoy-oral-drill", "parentId": "root", "path": "vce/speaking/eoy-oral-drill", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-drill-TAy4QNoc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/ChatYamatoEoyOralDrill-BTclP0yD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralUserAnswersHooks-BW3UZG5Q.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/stt-guard-D7htH6Xr.js"], "css": [] }, "routes/developer.test-yamato-note": { "id": "routes/developer.test-yamato-note", "parentId": "root", "path": "developer/test-yamato-note", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-note-e4sPa9xO.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking.eoy-oral-mock": { "id": "routes/vce.speaking.eoy-oral-mock", "parentId": "root", "path": "vce/speaking/eoy-oral-mock", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking.eoy-oral-mock-CDpsoS6D.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/OralExaminerAvatar-GI8PCouI.js", "/assets/OralPracticeHooks-BXAAURg7.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/oral-topics-DETRyncq.js", "/assets/OralMockReport-CjJ7wWFR.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/oral-exam-questions-ClpyZdVU.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.hiragana-solitaire": { "id": "routes/games.hiragana-solitaire", "parentId": "root", "path": "games/hiragana-solitaire", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hiragana-solitaire-CnRKXlSq.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/reference.writing-styles": { "id": "routes/reference.writing-styles", "parentId": "root", "path": "reference/writing-styles", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.writing-styles-CHk8iInW.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.prefecture-puzzle": { "id": "routes/games.prefecture-puzzle", "parentId": "root", "path": "games/prefecture-puzzle", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.prefecture-puzzle-B4uLlSdW.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/games.rolling-character": { "id": "routes/games.rolling-character", "parentId": "root", "path": "games/rolling-character", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.rolling-character-rqsxUdA7.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/test.lookalike_.answers": { "id": "routes/test.lookalike_.answers", "parentId": "root", "path": "test/lookalike/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike_.answers-Bss9r9p1.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.writing.eoy-writing": { "id": "routes/vce.writing.eoy-writing", "parentId": "root", "path": "vce/writing/eoy-writing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing.eoy-writing-D5EOj7xh.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/texttypes-DNhCsvQV.js", "/assets/writing-styles-Dx2aDlK1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/class-quiz.$homeworkId": { "id": "routes/class-quiz.$homeworkId", "parentId": "root", "path": "class-quiz/:homeworkId", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-quiz._homeworkId-DSr7aXWc.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/languages-DTmrW4de.js", "/assets/rotate-ccw-CKD3qyfQ.js", "/assets/volume-2-Dwpr9TEa.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/developer.test-yamato": { "id": "routes/developer.test-yamato", "parentId": "root", "path": "developer/test-yamato", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-yamato-_pGxLHlr.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/chatThemeColor--HWeni0n.js"], "css": [] }, "routes/games.ogre-star-sword": { "id": "routes/games.ogre-star-sword", "parentId": "root", "path": "games/ogre-star-sword", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.ogre-star-sword-mbyCF0tH.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/reference.vce-grammar": { "id": "routes/reference.vce-grammar", "parentId": "root", "path": "reference/vce-grammar", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vce-grammar-D06S2aG0.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-D9rPlhSC.js"], "css": [] }, "routes/api.teacher-register": { "id": "routes/api.teacher-register", "parentId": "root", "path": "api/teacher-register", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-register-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/developer.image-test": { "id": "routes/developer.image-test", "parentId": "root", "path": "developer/image-test", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.image-test-B0E8YBCe.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/developer.test-audio": { "id": "routes/developer.test-audio", "parentId": "root", "path": "developer/test-audio", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/developer.test-audio-BW1YIpSR.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.character-maze": { "id": "routes/games.character-maze", "parentId": "root", "path": "games/character-maze", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.character-maze-CNPNtDlQ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/reference.text-types": { "id": "routes/reference.text-types", "parentId": "root", "path": "reference/text-types", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.text-types-l-Hi1iVN.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/texttypes-DNhCsvQV.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.lesson-progress": { "id": "routes/api.lesson-progress", "parentId": "root", "path": "api/lesson-progress", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-progress-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.lesson-settings": { "id": "routes/api.lesson-settings", "parentId": "root", "path": "api/lesson-settings", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.lesson-settings-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games.tunnel-escape": { "id": "routes/games.tunnel-escape", "parentId": "root", "path": "games/tunnel-escape", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.tunnel-escape-D2MkV4HD.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/shuffle-Direv13U.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/test.kanji_.answers": { "id": "routes/test.kanji_.answers", "parentId": "root", "path": "test/kanji/answers", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji_.answers-Cp5J0mXO.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce.speaking._index": { "id": "routes/vce.speaking._index", "parentId": "root", "path": "vce/speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.speaking._index-DkMNrU4G.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.kanji-sudoku": { "id": "routes/games.kanji-sudoku", "parentId": "root", "path": "games/kanji-sudoku", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.kanji-sudoku-CUJ2wM9q.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/games.memory-match": { "id": "routes/games.memory-match", "parentId": "root", "path": "games/memory-match", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.memory-match-DKB3VK5v.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/shuffle-Direv13U.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/reference.200kanji": { "id": "routes/reference.200kanji", "parentId": "root", "path": "reference/200kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.200kanji-BwCHVuSt.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-D9rPlhSC.js"], "css": [] }, "routes/vce.writing._index": { "id": "routes/vce.writing._index", "parentId": "root", "path": "vce/writing", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce.writing._index-rVA3E2Vd.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.callback": { "id": "routes/api.auth.callback", "parentId": "root", "path": "api/auth/callback", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.callback-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.teacher-vocab": { "id": "routes/api.teacher-vocab", "parentId": "root", "path": "api/teacher-vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.teacher-vocab-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.test-attempts": { "id": "routes/api.test-attempts", "parentId": "root", "path": "api/test-attempts", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.test-attempts-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/teacher-dashboard": { "id": "routes/teacher-dashboard", "parentId": "root", "path": "teacher-dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/teacher-dashboard-CkhjdCfs.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/homework-status-Dj0dH4dI.js", "/assets/users-DFBKwJNd.js", "/assets/check--4iVUNyt.js", "/assets/pen-line-Ck1Zf9UQ.js", "/assets/refresh-cw-C9bR84o1.js", "/assets/trash-D2Nsuvrq.js", "/assets/gamepad-2-CUi-Bnaq.js", "/assets/lock-open-R9RobZXL.js", "/assets/book-open-Iet3k_vB.js", "/assets/languages-DTmrW4de.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/game-frame.$name": { "id": "routes/game-frame.$name", "parentId": "root", "path": "game-frame/:name", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/game-frame._name-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/legal.disclaimer": { "id": "routes/legal.disclaimer", "parentId": "root", "path": "legal/disclaimer", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.disclaimer-DOhOqrhI.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.family-1": { "id": "routes/lessons.family-1", "parentId": "root", "path": "lessons/family-1", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons.family-1-Dk6UKf5m.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/EduLessonPage-DWOyw2qQ.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/reference._index": { "id": "routes/reference._index", "parentId": "root", "path": "reference", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference._index-CWPKGIvL.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/api.auth.logout": { "id": "routes/api.auth.logout", "parentId": "root", "path": "api/auth/logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.auth.logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/api.game-access": { "id": "routes/api.game-access", "parentId": "root", "path": "api/game-access", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/api.game-access-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/reference.vocab": { "id": "routes/reference.vocab", "parentId": "root", "path": "reference/vocab", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/reference.vocab-D29iL6vv.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js"], "css": [] }, "routes/speaking._index": { "id": "routes/speaking._index", "parentId": "root", "path": "speaking", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._index-C-kczD8R.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/culture._index": { "id": "routes/culture._index", "parentId": "root", "path": "culture", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/culture._index-CaKIg9A2.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/culture-tasks-gcwModMq.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/useSoundEffect-4xvled9u.js"], "css": [] }, "routes/games.hanafuda": { "id": "routes/games.hanafuda", "parentId": "root", "path": "games/hanafuda", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.hanafuda-CV07a2CR.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/lessons._index": { "id": "routes/lessons._index", "parentId": "root", "path": "lessons", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._index-BbDRu36D.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/speaking.$task": { "id": "routes/speaking.$task", "parentId": "root", "path": "speaking/:task", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/speaking._task-DLPZUp4C.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/test.lookalike": { "id": "routes/test.lookalike", "parentId": "root", "path": "test/lookalike", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.lookalike-Cei49vfQ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/lookalike-sets-DfcnDEOL.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/legal.privacy": { "id": "routes/legal.privacy", "parentId": "root", "path": "legal/privacy", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.privacy-CB6H8ain.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/lessons.$slug": { "id": "routes/lessons.$slug", "parentId": "root", "path": "lessons/:slug", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/lessons._slug-BI0P0Vay.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/lesson-slugs-DboJpTAF.js", "/assets/EduLessonPage-DWOyw2qQ.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/culture-tasks-gcwModMq.js", "/assets/useSoundEffect-4xvled9u.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/GenkoyoshiModal-CoEx-k-g.js", "/assets/safeHtml-BmmIfdRC.js"], "css": [] }, "routes/sitemap[.]xml": { "id": "routes/sitemap[.]xml", "parentId": "root", "path": "sitemap.xml", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sitemap_._xml-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/games._index": { "id": "routes/games._index", "parentId": "root", "path": "games", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games._index-CmxvKtc1.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/lock-open-R9RobZXL.js", "/assets/gamepad-2-CUi-Bnaq.js", "/assets/grid-3x3-BiEJznFq.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/legal._index": { "id": "routes/legal._index", "parentId": "root", "path": "legal", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal._index-C_WjbiV5.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/print-report": { "id": "routes/print-report", "parentId": "root", "path": "print-report", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/print-report-B21AhAZv.js", "imports": [], "css": [] }, "routes/world.$place": { "id": "routes/world.$place", "parentId": "root", "path": "world/:place", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._place-DTmd9_7m.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/WorldTalk-DLkZGxR1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/stt-guard-D7htH6Xr.js", "/assets/OralMockReport-CjJ7wWFR.js"], "css": [] }, "routes/world._index": { "id": "routes/world._index", "parentId": "root", "path": "world", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/world._index-5g4w4HIg.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/places-CgZtRS8p.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/useSchoolAccountRedirect-Bp4RN2-y.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/games.shogi": { "id": "routes/games.shogi", "parentId": "root", "path": "games/shogi", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.shogi-CmZFieTD.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/legal.terms": { "id": "routes/legal.terms", "parentId": "root", "path": "legal/terms", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/legal.terms-DSEc_BdD.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test.typing": { "id": "routes/test.typing", "parentId": "root", "path": "test/typing", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.typing-CNhC-zrZ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/test._index": { "id": "routes/test._index", "parentId": "root", "path": "test", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test._index-B8N0HSvd.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/class-game": { "id": "routes/class-game", "parentId": "root", "path": "class-game", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/class-game-BRpABYsH.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/volume-2-Dwpr9TEa.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/users-DFBKwJNd.js", "/assets/log-in-B85G0CPk.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/my-account": { "id": "routes/my-account", "parentId": "root", "path": "my-account", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/my-account-BSdz5XrZ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/homework-status-Dj0dH4dI.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/billing-client-DAJJrg7K.js", "/assets/users-DFBKwJNd.js", "/assets/languages-DTmrW4de.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/yamatoApi-Dk2ND5-4.js"], "css": [] }, "routes/test.kanji": { "id": "routes/test.kanji", "parentId": "root", "path": "test/kanji", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/test.kanji-DDsAeP7c.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/kanji-meaning-check-BjDaGTC3.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/vce._index": { "id": "routes/vce._index", "parentId": "root", "path": "vce", "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/vce._index-CWwTRFke.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/games.igo": { "id": "routes/games.igo", "parentId": "root", "path": "games/igo", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/games.igo-DxWHHZMO.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/IframeGamePage-BkdGI_fb.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/GameAccessGate-CHulrtf3.js", "/assets/useGameAccess-JuAtw5YR.js", "/assets/log-in-B85G0CPk.js", "/assets/refresh-cw-C9bR84o1.js"], "css": [] }, "routes/progress": { "id": "routes/progress", "parentId": "root", "path": "progress", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/progress-BX_LHkzm.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/typing-progress-gSzmzyCD.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "contact", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/contact-Bds_HDDo.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/legal-content-BOt26Z5W.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] }, "routes/credits": { "id": "routes/credits", "parentId": "root", "path": "credits", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/credits-C2pk-zE-.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/prices": { "id": "routes/prices", "parentId": "root", "path": "prices", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/prices-DuPlxp5T.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/price-plans-CbxlD04y.js", "/assets/credit-costs-_rK41Fr1.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/FreePlanFeatures-C4tRJ3iX.js", "/assets/billing-client-DAJJrg7K.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/check--4iVUNyt.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-BzIxMEwX.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/yamatoApi-Dk2ND5-4.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/dailyQuiz-BBWKxvwX.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/volume-2-Dwpr9TEa.js", "/assets/FreePlanFeatures-C4tRJ3iX.js", "/assets/check--4iVUNyt.js", "/assets/yamato-configs-CKIuYNJ_.js", "/assets/price-plans-CbxlD04y.js", "/assets/loader-circle-DgdehLb4.js", "/assets/book-open-Iet3k_vB.js", "/assets/gamepad-2-CUi-Bnaq.js", "/assets/grid-3x3-BiEJznFq.js", "/assets/content-vce-speaking-o7c34zwO.js", "/assets/content-vce-writing-D0DUibYf.js", "/assets/content-reference-sUIzNJhZ.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/chatThemeColor--HWeni0n.js", "/assets/credit-costs-_rK41Fr1.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-wIpsFxpe.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/book-open-Iet3k_vB.js", "/assets/users-DFBKwJNd.js", "/assets/DataErrorState-C1xS2GIh.js", "/assets/openAuthModal-8JdLx2k1.js"], "css": [] }, "routes/faq": { "id": "routes/faq", "parentId": "root", "path": "faq", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/faq-7YeqvGZJ.js", "imports": ["/assets/components-cQBx1qLm.js", "/assets/safeHtml-BmmIfdRC.js", "/assets/ToolPageWrapper-BEdsJpxy.js", "/assets/ScrollTopButton-DEkW0EcX.js", "/assets/seoMeta-DEbqHjd7.js", "/assets/openAuthModal-8JdLx2k1.js", "/assets/scrollUtils-Oxqz4T0v.js", "/assets/PageLayout-D9rPlhSC.js", "/assets/DataErrorState-C1xS2GIh.js"], "css": [] } }, "url": "/assets/manifest-c4706e05.js", "version": "c4706e05" };
 var mode = "production";
 var assetsBuildDirectory = "build\\client";
 var basename = "/";
@@ -95875,13 +96050,21 @@ var routes = {
     caseSensitive: void 0,
     module: route71
   },
+  "routes/credits": {
+    id: "routes/credits",
+    parentId: "root",
+    path: "credits",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route72
+  },
   "routes/prices": {
     id: "routes/prices",
     parentId: "root",
     path: "prices",
     index: void 0,
     caseSensitive: void 0,
-    module: route72
+    module: route73
   },
   "routes/_index": {
     id: "routes/_index",
@@ -95889,7 +96072,7 @@ var routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route73
+    module: route74
   },
   "routes/about": {
     id: "routes/about",
@@ -95897,7 +96080,7 @@ var routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route74
+    module: route75
   },
   "routes/faq": {
     id: "routes/faq",
@@ -95905,7 +96088,7 @@ var routes = {
     path: "faq",
     index: void 0,
     caseSensitive: void 0,
-    module: route75
+    module: route76
   }
 };
 

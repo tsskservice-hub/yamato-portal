@@ -8,6 +8,7 @@ export const generatedRoutes: string[] = [
   "/api.test-attempts",
   "/class-quiz.$homeworkId",
   "/contact",
+  "/credits",
   "/culture._index",
   "/faq",
   "/games._index",
