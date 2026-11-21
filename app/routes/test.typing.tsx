@@ -11,6 +11,7 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/clo
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
+import { TYPING_STORE_KEY } from '~/data/typing-progress';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return json({ currentPath: new URL(request.url).pathname });
@@ -191,7 +192,7 @@ interface Best {
   kpm: number;
   passed: boolean;
 }
-const STORE_KEY = 'yamato-typing-progress-v1';
+const STORE_KEY = TYPING_STORE_KEY;
 
 function loadProgress(): Record<string, Best> {
   try {

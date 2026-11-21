@@ -17,7 +17,7 @@ export const meta: MetaFunction = () => [
   { title: 'Tests | JP Tutor AI Yamato' },
   {
     name: 'description',
-    content: 'Speed tests for kana, kanji, vocabulary and sentences, plus a touch typing course.',
+    content: 'Language tests for kana, kanji, vocabulary and sentences: how accurately and how instantly can you answer? Plus a touch typing course.',
   },
 ];
 
@@ -84,8 +84,13 @@ export default function TestHub() {
           <div>
             <h1 className="text-3xl font-black text-slate-900">Tests</h1>
             <p className="mt-1 text-slate-600">
-              How fast and how accurately can you recognise Japanese? Students can practise on their own, and teachers
+              How accurately — and how instantly — can you understand Japanese? Quick, confident answers show real language ability. Students can practise on their own, and teachers
               can use these tests as formative or summative assessment in class.
+            </p>
+            <p className="mt-2 text-sm">
+              <Link to="/progress" className="font-bold text-indigo-600 underline">
+                📈 See your results over time in My Progress
+              </Link>
             </p>
             <p className="mt-2 text-sm text-amber-800">
               ⌨️ A computer with a keyboard is strongly recommended. Typing on a phone is much slower.

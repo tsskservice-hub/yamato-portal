@@ -185,7 +185,7 @@ export function PortalModulesGrid({
               {
                 id: 'tests-hub',
                 name: 'Tests & Touch Typing',
-                description: 'How fast can you recognise kana, kanji and words? Speed tests, plus a step-by-step touch typing course.',
+                description: 'How quickly and accurately can you answer in Japanese? Language tests for kana, kanji and words, plus a step-by-step touch typing course.',
                 path: '/test',
                 category: 'Tests',
                 iconName: 'ClipboardCheck',

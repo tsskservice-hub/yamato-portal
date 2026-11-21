@@ -7,6 +7,7 @@
  *                          各場所に AI の話し手が 1 人いて、個人の利用者も声で話せる
  *     Speaking Tasks（/speaking/<id>、routes/speaking.$task.tsx）… ほかの人は見えない。AI と話す課題だけ（学校のアカウントも）
  * ・場所のデータは app/data/world/places.ts（画面は components/world を共通で使う）
+ * ・学校のアカウントは開いた時点で /speaking/<id> へ自動で移す（useSchoolAccountRedirect）
  * ・会話は 1 回 3 分・クレジットは CREDIT_COSTS.worldTalk3（サーバーが引く。api/src/handlers/world-handler.ts）
  */
 import React, { useEffect, useRef, useState } from 'react';
@@ -21,6 +22,7 @@ import { findWorldPlace } from '~/data/world/places';
 import { CREDIT_COSTS } from '~/data/credit-costs';
 import { supabase } from '~/lib/supabaseClient';
 import { requestAuthModal } from '~/utils/openAuthModal';
+import { useSchoolAccountRedirect } from '~/components/world/useSchoolAccountRedirect';
 
 export const meta: MetaFunction = ({ params }) => {
   const place = findWorldPlace(params.place);
@@ -43,10 +45,12 @@ export default function WorldPlacePage() {
   const [confirming, setConfirming] = useState(false);
   const [picked, setPicked] = useState<PlazaPlayer | null>(null);
   const sceneState = useRef({ x: place?.start.x ?? 50, y: place?.start.y ?? 84, avatar: 0 });
+  // 学校のアカウントは、同じ場所の Speaking Task へ自動で移す
+  const gate = useSchoolAccountRedirect(place ? `/speaking/${place.id}` : '/speaking');
 
   const plaza = usePlaza({
     placeId: place?.id ?? '',
-    active: Boolean(place) && signedIn === true,
+    active: Boolean(place) && signedIn === true && gate === 'ok',
     getStart: () => sceneState.current,
   });
 
@@ -80,6 +84,14 @@ export default function WorldPlacePage() {
             Back to Yamato Town
           </Link>
         </div>
+      </ToolPageWrapper>
+    );
+  }
+
+  if (gate === 'checking') {
+    return (
+      <ToolPageWrapper breadcrumbTitle={place.title}>
+        <div className="min-h-screen" />
       </ToolPageWrapper>
     );
   }

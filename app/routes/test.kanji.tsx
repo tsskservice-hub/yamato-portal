@@ -6,7 +6,8 @@
  * 結果は「合計時間」と「1 文字あたりの平均秒数」で見る（英語の長い・短いは平均でならす）。
  * 時間は打つ時間も含めて数える。間違えたときに正解を見ている時間は数えない。
  *
- * 試作のため、記録はまだ保存しない（ブラウザで測るだけ）。
+ * ログイン中なら、終わったときに結果を /api/test-attempts に送る（サーバーが答え合わせし直して test_attempts に保存。SQL 62）。
+ * 時間はブラウザで測る（試作）。結果は /progress（My Progress）で見られる。
  * 本番で記録を残すときは、問題の出題と時間の記録をサーバー側に移す。
  */
 import { json, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
@@ -21,7 +22,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export const meta: MetaFunction = () => [
-  { title: 'VCE Kanji Speed Test | JP Tutor AI Yamato' },
+  { title: 'VCE Kanji Test | JP Tutor AI Yamato' },
   { name: 'description', content: 'See each VCE kanji and type its English meaning as fast as you can.' },
   { name: 'robots', content: 'noindex' },
 ];
@@ -94,6 +95,7 @@ function tierLabel(ms: number) {
 }
 
 type Phase = 'setup' | 'running' | 'done';
+type SaveState = 'idle' | 'saving' | 'saved' | 'signin' | 'short' | 'error';
 
 export default function KanjiSpeedTest() {
   const [rows, setRows] = useState<KanjiRow[]>([]);
@@ -112,6 +114,8 @@ export default function KanjiSpeedTest() {
   const [now, setNow] = useState(0);
 
   const startRef = useRef(0);
+  const scopeRef = useRef('all');
+  const [saveState, setSaveState] = useState<SaveState>('idle');
   const leftPageRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -163,6 +167,7 @@ export default function KanjiSpeedTest() {
     setResults([]);
     setTyped('');
     setReview(null);
+    setSaveState('idle');
     setPhase('running');
   }, []);
 
@@ -174,6 +179,7 @@ export default function KanjiSpeedTest() {
         qs.push({ kanji: r.character, group: g, answers: acceptedAnswers(r.character, r.meaning) });
       }
     }
+    scopeRef.current = groups.every(([g]) => selected.has(g)) ? 'all' : groups.filter(([g]) => selected.has(g)).map(([g]) => g).join(', ');
     begin(randomOrder ? shuffle(qs) : qs);
   };
 
@@ -253,6 +259,27 @@ export default function KanjiSpeedTest() {
     };
   }, [review, goNext]);
 
+  // 終わったら結果を保存する（ログイン中・5 問以上）
+  useEffect(() => {
+    if (phase !== 'done' || saveState !== 'idle') return;
+    if (results.length < 5) {
+      setSaveState('short');
+      return;
+    }
+    setSaveState('saving');
+    fetch('/api/test-attempts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        testKey: 'kanji-vce200',
+        scope: scopeRef.current,
+        items: results.map((r) => ({ c: r.q.kanji, typed: r.typed, ms: Math.round(r.ms), passed: r.passed, left: r.leftPage })),
+      }),
+    })
+      .then((res) => setSaveState(res.ok ? 'saved' : res.status === 401 ? 'signin' : 'error'))
+      .catch(() => setSaveState('error'));
+  }, [phase, results, saveState]);
+
   // ---- 画面 ----
 
   return (
@@ -263,7 +290,7 @@ export default function KanjiSpeedTest() {
             <Link to="/test" className="text-sm text-indigo-600 hover:underline">
               ← All tests
             </Link>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-slate-900">VCE Kanji Speed Test</h1>
+            <h1 className="mt-2 text-2xl sm:text-3xl font-black text-slate-900">VCE Kanji Test</h1>
             <p className="mt-1 text-sm text-slate-600">
               See a kanji, type its English meaning, press Enter. Aim for an average of{' '}
               <b>{TARGET_SEC} seconds or less</b> per kanji.
@@ -394,9 +421,11 @@ export default function KanjiSpeedTest() {
               onRetrySame={() => begin(randomOrder ? shuffle(questions) : questions)}
               onRetryWeak={() => {
                 const weak = results.filter((r) => !r.correct || r.ms > GOOD_SEC * 1000).map((r) => r.q);
+                scopeRef.current = 'review: mistakes & slow ones';
                 begin(shuffle(weak));
               }}
               onSetup={() => setPhase('setup')}
+              saveState={saveState}
             />
           )}
         </div>
@@ -484,8 +513,9 @@ function ResultsPanel(props: {
   onRetrySame: () => void;
   onRetryWeak: () => void;
   onSetup: () => void;
+  saveState: SaveState;
 }) {
-  const { results, total, onRetrySame, onRetryWeak, onSetup } = props;
+  const { results, total, onRetrySame, onRetryWeak, onSetup, saveState } = props;
   const answered = results.length;
   const totalMs = results.reduce((n, r) => n + r.ms, 0);
   const avgMs = answered ? totalMs / answered : 0;
@@ -616,7 +646,21 @@ function ResultsPanel(props: {
         </Card>
       )}
 
-      <p className="text-xs text-slate-400 text-center">This is a trial version. Results are not saved yet.</p>
+      <p className="text-xs text-slate-500 text-center">
+        {saveState === 'saving' && 'Saving your results…'}
+        {saveState === 'saved' && (
+          <>
+            ✓ Saved. See how you are improving on{' '}
+            <Link to="/progress" className="text-indigo-600 font-bold underline">
+              My Progress
+            </Link>
+            .
+          </>
+        )}
+        {saveState === 'signin' && 'Sign in to save your results and see your progress over time.'}
+        {saveState === 'short' && 'Answer at least 5 kanji to save a result.'}
+        {saveState === 'error' && 'Your results could not be saved this time.'}
+      </p>
     </div>
   );
 }

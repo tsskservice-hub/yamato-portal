@@ -4,7 +4,7 @@
  */
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
+import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import type { PageLayoutRef } from '~/components/layout/PageLayout';
 import { generateModuleMeta } from '~/utils/seoMeta';
@@ -576,6 +576,18 @@ export default function AccountSettingsRoute() {
             Manage your AI tutor preferences, registration details, subscription plan, and credit history.
           </p>
         </div>
+
+        {/* 学習の達成具合（レッスン・文化・テスト・ブラインドタッチ）は別ページにまとめている */}
+        <Link
+          to="/progress"
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-5 py-4 transition-colors"
+        >
+          <span>
+            <span className="block font-black text-indigo-900">📈 My Progress</span>
+            <span className="block text-sm text-indigo-800/80">Lessons, culture tasks, language tests and typing — all in one place.</span>
+          </span>
+          <span className="font-bold text-indigo-700">Open →</span>
+        </Link>
 
         {/* 0. クラスに入っている生徒（学校の生徒）は、宿題・課題がいちばん大事なので一番上に出す */}
         {showStudentClass && inClass && studentClassSection}

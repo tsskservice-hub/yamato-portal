@@ -10,6 +10,7 @@ import type { MetaFunction } from '@remix-run/cloudflare';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { WORLD_PLACES, WORLD_PLACES_COMING_SOON } from '~/data/world/places';
 import { CREDIT_COSTS } from '~/data/credit-costs';
+import { useSchoolAccountRedirect } from '~/components/world/useSchoolAccountRedirect';
 
 const TITLE = 'Yamato Town';
 const DESCRIPTION =
@@ -23,6 +24,9 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function WorldIndexPage() {
+  // 学校のアカウントは Speaking Tasks へ自動で移す
+  const gate = useSchoolAccountRedirect('/speaking');
+  if (gate === 'checking') return <ToolPageWrapper breadcrumbTitle={TITLE}><div className="min-h-screen" /></ToolPageWrapper>;
   return (
     <ToolPageWrapper breadcrumbTitle={TITLE}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 sm:py-12 px-4">
