@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from '@remix-run/react';
 import { ToolPageWrapper } from '~/components/layout/ToolPageWrapper';
 import { supabase } from '~/lib/supabaseClient';
-import { acceptedAnswers, isCorrectMeaning } from '~/lib/kanji-meaning-check';
+import { acceptedAnswers, isCorrectMeaning, KANJI_GROUP_ORDER } from '~/lib/kanji-meaning-check';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return json({ currentPath: new URL(request.url).pathname });
@@ -49,14 +49,7 @@ interface Result {
   leftPage: boolean;
 }
 
-/** 参照ページ（/reference/200kanji）と同じ並び。ここに無いグループは最後に並べる */
-const GROUP_ORDER = [
-  'Numbers', 'Counters', 'Season', 'Days of the week', 'Day', 'Time', 'Parts of the body',
-  'Positions', 'Directions', 'School life', 'People/family', 'Adjectives/adverbs',
-  'Verbs (Movement)', 'Verbs (Body/Senses)', 'Verbs (Lifestyle)', 'Verbs (Activity)', 'Verbs',
-  'Country/city', 'Place', 'Travel/transport', 'Food', 'Nature', 'Animals', 'Colours',
-  'Repeat sign', 'Miscellaneous',
-];
+const GROUP_ORDER = KANJI_GROUP_ORDER;
 
 /** 目標: 平均 3 秒 */
 const TARGET_SEC = 3;
@@ -448,6 +441,15 @@ function SetupPanel(props: {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-5">
+      <Link
+        to="/test/kanji/answers"
+        className="flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-4 py-3 text-sm transition-colors"
+      >
+        <span className="text-indigo-900">
+          📖 <b>Optional:</b> check the 200 kanji and the English answers that are accepted before you start.
+        </span>
+        <span className="font-bold text-indigo-700 shrink-0">See the list →</span>
+      </Link>
       <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 space-y-1">
         <p>
           ⌨️ <b>A computer with a keyboard is strongly recommended.</b> Typing on a phone is much slower.

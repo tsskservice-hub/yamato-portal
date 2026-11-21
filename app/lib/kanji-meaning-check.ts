@@ -9,6 +9,15 @@
  *   イギリス式とアメリカ式のつづり（colour = color など）、ハイフン、句読点。
  */
 
+/** 参照ページ（/reference/200kanji）と同じ並び。ここに無いグループは最後に並べる */
+export const KANJI_GROUP_ORDER = [
+  'Numbers', 'Counters', 'Season', 'Days of the week', 'Day', 'Time', 'Parts of the body',
+  'Positions', 'Directions', 'School life', 'People/family', 'Adjectives/adverbs',
+  'Verbs (Movement)', 'Verbs (Body/Senses)', 'Verbs (Lifestyle)', 'Verbs (Activity)', 'Verbs',
+  'Country/city', 'Place', 'Travel/transport', 'Food', 'Nature', 'Animals', 'Colours',
+  'Repeat sign', 'Miscellaneous',
+];
+
 /** kl_character.meaning に無いが、正解にしたい言い方 */
 export const EXTRA_ANSWERS: Record<string, string[]> = {
   一: ['1'], 二: ['2'], 三: ['3'], 四: ['4'], 五: ['5'], 六: ['6'], 七: ['7'], 八: ['8'], 九: ['9'], 十: ['10'],
@@ -20,7 +29,7 @@ export const EXTRA_ANSWERS: Record<string, string[]> = {
   日: ['date', 'sun'],
   月: ['moon', 'month'],
   土: ['ground'],
-  曜: ['weekday'],
+  曜: ['weekday', 'days of the week'],
   時: ["o'clock"],
   分: ['minutes'],
   毎: ['each'],
@@ -55,7 +64,8 @@ export const EXTRA_ANSWERS: Record<string, string[]> = {
   安: ['peaceful', 'inexpensive', 'low price'],
   高: ['high'],
   多: ['a lot', 'lots'],
-  楽: ['enjoyable', 'easy'],
+  楽: ['enjoyable', 'easy', 'enjoy'],
+  少: ['small amount'],
   長: ['chief'],
   近: ['nearby'],
   広: ['spacious'],

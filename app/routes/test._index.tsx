@@ -50,7 +50,7 @@ const SECTIONS: TestSection[] = [
       {
         title: 'VCE Kanji 200',
         jp: '漢字',
-        description: 'See a kanji, type its English meaning. Total time and average seconds per kanji.',
+        description: 'See a kanji, type its English meaning. Total time and average seconds per kanji. You can check the accepted answers first.',
         to: '/test/kanji',
       },
     ],
